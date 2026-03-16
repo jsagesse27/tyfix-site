@@ -9,8 +9,8 @@ const DOC_FEE       = 175; // NY limit
 const TITLE_REG_FEE = 175; // Title $50 + Plates $25 + Reg ~$100
 const SALES_TAX_RATE = 0.08875; // NYC rate
 const ADV_FEE       = 350; // Average
-const RECOND_FEE    = 1500; // Average
-const MARKET_ADJ    = 2500; // Average
+const RECOND_FEE_RATE= 0.15; // 15%
+const MARKET_ADJ_RATE= 0.10; // 10%
 const DEFAULT_APR   = 14.9;
 const DEFAULT_TERM  = 60; // months
 
@@ -85,7 +85,9 @@ export default function CashCalculator() {
 
   /* Computed values */
   const salesTax    = Math.round(price * SALES_TAX_RATE);
-  const hiddenFees  = ADV_FEE + RECOND_FEE + MARKET_ADJ;
+  const recondFee   = Math.round(price * RECOND_FEE_RATE);
+  const marketAdj   = Math.round(price * MARKET_ADJ_RATE);
+  const hiddenFees  = ADV_FEE + recondFee + marketAdj;
   const totalBefore = price + DOC_FEE + TITLE_REG_FEE + salesTax + hiddenFees;
 
   const monthlyPmt  = includeFinancing ? pmt(apr / 100, term, totalBefore) : 0;
@@ -101,8 +103,8 @@ export default function CashCalculator() {
     { label: 'Title & Registration', amount: TITLE_REG_FEE, color: '#f97316' },
     { label: 'Sales Tax (8.875%)', amount: salesTax, color: '#ef4444' },
     { label: 'Advertising Fee', amount: ADV_FEE, color: '#ec4899' },
-    { label: 'Reconditioning Fee', amount: RECOND_FEE, color: '#a855f7' },
-    { label: 'Market Adjustment', amount: MARKET_ADJ, color: '#8b5cf6' },
+    { label: 'Reconditioning Fee', amount: recondFee, color: '#a855f7' },
+    { label: 'Market Adjustment', amount: marketAdj, color: '#8b5cf6' },
     ...(includeFinancing ? [{ label: `Interest (${apr}% × ${term}mo)`, amount: interestPaid, color: '#dc2626' }] : []),
   ];
 
