@@ -16,6 +16,7 @@ export default function FeaturedVehicles({ vehicles, settings }: FeaturedVehicle
   const display = featured.length > 0 ? featured.slice(0, 6) : vehicles.slice(0, 6);
   const headingRef = useReveal();
   const gridRef = useStaggerReveal(0.05);
+  const ctaRef = useReveal();
 
   if (display.length === 0) return null;
 
@@ -52,7 +53,7 @@ export default function FeaturedVehicles({ vehicles, settings }: FeaturedVehicle
         </div>
 
         {/* CTA */}
-        <div className="mt-16 text-center reveal">
+        <div ref={ctaRef} className="mt-16 text-center reveal">
           <div className="inline-block p-8 bg-white rounded-3xl border border-slate-100 shadow-sm transition-all hover:shadow-md">
             <h3 className="text-xl font-bold text-gray-900 mb-2">Don't see what you're looking for?</h3>
             <p className="text-slate-500 mb-6 max-w-sm mx-auto">
