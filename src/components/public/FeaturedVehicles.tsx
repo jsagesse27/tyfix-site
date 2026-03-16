@@ -1,10 +1,12 @@
 'use client';
 
 import Link from 'next/link';
+import { useState } from 'react';
 import { ArrowRight, Car } from 'lucide-react';
 import type { Vehicle, SiteSettings } from '@/lib/types';
 import VehicleCard from './VehicleCard';
 import { useReveal, useStaggerReveal } from '@/lib/useReveal';
+import VehicleRequestFlow from './VehicleRequestFlow';
 
 interface FeaturedVehiclesProps {
   vehicles: Vehicle[];
@@ -12,6 +14,7 @@ interface FeaturedVehiclesProps {
 }
 
 export default function FeaturedVehicles({ vehicles, settings }: FeaturedVehiclesProps) {
+  const [isRequestOpen, setIsRequestOpen] = useState(false);
   const featured = vehicles.filter((v) => v.featured_label);
   const display = featured.length > 0 ? featured.slice(0, 6) : vehicles.slice(0, 6);
   const headingRef = useReveal();
@@ -59,15 +62,17 @@ export default function FeaturedVehicles({ vehicles, settings }: FeaturedVehicle
             <p className="text-slate-500 mb-6 max-w-sm mx-auto">
               Our inventory changes daily. Tell us what you want and we'll track it down for you.
             </p>
-            <Link 
-              href="/#contact" 
-              className="btn-outline px-10 py-4 text-base font-black uppercase tracking-widest inline-flex items-center gap-3"
+            <button 
+              onClick={() => setIsRequestOpen(true)}
+              className="btn-outline px-10 py-4 text-base font-black uppercase tracking-widest inline-flex items-center gap-3 w-full sm:w-auto"
             >
               <Car size={20} /> Request a Vehicle
-            </Link>
+            </button>
           </div>
         </div>
       </div>
+
+      <VehicleRequestFlow isOpen={isRequestOpen} onClose={() => setIsRequestOpen(false)} />
     </section>
   );
 }
