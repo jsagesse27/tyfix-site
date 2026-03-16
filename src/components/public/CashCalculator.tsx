@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { DollarSign, TrendingUp, AlertTriangle, ChevronRight, RotateCcw, Car } from 'lucide-react';
+import { DollarSign, TrendingUp, AlertTriangle, ChevronRight, RotateCcw, Car, Minus, Plus } from 'lucide-react';
 import { useReveal } from '@/lib/useReveal';
 
 /* ── Fee Constants ───────────────────────────── */
@@ -128,27 +128,49 @@ export default function CashCalculator() {
           /* ── STEP 1: Input ──────────────────────────── */
           <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-3xl p-8 md:p-10 animate-fade-in">
             {/* Price slider */}
-            <label className="block mb-8">
-              <span className="text-sm font-bold text-slate-300 uppercase tracking-wider mb-3 block">Vehicle Price</span>
-              <div className="flex items-center gap-4">
-                <Car size={24} className="text-primary flex-shrink-0" />
-                <input
-                  type="range"
-                  min={2000}
-                  max={15000}
-                  step={50}
-                  value={price}
-                  onChange={(e) => setPrice(Number(e.target.value))}
-                  className="flex-1 h-2 rounded-full appearance-none cursor-pointer"
-                  style={{
-                    background: `linear-gradient(to right, var(--color-primary) 0%, var(--color-primary) ${((price - 2000) / 13000) * 100}%, rgba(255,255,255,0.1) ${((price - 2000) / 13000) * 100}%, rgba(255,255,255,0.1) 100%)`,
-                  }}
-                />
-                <span className="text-3xl font-black text-white min-w-[110px] text-right" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
+            <div className="mb-10">
+              <div className="flex justify-between items-end mb-4">
+                <span className="text-sm font-bold text-slate-300 uppercase tracking-wider">Vehicle Price</span>
+                <span className="text-4xl font-black text-white" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
                   {fmt(price)}
                 </span>
               </div>
-            </label>
+              
+              <div className="flex flex-col gap-6">
+                <div className="flex items-center gap-4">
+                  <button 
+                    onClick={() => setPrice(Math.max(2000, price - 50))}
+                    className="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 active:scale-95 transition-all"
+                    aria-label="Decrease price"
+                  >
+                    <Minus size={20} />
+                  </button>
+
+                  <div className="flex-1 relative py-4">
+                    <input
+                      type="range"
+                      min={2000}
+                      max={15000}
+                      step={50}
+                      value={price}
+                      onChange={(e) => setPrice(Number(e.target.value))}
+                      className="w-full h-2 rounded-full appearance-none cursor-pointer bg-white/10"
+                      style={{
+                        background: `linear-gradient(to right, var(--color-primary) 0%, var(--color-primary) ${((price - 2000) / 13000) * 100}%, rgba(255,255,255,0.1) ${((price - 2000) / 13000) * 100}%, rgba(255,255,255,0.1) 100%)`,
+                      }}
+                    />
+                  </div>
+
+                  <button 
+                    onClick={() => setPrice(Math.min(15000, price + 50))}
+                    className="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 active:scale-95 transition-all"
+                    aria-label="Increase price"
+                  >
+                    <Plus size={20} />
+                  </button>
+                </div>
+              </div>
+            </div>
 
             {/* Financing toggle */}
             <div className="flex flex-col sm:flex-row gap-6 mb-8">
