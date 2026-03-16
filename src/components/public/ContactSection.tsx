@@ -57,38 +57,44 @@ export default function ContactSection({ settings }: ContactSectionProps) {
             </div>
           </div>
 
-          <div className="h-[600px] rounded-[2rem] relative overflow-hidden shadow-[0_24px_60px_-15px_rgba(0,0,0,0.1)] border border-slate-100 group">
-            {/* Map Frame with Clean Border Overlay */}
-            <div className="absolute inset-0 z-10 border-[12px] border-white/80 pointer-events-none rounded-[2rem]" />
-
-            {/* OpenStreetMap Iframe with 'Clean Paper' styling */}
+          <div className="h-[600px] rounded-[2.5rem] relative overflow-hidden bg-white shadow-[0_30px_100px_-20px_rgba(0,0,0,0.08)] border border-slate-100 group">
+            {/* Minimalist Watermark Map */}
             <iframe
-              src="https://www.openstreetmap.org/export/embed.html?bbox=-73.989%2C40.572%2C-73.982%2C40.578&layer=mapnik&marker=40.5749%2C-73.9850"
-              className="w-full h-full scale-110 transition-transform duration-1000 group-hover:scale-100"
+              src="https://www.openstreetmap.org/export/embed.html?bbox=-74.05%2C40.54%2C-73.90%2C40.64&layer=mapnik"
+              className="w-full h-full scale-110"
               style={{ 
                 border: 0, 
-                filter: 'grayscale(1) brightness(1.0) contrast(1.1) opacity(0.8)' 
+                filter: 'grayscale(1) brightness(1.3) contrast(0.6) opacity(0.35) saturate(0)' 
               }}
               allowFullScreen
               loading="lazy"
-              title="TyFix Auto Sales Location"
+              title="TyFix Auto Sales Service Area"
             />
             
-            {/* Subtle palette overlays - using White, Navy, and Maroon accents */}
-            <div className="absolute inset-0 bg-white/40 pointer-events-none" />
-            <div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-transparent pointer-events-none opacity-60" />
+            {/* Stylized Borough Overlays - Matching Kaytee's look */}
+            <div className="absolute inset-0 pointer-events-none select-none">
+              <span className="absolute top-[35%] left-[45%] text-[clamp(2rem,6vw,4rem)] font-black text-slate-200/40 tracking-[0.2em] uppercase origin-center rotate-[-15deg]">
+                Brooklyn
+              </span>
+              <span className="absolute bottom-[20%] left-[30%] text-xs font-black text-slate-300 tracking-[0.5em] uppercase">
+                Coney Island Area
+              </span>
+            </div>
+
+            {/* Gradient Vignette to blend edges */}
+            <div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-white/40 pointer-events-none" />
             
-            {/* Location Badge - Clean Modern Style */}
-            <div className="absolute bottom-8 left-8 right-8 z-20 md:left-8 md:right-auto">
-              <div className="relative overflow-hidden bg-white/95 backdrop-blur-xl px-6 py-5 rounded-[1.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.1)] border border-slate-100 transition-all duration-500 hover:shadow-[0_20px_50px_rgba(139,0,0,0.15)] group-hover:border-primary/20">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-[#0F172A] rounded-xl flex items-center justify-center text-white shadow-lg">
-                    <MapPin size={24} className="text-primary" />
+            {/* Location Badge - Ultra Minimal */}
+            <div className="absolute bottom-10 left-10 right-10 z-20 md:left-10 md:right-auto">
+              <div className="bg-white/90 backdrop-blur-md px-8 py-6 rounded-[2rem] shadow-[0_20px_40px_rgba(0,0,0,0.05)] border border-slate-100/50">
+                <div className="flex items-center gap-5">
+                  <div className="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center">
+                    <MapPin size={28} className="text-primary animate-bounce shadow-primary" />
                   </div>
                   <div>
-                    <h4 className="font-black text-[#0F172A] text-lg tracking-tight leading-none uppercase">TyFix Auto Sales</h4>
-                    <p className="text-slate-500 text-sm font-bold mt-1.5 flex items-center gap-2">
-                       Brooklyn, NY <span className="w-1 h-1 bg-primary rounded-full" /> Coney Island Area
+                    <h4 className="font-black text-slate-900 text-xl tracking-tight leading-none uppercase">TyFix Auto Sales</h4>
+                    <p className="text-slate-400 text-sm font-bold mt-2 flex items-center gap-2">
+                      Brooklyn, NY <span className="w-1.5 h-1.5 bg-primary rounded-full" /> Visit Us Today
                     </p>
                   </div>
                 </div>
