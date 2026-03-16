@@ -80,7 +80,7 @@ export default function LoadingScreen() {
               y: 0,
               transition: { delay: 0.5, duration: 0.5 } 
             }}
-            className="absolute bottom-12 text-[10px] uppercase tracking-[0.3em] font-black text-slate-400"
+            className="mt-8 text-[10px] uppercase tracking-[0.3em] font-black text-slate-400 text-center max-w-[280px] leading-relaxed"
           >
             Tell a friend to tell a friend, come shop with TyFix!
           </motion.p>
