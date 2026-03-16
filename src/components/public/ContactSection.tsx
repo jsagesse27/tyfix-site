@@ -63,7 +63,7 @@ export default function ContactSection({ settings }: ContactSectionProps) {
 
             {/* OpenStreetMap Iframe with 'Clean Paper' styling */}
             <iframe
-              src="https://www.openstreetmap.org/export/embed.html?bbox=-73.989%2C40.572%2C-73.982%2C40.578&layer=mapnik&marker=40.5749%2C-73.9850"
+              src="https://www.openstreetmap.org/export/embed.html?bbox=-73.989%2C40.572%2C-73.982%2C40.578&layer=mapnik"
               className="w-full h-full scale-110 transition-transform duration-1000 group-hover:scale-100"
               style={{ 
                 border: 0, 
@@ -74,6 +74,11 @@ export default function ContactSection({ settings }: ContactSectionProps) {
               title="TyFix Auto Sales Location"
             />
             
+            {/* Custom Primary Pin Marker */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 pointer-events-none mb-4">
+              <MapPin size={40} className="text-primary fill-primary/10 drop-shadow-[0_4px_12px_rgba(139,0,0,0.5)] animate-float" />
+            </div>
+
             {/* Subtle palette overlays - using White, Navy, and Maroon accents */}
             <div className="absolute inset-0 bg-white/40 pointer-events-none" />
             <div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-transparent pointer-events-none opacity-60" />
