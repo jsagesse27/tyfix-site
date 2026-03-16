@@ -9,7 +9,8 @@ const DOC_FEE       = 175; // NY limit
 const TITLE_REG_FEE = 175; // Title $50 + Plates $25 + Reg ~$100
 const SALES_TAX_RATE = 0.08875; // NYC rate
 const ADV_FEE       = 350; // Average
-const RECOND_FEE    = 300; // Flat fee requested
+const RECOND_FEE    = 250; // Updated
+const MAINTENANCE_REPAIR_RATE = 0.20; // 20%
 const MARKET_ADJ_RATE= 0.10; // 10%
 const DEFAULT_APR   = 14.9;
 const DEFAULT_TERM  = 60; // months
@@ -86,7 +87,8 @@ export default function CashCalculator() {
   /* Computed values */
   const salesTax    = Math.round(price * SALES_TAX_RATE);
   const marketAdj   = Math.round(price * MARKET_ADJ_RATE);
-  const hiddenFees  = ADV_FEE + RECOND_FEE + marketAdj;
+  const maintenanceRepairs = Math.round(price * MAINTENANCE_REPAIR_RATE);
+  const hiddenFees  = ADV_FEE + RECOND_FEE + marketAdj + maintenanceRepairs;
   const totalBefore = price + DOC_FEE + TITLE_REG_FEE + salesTax + hiddenFees;
 
   const monthlyPmt  = includeFinancing ? pmt(apr / 100, term, totalBefore) : 0;
@@ -104,6 +106,7 @@ export default function CashCalculator() {
     { label: 'Advertising Fee', amount: ADV_FEE, color: '#ec4899' },
     { label: 'Reconditioning Fee', amount: RECOND_FEE, color: '#a855f7' },
     { label: 'Market Adjustment', amount: marketAdj, color: '#8b5cf6' },
+    { label: 'Maintenance Repairs (20%)', amount: maintenanceRepairs, color: '#f5dada' },
     ...(includeFinancing ? [{ label: `Interest (${apr}% × ${term}mo)`, amount: interestPaid, color: '#dc2626' }] : []),
   ];
 
