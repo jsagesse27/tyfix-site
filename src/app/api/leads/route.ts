@@ -1,8 +1,46 @@
 import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
+import { headers } from 'next/headers';
+
+/* ── In-Memory Rate Limiter ─────────────────── */
+const WINDOW_MS = 15 * 60 * 1000; // 15 minutes
+const MAX_REQUESTS = 5;
+
+const ipMap = new Map<string, { count: number; resetAt: number }>();
+
+function isRateLimited(ip: string): boolean {
+  const now = Date.now();
+
+  // Clean stale entries every check (lightweight since map is small)
+  for (const [key, val] of ipMap) {
+    if (now > val.resetAt) ipMap.delete(key);
+  }
+
+  const entry = ipMap.get(ip);
+  if (!entry) {
+    ipMap.set(ip, { count: 1, resetAt: now + WINDOW_MS });
+    return false;
+  }
+  if (now > entry.resetAt) {
+    ipMap.set(ip, { count: 1, resetAt: now + WINDOW_MS });
+    return false;
+  }
+  entry.count++;
+  return entry.count > MAX_REQUESTS;
+}
 
 export async function POST(request: Request) {
   try {
+    // Rate limit by IP
+    const headersList = await headers();
+    const ip = headersList.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
+    if (isRateLimited(ip)) {
+      return NextResponse.json(
+        { error: 'Too many submissions. Please try again later.' },
+        { status: 429 }
+      );
+    }
+
     const body = await request.json();
     const { name, phone, email, message, vehicle_of_interest, vehicle_id } = body;
 
