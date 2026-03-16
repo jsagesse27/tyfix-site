@@ -102,6 +102,8 @@ CREATE TABLE IF NOT EXISTS site_settings (
   logo_url TEXT,
   primary_color TEXT NOT NULL DEFAULT '#8B0000',
   font_family TEXT NOT NULL DEFAULT 'Inter',
+  auto_carousel_enabled BOOLEAN NOT NULL DEFAULT true,
+  auto_carousel_interval INTEGER NOT NULL DEFAULT 4,
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 

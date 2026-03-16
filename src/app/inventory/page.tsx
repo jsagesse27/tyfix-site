@@ -47,6 +47,7 @@ export default async function InventoryPage({ searchParams }: PageProps) {
 
           <InventoryClient
             vehicles={(vehiclesRes.data as Vehicle[]) || []}
+            settings={settingsRes.data as SiteSettings}
             initialFilters={{
               bodyType: params.bodyType,
               maxPrice: params.maxPrice,

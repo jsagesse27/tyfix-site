@@ -93,6 +93,8 @@ export interface SiteSettings {
   logo_url: string | null;
   primary_color: string;
   font_family: string;
+  auto_carousel_enabled: boolean;
+  auto_carousel_interval: number;
   updated_at: string;
 }
 

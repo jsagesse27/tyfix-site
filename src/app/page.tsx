@@ -45,7 +45,7 @@ export default async function HomePage() {
       <Navbar settings={settings} />
       <Hero settings={settings} content={content} soldCount={soldCount} />
       <TrustBadges content={content} />
-      <FeaturedVehicles vehicles={vehicles} />
+      <FeaturedVehicles vehicles={vehicles} settings={settings} />
       <CashAdvantage content={content} />
       <Testimonials testimonials={testimonials} showSection={settings?.show_reviews_section ?? true} />
       <ContactSection settings={settings} />

@@ -29,7 +29,7 @@ export default function AdminSettingsPage() {
     setTimeout(() => setSaved(false), 3000);
   };
 
-  const u = (field: keyof SiteSettings, value: string | boolean) => {
+  const u = (field: keyof SiteSettings, value: string | boolean | number) => {
     if (settings) setSettings({ ...settings, [field]: value });
   };
 
@@ -93,12 +93,42 @@ export default function AdminSettingsPage() {
         <div><label className="block text-xs font-bold text-gray-500 uppercase mb-1">Google Reviews Embed Code</label><textarea className="input-field resize-none" rows={3} value={settings.google_reviews_embed || ''} onChange={(e) => u('google_reviews_embed', e.target.value)} placeholder="Paste embed code here..." /></div>
       </div>
 
-      {/* Footer */}
+      {/* Site Experience */}
       <div className="admin-card">
-        <h2 className="text-lg font-bold mb-4">Footer</h2>
-        <div className="space-y-4">
-          <div><label className="block text-xs font-bold text-gray-500 uppercase mb-1">Footer Text</label><textarea className="input-field resize-none" rows={2} value={settings.footer_text} onChange={(e) => u('footer_text', e.target.value)} /></div>
-          <div><label className="block text-xs font-bold text-gray-500 uppercase mb-1">Legal Disclaimer</label><textarea className="input-field resize-none" rows={2} value={settings.legal_disclaimer || ''} onChange={(e) => u('legal_disclaimer', e.target.value)} /></div>
+        <h2 className="text-lg font-bold mb-4">Site Experience</h2>
+        <div className="space-y-6">
+          <div>
+            <label className="flex items-center gap-2 text-sm cursor-pointer mb-1">
+              <input 
+                type="checkbox" 
+                checked={settings.auto_carousel_enabled} 
+                onChange={(e) => u('auto_carousel_enabled', e.target.checked)} 
+                className="w-4 h-4 accent-primary" 
+              />
+              Enable auto-carousel for car thumbnails
+            </label>
+            <p className="text-xs text-gray-400">When enabled, car cards will smoothly cycle through all photos.</p>
+          </div>
+
+          {settings.auto_carousel_enabled && (
+            <div>
+              <label className="block text-xs font-bold text-gray-500 uppercase mb-3">
+                Transition Speed: {settings.auto_carousel_interval} Seconds
+              </label>
+              <div className="flex items-center gap-4">
+                <span className="text-xs text-gray-400">1s</span>
+                <input 
+                  type="range" 
+                  min={1} 
+                  max={15} 
+                  value={settings.auto_carousel_interval} 
+                  onChange={(e) => u('auto_carousel_interval', parseInt(e.target.value))}
+                  className="flex-1 h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary" 
+                />
+                <span className="text-xs text-gray-400">15s</span>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

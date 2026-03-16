@@ -1,19 +1,46 @@
+'use client';
+
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Gauge, Settings2, ChevronRight, ShieldCheck } from 'lucide-react';
 import type { Vehicle } from '@/lib/types';
 import { formatPrice, formatMileage, getHeroPhoto } from '@/lib/utils';
 
-export default function VehicleCard({ vehicle }: { vehicle: Vehicle }) {
-  const heroPhoto = getHeroPhoto(vehicle.photos);
+export default function VehicleCard({ 
+  vehicle, 
+  autoCarousel = true, 
+  interval = 4000 
+}: { 
+  vehicle: Vehicle;
+  autoCarousel?: boolean;
+  interval?: number;
+}) {
+  const [currentIdx, setCurrentIdx] = useState(0);
+  const photos = vehicle.photos && vehicle.photos.length > 0 
+    ? vehicle.photos.sort((a, b) => a.sort_order - b.sort_order) 
+    : [];
+
+  useEffect(() => {
+    if (!autoCarousel || photos.length <= 1) return;
+
+    const timer = setInterval(() => {
+      setCurrentIdx((prev) => (prev + 1) % photos.length);
+    }, interval);
+
+    return () => clearInterval(timer);
+  }, [autoCarousel, interval, photos.length]);
+
+  const displayPhoto = photos.length > 0 ? photos[currentIdx].public_url : '/placeholder-car.jpg';
 
   return (
     <Link href={`/vehicles/${vehicle.id}`} className="vehicle-card group block">
       {/* Image */}
       <div className="relative h-52 overflow-hidden bg-slate-100">
         <img
-          src={heroPhoto}
+          key={displayPhoto}
+          src={displayPhoto}
           alt={`${vehicle.year} ${vehicle.make} ${vehicle.model}`}
-          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+          className="w-full h-full object-cover transition-all duration-1000 group-hover:scale-105 animate-cross-fade"
         />
 
         {/* Overlay gradient */}

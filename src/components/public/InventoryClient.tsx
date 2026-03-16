@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import { Search, SlidersHorizontal, X } from 'lucide-react';
-import type { Vehicle } from '@/lib/types';
+import type { Vehicle, SiteSettings } from '@/lib/types';
 import VehicleCard from '@/components/public/VehicleCard';
 import {
   BODY_TYPES, TRANSMISSIONS, FUEL_TYPES, DRIVETRAINS,
@@ -11,13 +11,14 @@ import {
 
 interface InventoryClientProps {
   vehicles: Vehicle[];
+  settings: SiteSettings | null;
   initialFilters?: {
     bodyType?: string;
     maxPrice?: string;
   };
 }
 
-export default function InventoryClient({ vehicles, initialFilters }: InventoryClientProps) {
+export default function InventoryClient({ vehicles, settings, initialFilters }: InventoryClientProps) {
   const [search, setSearch] = useState('');
   const [selectedMake, setSelectedMake] = useState('All');
   const [selectedBodyType, setSelectedBodyType] = useState(initialFilters?.bodyType || 'All');
@@ -243,7 +244,12 @@ export default function InventoryClient({ vehicles, initialFilters }: InventoryC
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {filtered.map((vehicle) => (
-            <VehicleCard key={vehicle.id} vehicle={vehicle} />
+            <VehicleCard 
+              key={vehicle.id} 
+              vehicle={vehicle} 
+              autoCarousel={settings?.auto_carousel_enabled ?? true}
+              interval={(settings?.auto_carousel_interval ?? 4) * 1000}
+            />
           ))}
         </div>
       )}

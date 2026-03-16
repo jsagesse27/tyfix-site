@@ -2,15 +2,16 @@
 
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
-import type { Vehicle } from '@/lib/types';
+import type { Vehicle, SiteSettings } from '@/lib/types';
 import VehicleCard from './VehicleCard';
 import { useReveal, useStaggerReveal } from '@/lib/useReveal';
 
 interface FeaturedVehiclesProps {
   vehicles: Vehicle[];
+  settings: SiteSettings | null;
 }
 
-export default function FeaturedVehicles({ vehicles }: FeaturedVehiclesProps) {
+export default function FeaturedVehicles({ vehicles, settings }: FeaturedVehiclesProps) {
   const featured = vehicles.filter((v) => v.featured_label);
   const display = featured.length > 0 ? featured.slice(0, 6) : vehicles.slice(0, 6);
   const headingRef = useReveal();
@@ -41,7 +42,11 @@ export default function FeaturedVehicles({ vehicles }: FeaturedVehiclesProps) {
         <div ref={gridRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-7 stagger">
           {display.map((vehicle) => (
             <div key={vehicle.id} className="reveal">
-              <VehicleCard vehicle={vehicle} />
+              <VehicleCard 
+                vehicle={vehicle} 
+                autoCarousel={settings?.auto_carousel_enabled ?? true}
+                interval={(settings?.auto_carousel_interval ?? 4) * 1000}
+              />
             </div>
           ))}
         </div>
