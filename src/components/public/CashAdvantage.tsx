@@ -2,6 +2,7 @@
 
 import { CheckCircle2 } from 'lucide-react';
 import { useReveal } from '@/lib/useReveal';
+import CashCalculator from './CashCalculator';
 
 interface CashAdvantageProps {
   content: Record<string, string>;
@@ -90,6 +91,9 @@ export default function CashAdvantage({ content }: CashAdvantageProps) {
             </div>
           </div>
         </div>
+
+        {/* Interactive Calculator */}
+        <CashCalculator />
       </div>
     </section>
   );
