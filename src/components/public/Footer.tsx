@@ -9,7 +9,7 @@ interface FooterProps {
 }
 
 export default function Footer({ settings, content }: FooterProps) {
-  const footerAbout = content['footer_about'] || settings?.footer_text || 'Providing reliable, affordable transportation to the Houston community.';
+  const footerAbout = content['footer_about'] || settings?.footer_text || 'Tell a friend to tell a friend, come shop with TyFix!';
   const tagline = settings?.show_price_tagline ? settings.price_tagline_text : null;
   const year = new Date().getFullYear();
 

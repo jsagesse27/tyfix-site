@@ -13,8 +13,8 @@ interface HeroProps {
 export default function Hero({ settings, content, soldCount }: HeroProps) {
   const phone = settings?.phone_number || '(555) 123-4567';
   const smsNumber = settings?.sms_number || '5551234567';
-  const tagline = content['homepage_tagline'] || 'Reliable Cars. Cash Prices. No Games.';
-  const headline = content['homepage_headline'] || 'Quality Vehicles Under $7,500';
+  const tagline = content['homepage_tagline'] || 'Tell a friend to tell a friend, come shop with TyFix!';
+  const headline = content['homepage_headline'] || 'Quality Vehicles Under $5,000';
   const subheadline = content['homepage_subheadline'] || 'No credit checks. No interest. No monthly payments. Pay cash and drive away today in a vehicle you can trust.';
   const heroImage = content['hero_image_url'] || 'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&q=80&w=1920';
 

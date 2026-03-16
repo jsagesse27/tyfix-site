@@ -198,7 +198,7 @@ INSERT INTO site_settings (
 -- Seed: Default site content
 -- ============================
 INSERT INTO site_content (content_key, content_value, content_type) VALUES
-  ('homepage_tagline', 'Reliable Cars. Cash Prices. No Games.', 'text'),
+  ('homepage_tagline', 'Tell a friend to tell a friend, come shop with TyFix!', 'text'),
   ('homepage_headline', 'Quality Vehicles Under $5,000', 'text'),
   ('homepage_subheadline', 'No credit checks. No interest. No monthly payments. Pay cash and drive away today in a vehicle you can trust.', 'text'),
   ('about_title', 'The TyFix Cash Advantage', 'text'),

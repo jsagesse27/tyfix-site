@@ -82,7 +82,7 @@ export default function LoadingScreen() {
             }}
             className="absolute bottom-12 text-[10px] uppercase tracking-[0.3em] font-black text-slate-400"
           >
-            Houston's Cash Car Specialist
+            Tell a friend to tell a friend, come shop with TyFix!
           </motion.p>
         </motion.div>
       )}
