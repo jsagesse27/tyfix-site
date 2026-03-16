@@ -1,4 +1,7 @@
+'use client';
+
 import { MapPin, Clock, Phone } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 import type { SiteSettings } from '@/lib/types';
 import InquiryForm from './InquiryForm';
 
@@ -10,7 +13,61 @@ export default function ContactSection({ settings }: ContactSectionProps) {
   const phone = settings?.phone_number || '(555) 123-4567';
   const address = settings?.lot_address || 'Coney Island, Brooklyn, NY 11224';
   const hours = settings?.hours_of_operation || 'Mon - Sat: 9:00 AM - 6:00 PM | Sunday: Closed';
-  const mapsEmbed = settings?.google_maps_embed_url;
+  const mapContainerRef = useRef<HTMLDivElement>(null);
+  const [mapLoaded, setMapLoaded] = useState(false);
+
+  useEffect(() => {
+    // Prevent double initialization
+    if (mapLoaded || !mapContainerRef.current) return;
+
+    // Load Leaflet CSS
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+    document.head.appendChild(link);
+
+    // Load Leaflet JS
+    const script = document.createElement('script');
+    script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+    script.async = true;
+    script.onload = () => {
+      const L = (window as any).L;
+      if (!L || !mapContainerRef.current) return;
+
+      const coords: [number, number] = [40.5749, -73.9850];
+      const map = L.map(mapContainerRef.current, {
+        scrollWheelZoom: false,
+        zoomControl: false,
+      }).setView(coords, 15);
+
+      // Simple Clean Tiles (CartoDB Positron)
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; OpenStreetMap'
+      }).addTo(map);
+
+      // Custom Maroon Pin Marker
+      const icon = L.divIcon({
+        html: `
+          <div class="relative -top-10 -left-5">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="#8B0000" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="filter: drop-shadow(0 4px 12px rgba(139,0,0,0.4))">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+              <circle cx="12" cy="10" r="3" fill="white"></circle>
+            </svg>
+          </div>
+        `,
+        className: 'custom-map-pin',
+        iconSize: [0, 0],
+      });
+
+      L.marker(coords, { icon }).addTo(map);
+      setMapLoaded(true);
+    };
+    document.head.appendChild(script);
+
+    return () => {
+      // Cleanup tags if necessary, but Leaflet instance cleanup is hard without the ref
+    };
+  }, [mapLoaded]);
 
   return (
     <section id="contact" className="py-24 bg-white">
@@ -57,34 +114,19 @@ export default function ContactSection({ settings }: ContactSectionProps) {
             </div>
           </div>
 
-          <div className="h-[600px] rounded-[2rem] relative overflow-hidden shadow-[0_24px_60px_-15px_rgba(0,0,0,0.1)] border border-slate-100 group">
-            {/* Map Frame with Clean Border Overlay */}
-            <div className="absolute inset-0 z-10 border-[12px] border-white/80 pointer-events-none rounded-[2rem]" />
-
-            {/* OpenStreetMap Iframe with 'Clean Paper' styling */}
-            <iframe
-              src="https://www.openstreetmap.org/export/embed.html?bbox=-73.989%2C40.572%2C-73.982%2C40.578&layer=mapnik"
-              className="w-full h-full scale-110 transition-transform duration-1000 group-hover:scale-100"
-              style={{ 
-                border: 0, 
-                filter: 'grayscale(1) brightness(1.0) contrast(1.1) opacity(0.8)' 
-              }}
-              allowFullScreen
-              loading="lazy"
-              title="TyFix Auto Sales Location"
-            />
+          <div className="h-[600px] rounded-[2.5rem] relative overflow-hidden shadow-[0_24px_60px_-15px_rgba(0,0,0,0.1)] border border-slate-100 group bg-slate-50">
+            {/* Map Placeholder/Container */}
+            <div ref={mapContainerRef} className="w-full h-full grayscale-[0.2]" />
             
-            {/* Custom Primary Pin Marker */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 pointer-events-none mb-4">
-              <MapPin size={40} className="text-primary fill-primary/10 drop-shadow-[0_4px_12px_rgba(139,0,0,0.5)] animate-float" />
-            </div>
-
-            {/* Subtle palette overlays - using White, Navy, and Maroon accents */}
-            <div className="absolute inset-0 bg-white/40 pointer-events-none" />
-            <div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-transparent pointer-events-none opacity-60" />
+            {/* Map Frame with Clean Border Overlay */}
+            <div className="absolute inset-0 z-[1000] border-[12px] border-white/80 pointer-events-none rounded-[2.5rem]" />
+            
+            {/* Subtle palette overlays */}
+            <div className="absolute inset-0 bg-white/20 pointer-events-none z-[500]" />
+            <div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-transparent pointer-events-none opacity-40 z-[500]" />
             
             {/* Location Badge - Clean Modern Style */}
-            <div className="absolute bottom-8 left-8 right-8 z-20 md:left-8 md:right-auto">
+            <div className="absolute bottom-8 left-8 right-8 z-[1001] md:left-8 md:right-auto">
               <div className="relative overflow-hidden bg-white/95 backdrop-blur-xl px-6 py-5 rounded-[1.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.1)] border border-slate-100 transition-all duration-500 hover:shadow-[0_20px_50px_rgba(139,0,0,0.15)] group-hover:border-primary/20">
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 bg-[#0F172A] rounded-xl flex items-center justify-center text-white shadow-lg">
