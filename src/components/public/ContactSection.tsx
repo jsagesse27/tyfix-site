@@ -57,27 +57,47 @@ export default function ContactSection({ settings }: ContactSectionProps) {
             </div>
           </div>
 
-          <div className="h-[600px] rounded-3xl relative overflow-hidden shadow-2xl border-8 border-slate-100">
-            {/* OpenStreetMap Iframe */}
+          <div className="h-[600px] rounded-[2rem] relative overflow-hidden shadow-[0_24px_80px_-15px_rgba(0,0,0,0.2)] border-1 border-slate-100/50 group">
+            {/* Map Frame with Gradient Border Overlay */}
+            <div className="absolute inset-0 z-10 border-[12px] border-slate-50/50 pointer-events-none rounded-[2rem]" />
+            <div className="absolute inset-0 z-10 border border-primary/10 pointer-events-none rounded-[2rem]" />
+
+            {/* OpenStreetMap Iframe with 'Midnight Cinema' styling */}
             <iframe
-              src="https://www.openstreetmap.org/export/embed.html?bbox=-74.005%2C40.565%2C-73.965%2C40.585&layer=mapnik&marker=40.5749%2C-73.9859"
-              className="w-full h-full"
-              style={{ border: 0, filter: 'grayscale(1) contrast(1.1) brightness(0.95)' }}
+              src="https://www.openstreetmap.org/export/embed.html?bbox=-73.992%2C40.568%2C-73.978%2C40.582&layer=mapnik&marker=40.5749%2C-73.9859"
+              className="w-full h-full scale-105 transition-transform duration-1000 group-hover:scale-100"
+              style={{ 
+                border: 0, 
+                filter: 'grayscale(1) invert(100%) brightness(0.7) contrast(1.4) saturate(0.5)' 
+              }}
               allowFullScreen
               loading="lazy"
               title="TyFix Auto Sales Location"
             />
             
-            {/* Dynamic theme tint overlays (syncs with global primary color) */}
-            <div className="absolute inset-0 bg-primary mix-blend-color pointer-events-none opacity-70" />
-            <div className="absolute inset-0 bg-primary mix-blend-overlay pointer-events-none opacity-30" />
+            {/* Dynamic theme tint overlays - matching Navy and Maroon palette */}
+            <div className="absolute inset-0 bg-[#050A14] mix-blend-color pointer-events-none opacity-40" />
+            <div className="absolute inset-0 bg-primary mix-blend-soft-light pointer-events-none opacity-40" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#050A14]/80 via-transparent to-transparent pointer-events-none" />
             
-            {/* Location Badge */}
-            <div className="absolute bottom-6 left-6 z-10 bg-white/95 backdrop-blur-md px-5 py-3 rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.12)] border border-slate-100 pointer-events-none">
-              <p className="font-black text-gray-900 flex items-center gap-2">
-                <MapPin size={16} className="text-primary" /> TyFix Auto Sales
-              </p>
-              <p className="text-xs text-slate-500 font-medium mt-1">Coney Island, Brooklyn</p>
+            {/* Location Badge - Pro Max Glassmorphism */}
+            <div className="absolute bottom-8 left-8 right-8 z-20 md:left-8 md:right-auto">
+              <div className="relative overflow-hidden bg-[#0F172A]/90 backdrop-blur-2xl px-6 py-5 rounded-[1.5rem] shadow-2xl border border-white/10 group-hover:border-primary/30 transition-all duration-500">
+                {/* Glow effect */}
+                <div className="absolute -top-10 -right-10 w-24 h-24 bg-primary/20 blur-3xl rounded-full" />
+                
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center text-white shadow-lg shadow-primary/40 animate-pulse">
+                    <MapPin size={24} />
+                  </div>
+                  <div>
+                    <h4 className="font-black text-white text-lg tracking-tight leading-none uppercase">TyFix Auto Sales</h4>
+                    <p className="text-slate-400 text-sm font-bold mt-1.5 flex items-center gap-2">
+                       Brooklyn, NY <span className="w-1 h-1 bg-primary rounded-full" /> Coney Island Area
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
