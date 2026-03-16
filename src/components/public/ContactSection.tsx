@@ -57,42 +57,37 @@ export default function ContactSection({ settings }: ContactSectionProps) {
             </div>
           </div>
 
-          <div className="h-[600px] rounded-[2rem] relative overflow-hidden shadow-[0_24px_80px_-15px_rgba(0,0,0,0.2)] border-1 border-slate-100/50 group">
-            {/* Map Frame with Gradient Border Overlay */}
-            <div className="absolute inset-0 z-10 border-[12px] border-slate-50/50 pointer-events-none rounded-[2rem]" />
-            <div className="absolute inset-0 z-10 border border-primary/10 pointer-events-none rounded-[2rem]" />
+          <div className="h-[600px] rounded-[2rem] relative overflow-hidden shadow-[0_24px_60px_-15px_rgba(0,0,0,0.1)] border border-slate-100 group">
+            {/* Map Frame with Clean Border Overlay */}
+            <div className="absolute inset-0 z-10 border-[12px] border-white/80 pointer-events-none rounded-[2rem]" />
 
-            {/* OpenStreetMap Iframe with 'Midnight Cinema' styling */}
+            {/* OpenStreetMap Iframe with 'Clean Paper' styling */}
             <iframe
-              src="https://www.openstreetmap.org/export/embed.html?bbox=-73.992%2C40.568%2C-73.978%2C40.582&layer=mapnik&marker=40.5749%2C-73.9859"
-              className="w-full h-full scale-105 transition-transform duration-1000 group-hover:scale-100"
+              src="https://www.openstreetmap.org/export/embed.html?bbox=-73.989%2C40.572%2C-73.982%2C40.578&layer=mapnik&marker=40.5749%2C-73.9850"
+              className="w-full h-full scale-110 transition-transform duration-1000 group-hover:scale-100"
               style={{ 
                 border: 0, 
-                filter: 'grayscale(1) invert(100%) brightness(0.7) contrast(1.4) saturate(0.5)' 
+                filter: 'grayscale(1) brightness(1.0) contrast(1.1) opacity(0.8)' 
               }}
               allowFullScreen
               loading="lazy"
               title="TyFix Auto Sales Location"
             />
             
-            {/* Dynamic theme tint overlays - matching Navy and Maroon palette */}
-            <div className="absolute inset-0 bg-[#050A14] mix-blend-color pointer-events-none opacity-40" />
-            <div className="absolute inset-0 bg-primary mix-blend-soft-light pointer-events-none opacity-40" />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#050A14]/80 via-transparent to-transparent pointer-events-none" />
+            {/* Subtle palette overlays - using White, Navy, and Maroon accents */}
+            <div className="absolute inset-0 bg-white/40 pointer-events-none" />
+            <div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-transparent pointer-events-none opacity-60" />
             
-            {/* Location Badge - Pro Max Glassmorphism */}
+            {/* Location Badge - Clean Modern Style */}
             <div className="absolute bottom-8 left-8 right-8 z-20 md:left-8 md:right-auto">
-              <div className="relative overflow-hidden bg-[#0F172A]/90 backdrop-blur-2xl px-6 py-5 rounded-[1.5rem] shadow-2xl border border-white/10 group-hover:border-primary/30 transition-all duration-500">
-                {/* Glow effect */}
-                <div className="absolute -top-10 -right-10 w-24 h-24 bg-primary/20 blur-3xl rounded-full" />
-                
+              <div className="relative overflow-hidden bg-white/95 backdrop-blur-xl px-6 py-5 rounded-[1.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.1)] border border-slate-100 transition-all duration-500 hover:shadow-[0_20px_50px_rgba(139,0,0,0.15)] group-hover:border-primary/20">
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center text-white shadow-lg shadow-primary/40 animate-pulse">
-                    <MapPin size={24} />
+                  <div className="w-12 h-12 bg-[#0F172A] rounded-xl flex items-center justify-center text-white shadow-lg">
+                    <MapPin size={24} className="text-primary" />
                   </div>
                   <div>
-                    <h4 className="font-black text-white text-lg tracking-tight leading-none uppercase">TyFix Auto Sales</h4>
-                    <p className="text-slate-400 text-sm font-bold mt-1.5 flex items-center gap-2">
+                    <h4 className="font-black text-[#0F172A] text-lg tracking-tight leading-none uppercase">TyFix Auto Sales</h4>
+                    <p className="text-slate-500 text-sm font-bold mt-1.5 flex items-center gap-2">
                        Brooklyn, NY <span className="w-1 h-1 bg-primary rounded-full" /> Coney Island Area
                     </p>
                   </div>
