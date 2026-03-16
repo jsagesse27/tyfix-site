@@ -132,13 +132,13 @@ export default function CashCalculator() {
                 <input
                   type="range"
                   min={2000}
-                  max={15000}
-                  step={500}
+                  max={10000}
+                  step={50}
                   value={price}
                   onChange={(e) => setPrice(Number(e.target.value))}
                   className="flex-1 h-2 rounded-full appearance-none cursor-pointer"
                   style={{
-                    background: `linear-gradient(to right, var(--color-primary) 0%, var(--color-primary) ${((price - 2000) / 13000) * 100}%, rgba(255,255,255,0.1) ${((price - 2000) / 13000) * 100}%, rgba(255,255,255,0.1) 100%)`,
+                    background: `linear-gradient(to right, var(--color-primary) 0%, var(--color-primary) ${((price - 2000) / 8000) * 100}%, rgba(255,255,255,0.1) ${((price - 2000) / 8000) * 100}%, rgba(255,255,255,0.1) 100%)`,
                   }}
                 />
                 <span className="text-3xl font-black text-white min-w-[110px] text-right" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
