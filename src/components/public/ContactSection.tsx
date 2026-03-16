@@ -8,7 +8,7 @@ interface ContactSectionProps {
 
 export default function ContactSection({ settings }: ContactSectionProps) {
   const phone = settings?.phone_number || '(555) 123-4567';
-  const address = settings?.lot_address || '123 Auto Mall Dr, Houston, TX 77001';
+  const address = settings?.lot_address || 'Coney Island, Brooklyn, NY 11224';
   const hours = settings?.hours_of_operation || 'Mon - Sat: 9:00 AM - 6:00 PM | Sunday: Closed';
   const mapsEmbed = settings?.google_maps_embed_url;
 

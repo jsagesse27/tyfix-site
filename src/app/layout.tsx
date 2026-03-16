@@ -8,10 +8,10 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "TyFix Auto Sales | Quality Cash Cars Under $5,000 in Houston",
+  title: "TyFix Auto Sales | Quality Cash Cars Under $5,000 in Brooklyn",
   description:
-    "Shop reliable, inspected used cars under $5,000 at TyFix Auto Sales in Houston, TX. No credit checks, no interest, no hidden fees. Cash and drive today.",
-  keywords: ["used cars Houston", "cash cars", "cars under $5000", "TyFix Auto Sales", "no credit check cars"],
+    "Shop reliable, inspected used cars under $5,000 at TyFix Auto Sales in Brooklyn, NY. No credit checks, no interest, no hidden fees. Cash and drive today.",
+  keywords: ["used cars Brooklyn", "cash cars", "cars under $5000", "TyFix Auto Sales", "no credit check cars"],
   openGraph: {
     title: "TyFix Auto Sales | Quality Cash Cars Under $5,000",
     description: "No credit checks. No interest. No hidden fees. Drive away today.",

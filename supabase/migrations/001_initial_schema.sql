@@ -187,9 +187,9 @@ INSERT INTO site_settings (
   hours_of_operation, footer_text, price_tagline_text, primary_color
 ) VALUES (
   '(555) 123-4567', '5551234567', 'info@tyfixauto.com',
-  '123 Auto Mall Dr, Houston, TX 77001',
+  'Coney Island, Brooklyn, NY 11224',
   'Mon - Sat: 9:00 AM - 6:00 PM | Sunday: Closed',
-  'Providing reliable, affordable transportation to the Houston community.',
+  'Tell a friend to tell a friend, come shop with TyFix!',
   'The price you see is the price you pay.',
   '#8B0000'
 );
@@ -218,7 +218,7 @@ INSERT INTO site_content (content_key, content_value, content_type) VALUES
   ('trust_badge_3_title', 'Drive Today', 'text'),
   ('trust_badge_3_desc', 'Cash-only means no waiting for bank approvals. Sign the papers and drive away in minutes.', 'text'),
   ('hero_image_url', 'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&q=80&w=1920', 'image_url'),
-  ('footer_about', 'Providing reliable, affordable transportation to the Houston community since 2015. Straightforward cash sales, no games.', 'text')
+  ('footer_about', 'Providing reliable, affordable transportation to the Brooklyn community since 2015. Straightforward cash sales, no games.', 'text')
 ON CONFLICT (content_key) DO NOTHING;
 
 -- ============================

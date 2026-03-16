@@ -52,13 +52,13 @@ export default function ChatBot() {
       let botText = "I'm not sure about that. Would you like to speak with one of our specialists? You can call us at (555) 123-4567.";
 
       if (lower.includes('inventory') || lower.includes('cars') || lower.includes('stock')) {
-        botText = "We have a great selection of quality vehicles under $7,500! You can browse our current inventory right here on the site. Is there a specific make or model you're looking for?";
+        botText = "We have a great selection of quality vehicles under $5,000! You can browse our current inventory right here on the site. Is there a specific make or model you're looking for?";
       } else if (lower.includes('location') || lower.includes('address') || lower.includes('where')) {
-        botText = "We are located at 123 Auto Drive, Houston, TX. Come visit us today!";
+        botText = "We are located in Coney Island, Brooklyn, NY. Come visit us today!";
       } else if (lower.includes('phone') || lower.includes('call') || lower.includes('contact')) {
         botText = "You can reach us at (555) 123-4567. We're happy to answer any questions!";
       } else if (lower.includes('price') || lower.includes('cost') || lower.includes('money')) {
-        botText = "All our cars are priced to sell, mostly under $7,500. We deal in cash to keep prices low and transparent—no interest, no credit checks!";
+        botText = "All our cars are priced to sell, mostly under $5,000. We deal in cash to keep prices low and transparent—no interest, no credit checks!";
       } else if (lower.includes('hello') || lower.includes('hi')) {
         botText = "Hello! How can I assist you with your car search today?";
       }
