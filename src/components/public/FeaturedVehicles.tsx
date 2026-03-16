@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Car } from 'lucide-react';
 import type { Vehicle, SiteSettings } from '@/lib/types';
 import VehicleCard from './VehicleCard';
 import { useReveal, useStaggerReveal } from '@/lib/useReveal';
@@ -49,6 +49,22 @@ export default function FeaturedVehicles({ vehicles, settings }: FeaturedVehicle
               />
             </div>
           ))}
+        </div>
+
+        {/* CTA */}
+        <div className="mt-16 text-center reveal">
+          <div className="inline-block p-8 bg-white rounded-3xl border border-slate-100 shadow-sm transition-all hover:shadow-md">
+            <h3 className="text-xl font-bold text-gray-900 mb-2">Don't see what you're looking for?</h3>
+            <p className="text-slate-500 mb-6 max-w-sm mx-auto">
+              Our inventory changes daily. Tell us what you want and we'll track it down for you.
+            </p>
+            <Link 
+              href="/#contact" 
+              className="btn-outline px-10 py-4 text-base font-black uppercase tracking-widest inline-flex items-center gap-3"
+            >
+              <Car size={20} /> Request a Vehicle
+            </Link>
+          </div>
         </div>
       </div>
     </section>
