@@ -199,7 +199,7 @@ INSERT INTO site_settings (
 -- ============================
 INSERT INTO site_content (content_key, content_value, content_type) VALUES
   ('homepage_tagline', 'Reliable Cars. Cash Prices. No Games.', 'text'),
-  ('homepage_headline', 'Quality Vehicles Under $7,500', 'text'),
+  ('homepage_headline', 'Quality Vehicles Under $5,000', 'text'),
   ('homepage_subheadline', 'No credit checks. No interest. No monthly payments. Pay cash and drive away today in a vehicle you can trust.', 'text'),
   ('about_title', 'The TyFix Cash Advantage', 'text'),
   ('about_text', 'At TyFix Auto Sales, we believe car shopping should be simple and honest. Every vehicle on our lot passes a rigorous 25-point mechanical inspection. We price fairly, we do not charge hidden fees, and we let our cars speak for themselves.', 'text'),

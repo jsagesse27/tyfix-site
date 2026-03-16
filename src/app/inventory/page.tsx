@@ -8,7 +8,7 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Inventory | TyFix Auto Sales',
-  description: 'Browse our full inventory of quality used cars under $7,500. Filter by make, price, body type, and more. Cash prices, no hidden fees.',
+  description: 'Browse our full inventory of quality used cars under $5,000. Filter by make, price, body type, and more. Cash prices, no hidden fees.',
 };
 
 interface PageProps {
