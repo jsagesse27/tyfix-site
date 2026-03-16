@@ -5,12 +5,12 @@ import { DollarSign, TrendingUp, AlertTriangle, ChevronRight, RotateCcw, Car } f
 import { useReveal } from '@/lib/useReveal';
 
 /* ── Fee Constants ───────────────────────────── */
-const DOC_FEE       = 599;
-const TITLE_REG_FEE = 325;
+const DOC_FEE       = 175; // NY limit
+const TITLE_REG_FEE = 175; // Title $50 + Plates $25 + Reg ~$100
 const SALES_TAX_RATE = 0.08875; // NYC rate
-const ADV_FEE       = 299;
-const RECOND_FEE    = 895;
-const MARKET_ADJ    = 1200;
+const ADV_FEE       = 350; // Average
+const RECOND_FEE    = 1500; // Average
+const MARKET_ADJ    = 2500; // Average
 const DEFAULT_APR   = 14.9;
 const DEFAULT_TERM  = 60; // months
 
