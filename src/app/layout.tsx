@@ -20,6 +20,7 @@ export const metadata: Metadata = {
 };
 
 import ChatBot from "@/components/public/ChatBot";
+import LoadingScreen from "@/components/public/LoadingScreen";
 
 export default function RootLayout({
   children,
@@ -29,6 +30,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={inter.variable}>
       <body className="min-h-screen antialiased">
+        <LoadingScreen />
         {children}
         <ChatBot />
       </body>
