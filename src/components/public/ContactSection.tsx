@@ -57,26 +57,28 @@ export default function ContactSection({ settings }: ContactSectionProps) {
             </div>
           </div>
 
-          <div className="h-[600px] rounded-3xl overflow-hidden shadow-2xl border-8 border-gray-100">
-            {mapsEmbed ? (
-              <iframe
-                src={mapsEmbed}
-                width="100%"
-                height="100%"
-                style={{ border: 0 }}
-                allowFullScreen
-                loading="lazy"
-                title="TyFix Auto Sales Location"
-              />
-            ) : (
-              <div className="w-full h-full bg-gray-100 flex items-center justify-center text-gray-400">
-                <div className="text-center">
-                  <MapPin size={48} className="mx-auto mb-4" />
-                  <p className="font-bold">Map Coming Soon</p>
-                  <p className="text-sm">{address}</p>
-                </div>
-              </div>
-            )}
+          <div className="h-[600px] rounded-3xl relative overflow-hidden shadow-2xl border-8 border-slate-100">
+            {/* OpenStreetMap Iframe */}
+            <iframe
+              src="https://www.openstreetmap.org/export/embed.html?bbox=-74.005%2C40.565%2C-73.965%2C40.585&layer=mapnik&marker=40.5749%2C-73.9859"
+              className="w-full h-full"
+              style={{ border: 0, filter: 'grayscale(1) contrast(1.1) brightness(0.95)' }}
+              allowFullScreen
+              loading="lazy"
+              title="TyFix Auto Sales Location"
+            />
+            
+            {/* Dynamic theme tint overlays (syncs with global primary color) */}
+            <div className="absolute inset-0 bg-primary mix-blend-color pointer-events-none opacity-70" />
+            <div className="absolute inset-0 bg-primary mix-blend-overlay pointer-events-none opacity-30" />
+            
+            {/* Location Badge */}
+            <div className="absolute bottom-6 left-6 z-10 bg-white/95 backdrop-blur-md px-5 py-3 rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.12)] border border-slate-100 pointer-events-none">
+              <p className="font-black text-gray-900 flex items-center gap-2">
+                <MapPin size={16} className="text-primary" /> TyFix Auto Sales
+              </p>
+              <p className="text-xs text-slate-500 font-medium mt-1">Coney Island, Brooklyn</p>
+            </div>
           </div>
         </div>
       </div>
