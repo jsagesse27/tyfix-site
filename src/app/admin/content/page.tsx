@@ -6,27 +6,42 @@ import { Save, CheckCircle2 } from 'lucide-react';
 import type { SiteContent } from '@/lib/types';
 
 const CONTENT_SECTIONS = [
-  { key: 'homepage_tagline', label: 'Homepage Tagline', rows: 1 },
-  { key: 'homepage_headline', label: 'Homepage Headline', rows: 1 },
-  { key: 'homepage_subheadline', label: 'Homepage Sub-headline', rows: 2 },
-  { key: 'about_title', label: 'About Section Title', rows: 1 },
-  { key: 'about_text', label: 'About Section Text', rows: 3 },
-  { key: 'trust_badge_1_title', label: 'Trust Badge 1 Title', rows: 1 },
-  { key: 'trust_badge_1_desc', label: 'Trust Badge 1 Description', rows: 2 },
-  { key: 'trust_badge_2_title', label: 'Trust Badge 2 Title', rows: 1 },
-  { key: 'trust_badge_2_desc', label: 'Trust Badge 2 Description', rows: 2 },
-  { key: 'trust_badge_3_title', label: 'Trust Badge 3 Title', rows: 1 },
-  { key: 'trust_badge_3_desc', label: 'Trust Badge 3 Description', rows: 2 },
-  { key: 'cash_advantage_1_title', label: 'Cash Advantage 1 Title', rows: 1 },
-  { key: 'cash_advantage_1_desc', label: 'Cash Advantage 1 Description', rows: 2 },
-  { key: 'cash_advantage_2_title', label: 'Cash Advantage 2 Title', rows: 1 },
-  { key: 'cash_advantage_2_desc', label: 'Cash Advantage 2 Description', rows: 2 },
-  { key: 'cash_advantage_3_title', label: 'Cash Advantage 3 Title', rows: 1 },
-  { key: 'cash_advantage_3_desc', label: 'Cash Advantage 3 Description', rows: 2 },
-  { key: 'cash_advantage_4_title', label: 'Cash Advantage 4 Title', rows: 1 },
-  { key: 'cash_advantage_4_desc', label: 'Cash Advantage 4 Description', rows: 2 },
-  { key: 'hero_image_url', label: 'Hero Image URL', rows: 1 },
-  { key: 'footer_about', label: 'Footer About Text', rows: 2 },
+  // Hero Section
+  { key: 'homepage_tagline', label: 'Hero: Tagline (Above Headline)', rows: 1 },
+  { key: 'homepage_headline', label: 'Hero: Main Headline', rows: 1 },
+  { key: 'homepage_subheadline', label: 'Hero: Sub-headline', rows: 2 },
+  { key: 'hero_image_url', label: 'Hero: Background Image URL', rows: 1 },
+  
+  // Hero Stats
+  { key: 'hero_stat_1_label', label: 'Hero Stat 1: Label (e.g. Cars Sold)', rows: 1 },
+  { key: 'hero_stat_1_base', label: 'Hero Stat 1: Base Count (Number only)', rows: 1 },
+  { key: 'hero_stat_2_label', label: 'Hero Stat 2: Label (e.g. Happy Clients)', rows: 1 },
+  { key: 'hero_stat_2_value', label: 'Hero Stat 2: Value (e.g. 100k+)', rows: 1 },
+  { key: 'hero_stat_3_label', label: 'Hero Stat 3: Label (e.g. Cash-Only)', rows: 1 },
+  { key: 'hero_stat_3_value', label: 'Hero Stat 3: Value (e.g. 100%)', rows: 1 },
+
+  // Trust Badges
+  { key: 'trust_badge_1_title', label: 'Trust Badge 1: Title', rows: 1 },
+  { key: 'trust_badge_1_desc', label: 'Trust Badge 1: Description', rows: 2 },
+  { key: 'trust_badge_2_title', label: 'Trust Badge 2: Title', rows: 1 },
+  { key: 'trust_badge_2_desc', label: 'Trust Badge 2: Description', rows: 2 },
+  { key: 'trust_badge_3_title', label: 'Trust Badge 3: Title', rows: 1 },
+  { key: 'trust_badge_3_desc', label: 'Trust Badge 3: Description', rows: 2 },
+
+  // Cash Advantage / About
+  { key: 'about_title', label: 'About: Section Title', rows: 1 },
+  { key: 'about_text', label: 'About: Main Text Paragraph', rows: 3 },
+  { key: 'cash_advantage_1_title', label: 'Cash Advantage 1: Title', rows: 1 },
+  { key: 'cash_advantage_1_desc', label: 'Cash Advantage 1: Description', rows: 2 },
+  { key: 'cash_advantage_2_title', label: 'Cash Advantage 2: Title', rows: 1 },
+  { key: 'cash_advantage_2_desc', label: 'Cash Advantage 2: Description', rows: 2 },
+  { key: 'cash_advantage_3_title', label: 'Cash Advantage 3: Title', rows: 1 },
+  { key: 'cash_advantage_3_desc', label: 'Cash Advantage 3: Description', rows: 2 },
+  { key: 'cash_advantage_4_title', label: 'Cash Advantage 4: Title', rows: 1 },
+  { key: 'cash_advantage_4_desc', label: 'Cash Advantage 4: Description', rows: 2 },
+
+  // Footer
+  { key: 'footer_about', label: 'Footer: About TyFix Text', rows: 2 },
 ];
 
 export default function AdminContentPage() {

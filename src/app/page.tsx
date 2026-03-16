@@ -13,11 +13,12 @@ import type { Vehicle, Testimonial, SiteSettings, SiteContent } from '@/lib/type
 async function getData() {
   const supabase = await createClient();
 
-  const [vehiclesRes, testimonialsRes, settingsRes, contentRes] = await Promise.all([
+  const [vehiclesRes, testimonialsRes, settingsRes, contentRes, soldCountRes] = await Promise.all([
     supabase.from('vehicles').select('*, photos:vehicle_photos(*)').eq('listing_status', 'active').order('sort_order'),
     supabase.from('testimonials').select('*').eq('is_visible', true).order('sort_order'),
     supabase.from('site_settings').select('*').limit(1).single(),
     supabase.from('site_content').select('*'),
+    supabase.from('vehicles').select('*', { count: 'exact', head: true }).eq('listing_status', 'sold'),
   ]);
 
   const contentMap: Record<string, string> = {};
@@ -32,16 +33,17 @@ async function getData() {
     testimonials: (testimonialsRes.data as Testimonial[]) || [],
     settings: (settingsRes.data as SiteSettings) || null,
     content: contentMap,
+    soldCount: soldCountRes.count || 0,
   };
 }
 
 export default async function HomePage() {
-  const { vehicles, testimonials, settings, content } = await getData();
+  const { vehicles, testimonials, settings, content, soldCount } = await getData();
 
   return (
     <div className="min-h-screen">
       <Navbar settings={settings} />
-      <Hero settings={settings} content={content} />
+      <Hero settings={settings} content={content} soldCount={soldCount} />
       <TrustBadges content={content} />
       <FeaturedVehicles vehicles={vehicles} />
       <CashAdvantage content={content} />

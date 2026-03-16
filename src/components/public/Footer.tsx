@@ -45,7 +45,6 @@ export default function Footer({ settings, content }: FooterProps) {
             <h4 className="font-bold mb-6 uppercase tracking-widest text-sm text-primary">Quick Links</h4>
             <ul className="space-y-4 text-gray-400">
               <li><Link href="/inventory" className="hover:text-white transition-colors">Inventory</Link></li>
-              <li><Link href="/sold" className="hover:text-white transition-colors">Recently Sold</Link></li>
               <li><Link href="/#about" className="hover:text-white transition-colors">Why Cash?</Link></li>
               <li><Link href="/#reviews" className="hover:text-white transition-colors">Reviews</Link></li>
               <li><Link href="/#contact" className="hover:text-white transition-colors">Location</Link></li>

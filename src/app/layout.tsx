@@ -19,6 +19,8 @@ export const metadata: Metadata = {
   },
 };
 
+import ChatBot from "@/components/public/ChatBot";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -28,6 +30,7 @@ export default function RootLayout({
     <html lang="en" className={inter.variable}>
       <body className="min-h-screen antialiased">
         {children}
+        <ChatBot />
       </body>
     </html>
   );

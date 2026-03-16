@@ -6,6 +6,13 @@ import Image from 'next/image';
 import { Phone, Menu, X, MessageCircle } from 'lucide-react';
 import type { SiteSettings } from '@/lib/types';
 
+const NAV_LINKS = [
+  { label: 'Inventory', href: '/inventory' },
+  { label: 'About', href: '/#about' },
+  { label: 'Reviews', href: '/#reviews' },
+  { label: 'Contact', href: '/#contact' },
+];
+
 export default function Navbar({ settings }: { settings: SiteSettings | null }) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -13,102 +20,98 @@ export default function Navbar({ settings }: { settings: SiteSettings | null }) 
   const smsNumber = settings?.sms_number || '5551234567';
 
   useEffect(() => {
-    const handleScroll = () => setIsScrolled(window.scrollY > 20);
-    window.addEventListener('scroll', handleScroll);
+    const handleScroll = () => setIsScrolled(window.scrollY > 40);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   return (
-    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? 'bg-white shadow-md py-2' : 'bg-transparent py-4'}`}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center">
-          <Link href="/" className="flex items-center gap-2">
-            <Image src="/tyfix-logo.png" alt="TyFix Auto Sales" width={120} height={40} className="h-10 w-auto" priority />
-          </Link>
+    <>
+      <nav
+        className={`fixed z-50 transition-all duration-500 ${
+          isScrolled
+            ? 'top-0 left-0 right-0 bg-white/90 backdrop-blur-xl shadow-sm border-b border-slate-100 py-2'
+            : 'top-4 left-4 right-4 rounded-2xl bg-black/30 backdrop-blur-md border border-white/10 py-3'
+        }`}
+        style={{ transition: 'all 0.4s cubic-bezier(0.16,1,0.3,1)' }}
+      >
+        <div className={`${isScrolled ? 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8' : 'px-4 sm:px-6'}`}>
+          <div className="flex justify-between items-center">
+            {/* Logo */}
+            <Link href="/" className="flex items-center gap-2 cursor-pointer">
+              <Image
+                src="/tyfix-logo.png"
+                alt="TyFix Auto Sales"
+                width={110}
+                height={36}
+                className="h-9 w-auto"
+                priority
+              />
+            </Link>
 
-          <div className="hidden md:flex items-center gap-8">
-            {[
-              { label: 'Inventory', href: '/inventory' },
-              { label: 'Recently Sold', href: '/sold' },
-              { label: 'About', href: '/#about' },
-              { label: 'Reviews', href: '/#reviews' },
-              { label: 'Contact', href: '/#contact' },
-            ].map((item) => (
-              <Link
-                key={item.label}
-                href={item.href}
-                className={`font-medium transition-colors hover:text-primary ${isScrolled ? 'text-gray-700' : 'text-white'}`}
+            {/* Desktop nav */}
+            <div className="hidden md:flex items-center gap-7">
+              {NAV_LINKS.map((item) => (
+                <Link
+                  key={item.label}
+                  href={item.href}
+                  className={`text-sm font-semibold transition-colors duration-200 hover:text-primary ${
+                    isScrolled ? 'text-slate-700' : 'text-white/90'
+                  }`}
+                >
+                  {item.label}
+                </Link>
+              ))}
+              <a
+                href={`tel:${smsNumber}`}
+                className="flex items-center gap-2 bg-primary text-white px-5 py-2.5 rounded-full text-sm font-bold hover:bg-primary-dark transition-all hover:-translate-y-0.5 hover:shadow-lg hover:shadow-primary/30 cursor-pointer"
               >
-                {item.label}
-              </Link>
-            ))}
-            <a
-              href={`sms:${smsNumber}`}
-              className={`flex items-center gap-2 font-medium transition-colors hover:text-primary ${isScrolled ? 'text-gray-700' : 'text-white'}`}
-            >
-              <MessageCircle size={18} />
-              Text Us
-            </a>
-            <a
-              href={`tel:${smsNumber}`}
-              className="flex items-center gap-2 bg-primary text-white px-5 py-2 rounded-full font-bold hover:bg-primary-dark transition-all transform hover:scale-105"
-            >
-              <Phone size={18} />
-              {phone}
-            </a>
-          </div>
+                <Phone size={16} />
+                {phone}
+              </a>
+            </div>
 
-          <button
-            className="md:hidden"
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            aria-label="Toggle menu"
-          >
-            {isMobileMenuOpen ? (
-              <X size={28} className="text-primary" />
-            ) : (
-              <Menu size={28} className={isScrolled ? 'text-primary' : 'text-white'} />
-            )}
-          </button>
+            {/* Mobile hamburger */}
+            <button
+              className="md:hidden cursor-pointer p-1"
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              aria-label="Toggle menu"
+            >
+              {isMobileMenuOpen ? (
+                <X size={26} className="text-primary" />
+              ) : (
+                <Menu size={26} className={isScrolled ? 'text-slate-800' : 'text-white'} />
+              )}
+            </button>
+          </div>
         </div>
-      </div>
+      </nav>
 
       {/* Mobile Menu */}
       {isMobileMenuOpen && (
-        <div className="md:hidden bg-white border-t border-gray-100 animate-fade-in">
-          <div className="px-4 pt-2 pb-6 space-y-1">
-            {[
-              { label: 'Inventory', href: '/inventory' },
-              { label: 'Recently Sold', href: '/sold' },
-              { label: 'About', href: '/#about' },
-              { label: 'Reviews', href: '/#reviews' },
-              { label: 'Contact', href: '/#contact' },
-            ].map((item) => (
+        <div className="fixed inset-0 z-40 bg-white flex flex-col pt-24 px-6 pb-10 animate-fade-in md:hidden overflow-y-auto">
+          <div className="space-y-1 flex-1">
+            {NAV_LINKS.map((item) => (
               <Link
                 key={item.label}
                 href={item.href}
-                className="block px-3 py-4 text-base font-medium text-gray-700 hover:text-primary hover:bg-gray-50 rounded-md"
+                className="block px-4 py-4 text-lg font-semibold text-slate-800 hover:text-primary hover:bg-slate-50 rounded-xl transition-colors cursor-pointer"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 {item.label}
               </Link>
             ))}
+          </div>
+          <div className="space-y-3 pt-6 border-t border-slate-100">
             <a
               href={`tel:${smsNumber}`}
-              className="flex items-center justify-center gap-2 bg-primary text-white px-5 py-4 rounded-lg font-bold mt-4"
+              className="flex items-center justify-center gap-2 bg-primary text-white px-5 py-4 rounded-xl font-bold text-base w-full cursor-pointer"
             >
-              <Phone size={18} />
-              Call Now: {phone}
-            </a>
-            <a
-              href={`sms:${smsNumber}`}
-              className="flex items-center justify-center gap-2 bg-white text-primary border-2 border-primary px-5 py-4 rounded-lg font-bold"
-            >
-              <MessageCircle size={18} />
-              Text Us
+              <Phone size={18} /> Call Now: {phone}
             </a>
           </div>
         </div>
       )}
-    </nav>
+    </>
   );
 }

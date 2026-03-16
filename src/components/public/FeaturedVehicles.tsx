@@ -1,7 +1,10 @@
+'use client';
+
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import type { Vehicle } from '@/lib/types';
 import VehicleCard from './VehicleCard';
+import { useReveal, useStaggerReveal } from '@/lib/useReveal';
 
 interface FeaturedVehiclesProps {
   vehicles: Vehicle[];
@@ -10,32 +13,36 @@ interface FeaturedVehiclesProps {
 export default function FeaturedVehicles({ vehicles }: FeaturedVehiclesProps) {
   const featured = vehicles.filter((v) => v.featured_label);
   const display = featured.length > 0 ? featured.slice(0, 6) : vehicles.slice(0, 6);
+  const headingRef = useReveal();
+  const gridRef = useStaggerReveal(0.05);
 
   if (display.length === 0) return null;
 
   return (
-    <section id="inventory" className="py-20 bg-white">
+    <section id="inventory" className="py-24 bg-slate-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
+        {/* Header */}
+        <div ref={headingRef} className="reveal flex flex-col md:flex-row justify-between items-start md:items-end mb-14 gap-6">
           <div>
-            <h2 className="text-4xl font-black text-gray-900 mb-4">
+            <span className="section-label">Available Now</span>
+            <h2 className="text-4xl font-black text-gray-900 leading-tight">
               {featured.length > 0 ? 'Featured Vehicles' : 'Current Inventory'}
             </h2>
-            <p className="text-gray-500 max-w-lg">
-              Our inventory moves fast. See something you like? Call us now to schedule a test drive.
+            <p className="text-slate-500 mt-3 max-w-md">
+              Our inventory moves fast. See something you like? Call us now to hold it.
             </p>
           </div>
-          <Link
-            href="/inventory"
-            className="btn-primary flex items-center gap-2 whitespace-nowrap"
-          >
-            View All Inventory <ArrowRight size={18} />
+          <Link href="/inventory" className="btn-primary whitespace-nowrap flex items-center gap-2">
+            View All <ArrowRight size={18} />
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {/* Grid */}
+        <div ref={gridRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-7 stagger">
           {display.map((vehicle) => (
-            <VehicleCard key={vehicle.id} vehicle={vehicle} />
+            <div key={vehicle.id} className="reveal">
+              <VehicleCard vehicle={vehicle} />
+            </div>
           ))}
         </div>
       </div>
