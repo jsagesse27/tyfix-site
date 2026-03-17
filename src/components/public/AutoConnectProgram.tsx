@@ -53,10 +53,10 @@ export default function AutoConnectProgram() {
           <p className="text-slate-400 max-w-2xl mx-auto text-lg leading-relaxed">
             Don't waste time searching dealerships and marketplaces. We go directly to auctions to secure your ideal vehicle at below-market prices.
           </p>
-          <div className="flex flex-wrap justify-center gap-4 mt-6">
-            <span className="px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary-light text-sm font-bold tracking-tight uppercase">Min. $3,500 Budget</span>
-            <span className="px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary-light text-sm font-bold tracking-tight uppercase">~3 Weeks Avg.</span>
-            <span className="px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary-light text-sm font-bold tracking-tight uppercase">$1,000 Deposit</span>
+          <div className="flex flex-wrap justify-center gap-2 sm:gap-4 mt-6">
+            <span className="px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-primary/10 border border-primary/20 text-primary-light text-[10px] sm:text-sm font-bold tracking-tight uppercase">Min. $3,500 Budget</span>
+            <span className="px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-primary/10 border border-primary/20 text-primary-light text-[10px] sm:text-sm font-bold tracking-tight uppercase">~3 Weeks Avg.</span>
+            <span className="px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-primary/10 border border-primary/20 text-primary-light text-[10px] sm:text-sm font-bold tracking-tight uppercase">$1,000 Deposit</span>
           </div>
         </div>
 
@@ -141,15 +141,15 @@ export default function AutoConnectProgram() {
                 exit={{ opacity: 0, scale: 0.9, y: 20 }}
                 className="relative w-full max-w-lg bg-white rounded-[2rem] shadow-2xl overflow-hidden text-slate-900 max-h-[90vh] overflow-y-auto"
               >
-                <div className="px-8 py-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                <div className="px-5 sm:px-8 py-4 sm:py-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
                   <div>
-                    <h3 className="text-lg font-black">AutoConnect™ Enrollment</h3>
+                    <h3 className="text-base sm:text-lg font-black">AutoConnect™ Enrollment</h3>
                     <p className="text-slate-500 text-xs font-bold uppercase tracking-widest mt-0.5">Step {formStep} of 2</p>
                   </div>
                   <button onClick={() => setShowForm(false)} className="p-2 hover:bg-slate-100 rounded-full"><span className="text-slate-400 text-xl">✕</span></button>
                 </div>
 
-                <div className="p-8">
+                <div className="p-5 sm:p-8">
                   <AnimatePresence mode="wait">
                     {submitted ? (
                       <motion.div key="done" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-8">
@@ -173,7 +173,7 @@ export default function AutoConnectProgram() {
                           <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Preferences</label>
                           <textarea placeholder="Color, features, specific models, brands..." rows={2} className="input-field resize-none p-4" value={form.preferences} onChange={e => u('preferences', e.target.value)} />
                         </div>
-                        <div className="grid grid-cols-2 gap-3">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                           <div>
                             <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Year Range</label>
                             <input placeholder="e.g. 2015-2020" className="input-field h-12" value={form.yearRange} onChange={e => u('yearRange', e.target.value)} />
