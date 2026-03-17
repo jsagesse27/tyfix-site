@@ -1,0 +1,6 @@
+-- Phase 2: Lead Generation Updates
+ALTER TABLE leads ADD COLUMN IF NOT EXISTS lead_type TEXT DEFAULT 'inquiry';
+ALTER TABLE leads ADD COLUMN IF NOT EXISTS instagram TEXT;
+ALTER TABLE leads ADD COLUMN IF NOT EXISTS contact_consent BOOLEAN DEFAULT false;
+ALTER TABLE leads ADD COLUMN IF NOT EXISTS timeline TEXT;
+ALTER TABLE leads ADD COLUMN IF NOT EXISTS extra_data JSONB;

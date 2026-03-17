@@ -4,10 +4,12 @@ import Hero from '@/components/public/Hero';
 import TrustBadges from '@/components/public/TrustBadges';
 import FeaturedVehicles from '@/components/public/FeaturedVehicles';
 import CashAdvantage from '@/components/public/CashAdvantage';
+import AutoConnectProgram from '@/components/public/AutoConnectProgram';
 import Testimonials from '@/components/public/Testimonials';
 import ContactSection from '@/components/public/ContactSection';
 import Footer from '@/components/public/Footer';
 import MobileStickyBar from '@/components/public/MobileStickyBar';
+import LeadCapturePopup from '@/components/public/LeadCapturePopup';
 import type { Vehicle, Testimonial, SiteSettings, SiteContent } from '@/lib/types';
 
 async function getData() {
@@ -47,10 +49,12 @@ export default async function HomePage() {
       <TrustBadges content={content} />
       <FeaturedVehicles vehicles={vehicles} settings={settings} />
       <CashAdvantage content={content} />
+      <AutoConnectProgram />
       <Testimonials testimonials={testimonials} showSection={settings?.show_reviews_section ?? true} />
       <ContactSection settings={settings} />
       <Footer settings={settings} content={content} />
       <MobileStickyBar settings={settings} />
+      <LeadCapturePopup />
     </div>
   );
 }

@@ -8,7 +8,8 @@ import type { SiteSettings } from '@/lib/types';
 
 const NAV_LINKS = [
   { label: 'Inventory', href: '/inventory' },
-  { label: 'About', href: '/#about' },
+  { label: 'Trade-In', href: '/trade-in' },
+  { label: 'AutoConnect', href: '/#autoconnect' },
   { label: 'Reviews', href: '/#reviews' },
   { label: 'Contact', href: '/#contact' },
 ];

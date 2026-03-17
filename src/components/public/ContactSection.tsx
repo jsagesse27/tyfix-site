@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { MapPin, Clock, Phone } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import type { SiteSettings } from '@/lib/types';
@@ -34,11 +35,11 @@ export default function ContactSection({ settings }: ContactSectionProps) {
       const L = (window as any).L;
       if (!L || !mapContainerRef.current) return;
 
-      const coords: [number, number] = [40.5749, -73.9850];
+      const coords: [number, number] = [40.5955, -73.9935];
       const map = L.map(mapContainerRef.current, {
         scrollWheelZoom: false,
         zoomControl: false,
-      }).setView(coords, 15);
+      }).setView(coords, 16);
 
       // Simple Clean Tiles (CartoDB Positron)
       L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
@@ -108,6 +109,12 @@ export default function ContactSection({ settings }: ContactSectionProps) {
               </div>
             </div>
 
+            <div className="p-6 rounded-3xl bg-slate-900 text-white mb-6">
+              <h4 className="text-lg font-bold mb-2">Sell Us Your Car</h4>
+              <p className="text-slate-400 text-sm mb-4">We buy cars for cash, even if you don't buy from us.</p>
+              <Link href="/trade-in" className="btn-primary w-full text-center block text-sm">Get Cash Offer</Link>
+            </div>
+
             <div className="p-8 rounded-3xl bg-gray-50 border border-gray-100">
               <h4 className="text-xl font-bold mb-4 text-gray-900">Send Us a Message</h4>
               <InquiryForm />
@@ -135,7 +142,7 @@ export default function ContactSection({ settings }: ContactSectionProps) {
                   <div>
                     <h4 className="font-black text-[#0F172A] text-lg tracking-tight leading-none uppercase">TyFix Auto Sales</h4>
                     <p className="text-slate-500 text-sm font-bold mt-1.5 flex items-center gap-2">
-                       Brooklyn, NY <span className="w-1 h-1 bg-primary rounded-full" /> Coney Island Area
+                       Brooklyn, NY <span className="w-1 h-1 bg-primary rounded-full" /> Bath Beach Area
                     </p>
                   </div>
                 </div>
