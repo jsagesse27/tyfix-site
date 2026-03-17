@@ -54,14 +54,14 @@ export default function LeadCapturePopup() {
               <div className="p-10 text-center">
                 <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4"><Check size={32} /></div>
                 <h3 className="text-2xl font-black text-slate-900 mb-2">You're In! 🎉</h3>
-                <p className="text-slate-500 text-sm">We'll notify you when new cars hit the lot. Your $200 discount will be applied at purchase.</p>
+                 <p className="text-slate-500 text-sm">We'll notify you when new cars hit the lot. Your $250 discount will be applied at purchase.</p>
                 <button onClick={close} className="btn-primary mt-6 w-full">Got It</button>
               </div>
             ) : (
               <>
                 <div className="bg-gradient-to-br from-primary to-red-900 p-8 text-center text-white">
                   <div className="w-14 h-14 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mx-auto mb-4"><Gift size={28} /></div>
-                  <h3 className="text-2xl font-black mb-1">Get $200 Off Your Car</h3>
+                  <h3 className="text-2xl font-black mb-1">Get $250 Off Your Next Car</h3>
                   <p className="text-white/80 text-sm">Sign up for alerts when new cars hit the lot</p>
                 </div>
                 <form onSubmit={handleSubmit} className="p-6 space-y-3">
@@ -76,8 +76,8 @@ export default function LeadCapturePopup() {
                     <input type="checkbox" checked={form.consent} onChange={e => u('consent', e.target.checked)} className="mt-1 accent-primary w-4 h-4" />
                     <span className="text-[11px] text-slate-500 leading-tight">I agree to receive calls, texts, and emails from TyFix Auto Sales about inventory updates and promotions.</span>
                   </label>
-                  <button type="submit" disabled={submitting || !form.consent} className="btn-primary w-full h-12 disabled:opacity-50 text-sm">
-                    {submitting ? 'Signing Up...' : 'Claim My $200 Discount'}
+                   <button type="submit" disabled={submitting || !form.consent} className="btn-primary w-full h-12 disabled:opacity-50 text-sm">
+                    {submitting ? 'Signing Up...' : 'Claim My $250 Discount'}
                   </button>
                 </form>
               </>

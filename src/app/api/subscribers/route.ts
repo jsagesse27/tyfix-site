@@ -32,8 +32,8 @@ export async function POST(request: Request) {
       email,
       instagram: instagram || null,
       contact_consent: consent || false,
-      message: `Newsletter Signup — $200 Off Claim${instagram ? ` | IG: ${instagram}` : ''}`,
-      vehicle_of_interest: 'Newsletter Signup — $200 Off',
+      message: `Newsletter Signup — $250 Off Claim${instagram ? ` | IG: ${instagram}` : ''}`,
+      vehicle_of_interest: 'Newsletter Signup — $250 Off',
       lead_type: 'subscriber',
       status: 'new',
     });

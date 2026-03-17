@@ -54,9 +54,9 @@ export default function AutoConnectProgram() {
             Don't waste time searching dealerships and marketplaces. We go directly to auctions to secure your ideal vehicle at below-market prices.
           </p>
           <div className="flex flex-wrap justify-center gap-2 sm:gap-4 mt-6">
-            <span className="px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-primary/10 border border-primary/20 text-primary-light text-[10px] sm:text-sm font-bold tracking-tight uppercase">Min. $3,500 Budget</span>
-            <span className="px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-primary/10 border border-primary/20 text-primary-light text-[10px] sm:text-sm font-bold tracking-tight uppercase">~3 Weeks Avg.</span>
-            <span className="px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-primary/10 border border-primary/20 text-primary-light text-[10px] sm:text-sm font-bold tracking-tight uppercase">$1,000 Deposit</span>
+            <span className="px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-white/10 border border-white/20 text-white text-[10px] sm:text-sm font-bold tracking-tight uppercase">Min. $3,500 Budget</span>
+            <span className="px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-white/10 border border-white/20 text-white text-[10px] sm:text-sm font-bold tracking-tight uppercase">~3 Weeks Avg.</span>
+            <span className="px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-white/10 border border-white/20 text-white text-[10px] sm:text-sm font-bold tracking-tight uppercase">$1,000 Deposit</span>
           </div>
         </div>
 

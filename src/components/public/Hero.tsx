@@ -62,26 +62,26 @@ export default function Hero({ settings, content, soldCount }: HeroProps) {
             </h1>
           </div>
 
-            <p className="text-lg md:text-xl text-slate-300 mb-10 leading-relaxed max-w-xl animate-fade-in" style={{ animationDelay: '200ms', opacity: 0 }}>{subheadline}</p>
+          <p className="text-base sm:text-lg md:text-xl text-slate-300 mb-8 sm:mb-10 leading-relaxed max-w-xl animate-fade-in px-2" style={{ animationDelay: '200ms', opacity: 0 }}>{subheadline}</p>
 
-            <div className="flex flex-col sm:flex-row gap-4 animate-fade-in" style={{ animationDelay: '300ms', opacity: 0 }}>
-              <Link href="/inventory" className="btn-primary text-base px-8 py-4">
-                Browse Inventory <ArrowRight size={20} />
-              </Link>
-              <button onClick={() => setShowBooking(true)} className="btn-outline !text-white !border-white/40 hover:!bg-white/10 hover:!border-white text-base px-8 py-4 cursor-pointer">
-                <CalendarCheck size={18} /> Book a Test Drive
-              </button>
-            </div>
-
-            <div className="mt-16 sm:mt-24 grid grid-cols-1 sm:grid-cols-3 gap-4 w-full animate-fade-in" style={{ animationDelay: '450ms', opacity: 0 }}>
-              {stats.map((stat, i) => (
-                <div key={i} className="border border-white/10 rounded-2xl p-6 backdrop-blur-sm bg-white/5 text-center">
-                  <p className="text-2xl md:text-3xl font-black text-white" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>{stat.value}</p>
-                  <p className="text-[10px] text-slate-400 font-black uppercase tracking-[0.2em] mt-2">{stat.label}</p>
-                </div>
-              ))}
-            </div>
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full sm:w-auto animate-fade-in px-2" style={{ animationDelay: '300ms', opacity: 0 }}>
+            <Link href="/inventory" className="btn-primary text-sm sm:text-base px-6 sm:px-8 py-3.5 sm:py-4">
+              Browse Inventory <ArrowRight size={18} />
+            </Link>
+            <button onClick={() => setShowBooking(true)} className="btn-outline !text-white !border-white/40 hover:!bg-white/10 hover:!border-white text-sm sm:text-base px-6 sm:px-8 py-3.5 sm:py-4 cursor-pointer">
+              <CalendarCheck size={16} /> Book a Test Drive
+            </button>
           </div>
+
+          <div className="mt-10 sm:mt-20 grid grid-cols-3 gap-2 sm:gap-4 w-full animate-fade-in" style={{ animationDelay: '450ms', opacity: 0 }}>
+            {stats.map((stat, i) => (
+              <div key={i} className="border border-white/10 rounded-xl sm:rounded-2xl p-3 sm:p-6 backdrop-blur-sm bg-white/5 text-center">
+                <p className="text-lg sm:text-2xl md:text-3xl font-black text-white" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>{stat.value}</p>
+                <p className="text-[8px] sm:text-[10px] text-slate-400 font-black uppercase tracking-[0.15em] sm:tracking-[0.2em] mt-1 sm:mt-2">{stat.label}</p>
+              </div>
+            ))}
+          </div>
+        </div>
 
           <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 animate-float">
             <ChevronDown size={28} className="text-white/30" />
