@@ -1,10 +1,10 @@
 'use client';
 
 import Link from 'next/link';
-import { MapPin, Clock, Phone } from 'lucide-react';
+import { MapPin, Clock, Phone, CalendarCheck, MessageSquare } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import type { SiteSettings } from '@/lib/types';
-import InquiryForm from './InquiryForm';
+import BookTestDrive from './BookTestDrive';
 
 interface ContactSectionProps {
   settings: SiteSettings | null;
@@ -16,6 +16,7 @@ export default function ContactSection({ settings }: ContactSectionProps) {
   const hours = settings?.hours_of_operation || 'Mon - Sat: 9:00 AM - 6:00 PM | Sunday: Closed';
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const [mapLoaded, setMapLoaded] = useState(false);
+  const [showBooking, setShowBooking] = useState(false);
 
   useEffect(() => {
     // Prevent double initialization
@@ -115,9 +116,64 @@ export default function ContactSection({ settings }: ContactSectionProps) {
               <Link href="/trade-in" className="btn-primary w-full text-center block text-sm">Get Cash Offer</Link>
             </div>
 
-            <div className="p-8 rounded-3xl bg-gray-50 border border-gray-100">
-              <h4 className="text-xl font-bold mb-4 text-gray-900">Send Us a Message</h4>
-              <InquiryForm />
+            <div className="p-8 rounded-3xl bg-white border border-gray-100 shadow-xl shadow-slate-200/50">
+              <h4 className="text-xl font-bold mb-6 text-gray-900 border-b pb-4">Connect With Us</h4>
+              
+              <div className="space-y-4">
+                <button 
+                  onClick={() => setShowBooking(true)}
+                  className="w-full flex items-center justify-between p-5 rounded-2xl bg-slate-900 text-white hover:bg-slate-800 transition-all group"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+                      <CalendarCheck size={24} />
+                    </div>
+                    <div className="text-left">
+                      <p className="font-bold text-base leading-tight">Book Test Drive</p>
+                      <p className="text-slate-400 text-xs">Schedule an appointment</p>
+                    </div>
+                  </div>
+                  <div className="w-10 h-10 rounded-full border border-slate-700 flex items-center justify-center group-hover:bg-primary group-hover:border-primary transition-all">
+                    <CalendarCheck size={18} className="group-hover:text-white" />
+                  </div>
+                </button>
+
+                <a 
+                  href={`tel:${phone.replace(/\D/g, '')}`}
+                  className="w-full flex items-center justify-between p-5 rounded-2xl bg-white border border-slate-100 hover:border-primary/30 hover:bg-slate-50 transition-all group"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-xl bg-green-500/10 flex items-center justify-center text-green-600 group-hover:scale-110 transition-transform">
+                      <Phone size={24} />
+                    </div>
+                    <div className="text-left">
+                      <p className="font-bold text-base leading-tight text-slate-900">Call Us</p>
+                      <p className="text-slate-500 text-xs">{phone}</p>
+                    </div>
+                  </div>
+                  <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center group-hover:bg-green-600 group-hover:text-white transition-all text-slate-400">
+                    <Phone size={18} />
+                  </div>
+                </a>
+
+                <a 
+                  href={`sms:${phone.replace(/\D/g, '')}`}
+                  className="w-full flex items-center justify-between p-5 rounded-2xl bg-white border border-slate-100 hover:border-primary/30 hover:bg-slate-50 transition-all group"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-600 group-hover:scale-110 transition-transform">
+                      <MessageSquare size={24} />
+                    </div>
+                    <div className="text-left">
+                      <p className="font-bold text-base leading-tight text-slate-900">Text Us</p>
+                      <p className="text-slate-500 text-xs">Instant text inquiry</p>
+                    </div>
+                  </div>
+                  <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition-all text-slate-400">
+                    <MessageSquare size={18} />
+                  </div>
+                </a>
+              </div>
             </div>
           </div>
 
@@ -151,6 +207,7 @@ export default function ContactSection({ settings }: ContactSectionProps) {
           </div>
         </div>
       </div>
+      <BookTestDrive isOpen={showBooking} onClose={() => setShowBooking(false)} />
     </section>
   );
 }
