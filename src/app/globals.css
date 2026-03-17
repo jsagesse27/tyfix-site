@@ -107,223 +107,231 @@ body {
   }
 }
 
-/* ============================================================
-   Buttons
-   ============================================================ */
-.btn-primary {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  padding: 0.8rem 2rem;
-  background-color: var(--color-primary);
-  color: white;
-  font-family: var(--font-sans);
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  border-radius: 9999px;
-  transition: all 0.25s var(--easing-smooth);
-  border: 2px solid transparent;
-  cursor: pointer;
-  font-size: 0.95rem;
-  position: relative;
-  overflow: hidden;
+@layer components {
+  /* ============================================================
+     Buttons
+     ============================================================ */
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.8rem 2rem;
+    background-color: var(--color-primary);
+    color: white;
+    font-family: var(--font-sans);
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    border-radius: 9999px;
+    transition: all 0.25s var(--easing-smooth);
+    border: 2px solid transparent;
+    cursor: pointer;
+    font-size: 0.95rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-primary::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(255,255,255,0.1);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+
+  .btn-primary:hover:not(:disabled) {
+    background-color: var(--color-primary-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 12px 32px -4px var(--color-primary-glow);
+  }
+
+  .btn-primary:hover::after {
+    opacity: 1;
+  }
+
+  .btn-primary:active:not(:disabled) {
+    transform: translateY(0);
+  }
+
+  .btn-primary:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  .btn-outline {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.8rem 2rem;
+    background-color: transparent;
+    color: var(--color-primary);
+    font-family: var(--font-sans);
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    border-radius: 9999px;
+    border: 2px solid var(--color-primary);
+    transition: all 0.25s var(--easing-smooth);
+    cursor: pointer;
+    font-size: 0.95rem;
+  }
+
+  .btn-outline:hover {
+    background-color: var(--color-primary);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 12px 32px -4px var(--color-primary-glow);
+  }
+
+  /* Admin buttons */
+  .btn-admin {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1.25rem;
+    background-color: var(--color-primary);
+    color: white;
+    font-weight: 600;
+    border-radius: 0.5rem;
+    transition: all 0.15s ease;
+    border: none;
+    cursor: pointer;
+    font-size: 0.875rem;
+  }
+
+  .btn-admin:hover {
+    background-color: var(--color-primary-dark);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px var(--color-primary-glow);
+  }
+
+  .btn-admin-outline {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1.25rem;
+    background-color: transparent;
+    color: var(--color-text-primary);
+    font-weight: 600;
+    border-radius: 0.5rem;
+    border: 1px solid var(--color-border);
+    transition: all 0.15s ease;
+    cursor: pointer;
+    font-size: 0.875rem;
+  }
+
+  .btn-admin-outline:hover {
+    background-color: var(--color-accent);
+    border-color: var(--color-text-secondary);
+  }
+
+  /* ============================================================
+     Cards
+     ============================================================ */
+  .glass-card {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+  }
+
+  .vehicle-card {
+    background: white;
+    border-radius: 1.25rem;
+    overflow: hidden;
+    border: 1px solid var(--color-border);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+    transition: all 0.35s var(--easing-smooth);
+    cursor: pointer;
+  }
+
+  .vehicle-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.12);
+    border-color: rgba(139, 0, 0, 0.15);
+  }
+
+  .admin-card {
+    background: white;
+    border: 1px solid var(--color-border);
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+  }
+
+  /* ============================================================
+     Inputs
+     ============================================================ */
+  .input-field {
+    width: 100%;
+    padding: 0.625rem 0.875rem;
+    border: 1px solid var(--color-border);
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    font-family: var(--font-sans);
+    transition: all 0.2s ease;
+    background: white;
+    color: var(--color-text-primary);
+  }
+
+  .input-field:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(139, 0, 0, 0.1);
+  }
+
+  .input-field::placeholder {
+    color: var(--color-text-muted);
+  }
+
+  /* ============================================================
+     Badges
+     ============================================================ */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.125rem 0.625rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .badge-active { background-color: #D1FAE5; color: #065F46; }
+  .badge-sold { background-color: #FEE2E2; color: #991B1B; }
+  .badge-hidden { background-color: #F3F4F6; color: #6B7280; }
+  .badge-new { background-color: #DBEAFE; color: #1E40AF; }
+  .badge-featured { background-color: var(--color-primary); color: white; }
+
+  /* ============================================================
+     Section Divider
+     ============================================================ */
+  .section-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--color-primary);
+    margin-bottom: 1rem;
+  }
+
+  .section-label::before {
+    content: '';
+    display: block;
+    width: 24px;
+    height: 2px;
+    background: var(--color-primary);
+    border-radius: 1px;
+  }
 }
 
-.btn-primary::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: rgba(255,255,255,0.1);
-  opacity: 0;
-  transition: opacity 0.2s ease;
-}
-
-.btn-primary:hover {
-  background-color: var(--color-primary-dark);
-  transform: translateY(-2px);
-  box-shadow: 0 12px 32px -4px var(--color-primary-glow);
-}
-
-.btn-primary:hover::after {
-  opacity: 1;
-}
-
-.btn-primary:active {
-  transform: translateY(0);
-}
-
-.btn-outline {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  padding: 0.8rem 2rem;
-  background-color: transparent;
-  color: var(--color-primary);
-  font-family: var(--font-sans);
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  border-radius: 9999px;
-  border: 2px solid var(--color-primary);
-  transition: all 0.25s var(--easing-smooth);
-  cursor: pointer;
-  font-size: 0.95rem;
-}
-
-.btn-outline:hover {
-  background-color: var(--color-primary);
-  color: white;
-  transform: translateY(-2px);
-  box-shadow: 0 12px 32px -4px var(--color-primary-glow);
-}
-
-/* Admin buttons */
-.btn-admin {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1.25rem;
-  background-color: var(--color-primary);
-  color: white;
-  font-weight: 600;
-  border-radius: 0.5rem;
-  transition: all 0.15s ease;
-  border: none;
-  cursor: pointer;
-  font-size: 0.875rem;
-}
-
-.btn-admin:hover {
-  background-color: var(--color-primary-dark);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px var(--color-primary-glow);
-}
-
-.btn-admin-outline {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1.25rem;
-  background-color: transparent;
-  color: var(--color-text-primary);
-  font-weight: 600;
-  border-radius: 0.5rem;
-  border: 1px solid var(--color-border);
-  transition: all 0.15s ease;
-  cursor: pointer;
-  font-size: 0.875rem;
-}
-
-.btn-admin-outline:hover {
-  background-color: var(--color-accent);
-  border-color: var(--color-text-secondary);
-}
-
-/* ============================================================
-   Cards
-   ============================================================ */
-.glass-card {
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.4);
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
-}
-
-.vehicle-card {
-  background: white;
-  border-radius: 1.25rem;
-  overflow: hidden;
-  border: 1px solid var(--color-border);
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
-  transition: all 0.35s var(--easing-smooth);
-  cursor: pointer;
-}
-
-.vehicle-card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.12);
-  border-color: rgba(139, 0, 0, 0.15);
-}
-
-.admin-card {
-  background: white;
-  border: 1px solid var(--color-border);
-  border-radius: 0.75rem;
-  padding: 1.5rem;
-}
-
-/* ============================================================
-   Inputs
-   ============================================================ */
-.input-field {
-  width: 100%;
-  padding: 0.625rem 0.875rem;
-  border: 1px solid var(--color-border);
-  border-radius: 0.5rem;
-  font-size: 0.875rem;
-  font-family: var(--font-sans);
-  transition: all 0.2s ease;
-  background: white;
-  color: var(--color-text-primary);
-}
-
-.input-field:focus {
-  outline: none;
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(139, 0, 0, 0.1);
-}
-
-.input-field::placeholder {
-  color: var(--color-text-muted);
-}
-
-/* ============================================================
-   Badges
-   ============================================================ */
-.badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 0.125rem 0.625rem;
-  border-radius: 9999px;
-  font-size: 0.75rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-}
-
-.badge-active { background-color: #D1FAE5; color: #065F46; }
-.badge-sold { background-color: #FEE2E2; color: #991B1B; }
-.badge-hidden { background-color: #F3F4F6; color: #6B7280; }
-.badge-new { background-color: #DBEAFE; color: #1E40AF; }
-.badge-featured { background-color: var(--color-primary); color: white; }
-
-/* ============================================================
-   Section Divider
-   ============================================================ */
-.section-label {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  color: var(--color-primary);
-  margin-bottom: 1rem;
-}
-
-.section-label::before {
-  content: '';
-  display: block;
-  width: 24px;
-  height: 2px;
-  background: var(--color-primary);
-  border-radius: 1px;
-}
 
 /* ============================================================
    Scrollbar
