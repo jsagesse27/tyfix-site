@@ -41,22 +41,22 @@ export default function AutoConnectProgram() {
   return (
     <section id="autoconnect" className="relative py-28 bg-[#070C18] text-white overflow-hidden">
       {/* Ambient effects */}
-      <div className="absolute top-1/3 left-1/4 w-96 h-96 rounded-full bg-amber-500/8 blur-[140px] pointer-events-none" />
-      <div className="absolute bottom-0 right-1/4 w-72 h-72 rounded-full bg-primary/10 blur-[120px] pointer-events-none" />
+      <div className="absolute top-1/3 left-1/4 w-96 h-96 rounded-full bg-primary/10 blur-[140px] pointer-events-none" />
+      <div className="absolute bottom-0 right-1/4 w-72 h-72 rounded-full bg-primary/20 blur-[120px] pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div ref={sectionRef} className="reveal text-center mb-16">
-          <span className="section-label !text-amber-400">Skip the Search</span>
+          <span className="section-label !text-primary">Skip the Search</span>
           <h2 className="text-4xl md:text-5xl font-black leading-tight mb-4">
-            TyFix <span className="text-amber-400">AutoConnect</span>™
+            TyFix <span className="text-primary">AutoConnect</span>™
           </h2>
           <p className="text-slate-400 max-w-2xl mx-auto text-lg leading-relaxed">
             Don't waste time searching dealerships and marketplaces. We go directly to auctions to secure your ideal vehicle at below-market prices.
           </p>
           <div className="flex flex-wrap justify-center gap-4 mt-6">
-            <span className="px-4 py-2 rounded-full bg-amber-400/10 border border-amber-400/20 text-amber-300 text-sm font-bold">Min. $3,500 Budget</span>
-            <span className="px-4 py-2 rounded-full bg-amber-400/10 border border-amber-400/20 text-amber-300 text-sm font-bold">~3 Weeks Avg.</span>
-            <span className="px-4 py-2 rounded-full bg-amber-400/10 border border-amber-400/20 text-amber-300 text-sm font-bold">$1,000 Deposit</span>
+            <span className="px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary-light text-sm font-bold tracking-tight uppercase">Min. $3,500 Budget</span>
+            <span className="px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary-light text-sm font-bold tracking-tight uppercase">~3 Weeks Avg.</span>
+            <span className="px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary-light text-sm font-bold tracking-tight uppercase">$1,000 Deposit</span>
           </div>
         </div>
 
@@ -71,11 +71,11 @@ export default function AutoConnectProgram() {
                   key={i}
                   onClick={() => setActiveStep(i)}
                   className={`w-full text-left flex gap-4 p-5 rounded-2xl border transition-all duration-300 cursor-pointer ${
-                    isActive ? 'bg-amber-400/10 border-amber-400/30' : 'bg-white/5 border-white/10 hover:bg-white/10'
+                    isActive ? 'bg-primary/10 border-primary/30' : 'bg-white/5 border-white/10 hover:bg-white/10'
                   }`}
                 >
                   <div className={`flex-shrink-0 w-11 h-11 rounded-xl flex items-center justify-center font-black text-sm transition-all ${
-                    isActive ? 'bg-amber-400 text-black' : 'bg-white/10 text-white/60'
+                    isActive ? 'bg-primary text-white shadow-lg shadow-primary/40' : 'bg-white/10 text-white/60'
                   }`}>
                     {i + 1}
                   </div>
@@ -109,7 +109,7 @@ export default function AutoConnectProgram() {
                   exit={{ opacity: 0, y: -10 }}
                   className="text-center"
                 >
-                  {(() => { const Icon = STEPS[activeStep].icon; return <Icon size={48} className="text-amber-400 mx-auto mb-4" />; })()}
+                  {(() => { const Icon = STEPS[activeStep].icon; return <Icon size={48} className="text-primary-light mx-auto mb-4" />; })()}
                   <h3 className="text-2xl font-black mb-3">Step {activeStep + 1}: {STEPS[activeStep].title}</h3>
                   <p className="text-slate-300 leading-relaxed">{STEPS[activeStep].desc}</p>
                   {activeStep === 2 && (
@@ -125,8 +125,8 @@ export default function AutoConnectProgram() {
 
         {/* CTA */}
         <div className="text-center">
-          <button onClick={() => setShowForm(true)} className="inline-flex items-center gap-2 bg-amber-400 text-black px-10 py-4 rounded-full font-black text-lg hover:bg-amber-300 transition-all hover:-translate-y-0.5 hover:shadow-xl hover:shadow-amber-400/20 cursor-pointer">
-            <Zap size={22} /> Enroll in AutoConnect™
+          <button onClick={() => setShowForm(true)} className="btn-primary inline-flex items-center gap-2 px-10 py-5 text-lg font-black tracking-tight uppercase shadow-2xl shadow-primary/25">
+            <Zap size={22} className="fill-white" /> Enroll in AutoConnect™
           </button>
         </div>
 
