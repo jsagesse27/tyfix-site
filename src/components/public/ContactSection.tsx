@@ -35,7 +35,7 @@ export default function ContactSection({ settings }: ContactSectionProps) {
       const L = (window as any).L;
       if (!L || !mapContainerRef.current) return;
 
-      const coords: [number, number] = [40.5955, -73.9935];
+      const coords: [number, number] = [40.5823498, -73.988411];
       const map = L.map(mapContainerRef.current, {
         scrollWheelZoom: false,
         zoomControl: false,
@@ -142,7 +142,7 @@ export default function ContactSection({ settings }: ContactSectionProps) {
                   <div>
                     <h4 className="font-black text-[#0F172A] text-lg tracking-tight leading-none uppercase">TyFix Auto Sales</h4>
                     <p className="text-slate-500 text-sm font-bold mt-1.5 flex items-center gap-2">
-                       Brooklyn, NY <span className="w-1 h-1 bg-primary rounded-full" /> Bath Beach Area
+                       Brooklyn, NY <span className="w-1 h-1 bg-primary rounded-full" /> Coney Island Area
                     </p>
                   </div>
                 </div>
