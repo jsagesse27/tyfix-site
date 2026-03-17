@@ -40,25 +40,24 @@ export default function Hero({ settings, content, soldCount }: HeroProps) {
             <span className="section-label !text-primary/90">{tagline}</span>
           </div>
 
-          <div className="flex flex-col items-center mb-10 animate-fade-in" style={{ animationDelay: '100ms', opacity: 0 }}>
-            {/* Scaled Up Logo */}
-            <div className="relative mb-4">
+          <div className="flex flex-col items-center mb-8 animate-fade-in" style={{ animationDelay: '100ms', opacity: 0 }}>
+            <div className="relative mb-2">
               <Image 
                 src="/tyfix-logo.png" 
                 alt="TyFix" 
-                width={600} 
-                height={200} 
-                className="w-auto h-24 sm:h-32 md:h-40 xl:h-48 drop-shadow-[0_0_30px_rgba(139,0,0,0.3)]"
+                width={400} 
+                height={130} 
+                className="w-auto h-16 sm:h-20 md:h-24 lg:h-28 drop-shadow-[0_0_30px_rgba(139,0,0,0.3)]"
                 priority
               />
             </div>
             
-            <h1 className="flex flex-col items-center gap-1 sm:gap-4 font-black tracking-tight" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
-              <span className="text-4xl sm:text-5xl md:text-6xl text-white/90 uppercase tracking-[0.2em] -mt-4 sm:-mt-8 mb-8">Auto Sales</span>
+            <h1 className="flex flex-col items-center gap-0 sm:gap-1 font-black tracking-tight" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
+              <span className="text-xl sm:text-2xl md:text-3xl lg:text-4xl text-white/90 uppercase tracking-[0.25em] -mt-1 sm:-mt-3 mb-4 sm:mb-6">Auto Sales</span>
               
-              <div className="flex flex-col gap-0 leading-[1.0]">
-                <span className="text-5xl sm:text-7xl md:text-8xl xl:text-9xl text-white">Quality Cars</span>
-                <span className="text-6xl sm:text-8xl md:text-9xl xl:text-[11rem] text-primary" style={{ textShadow: '0 0 80px rgba(139,0,0,0.5)' }}>Under $5000</span>
+              <div className="flex flex-col gap-0 leading-[0.95]">
+                <span className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl text-white">Quality Cars</span>
+                <span className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl text-primary" style={{ textShadow: '0 0 80px rgba(139,0,0,0.5)' }}>Under $5000</span>
               </div>
             </h1>
           </div>
