@@ -59,6 +59,11 @@ export interface Lead {
   message: string | null;
   vehicle_of_interest: string;
   status: 'new' | 'contacted' | 'closed';
+  lead_type: 'inquiry' | 'trade-in' | 'autoconnect';
+  instagram?: string | null;
+  contact_consent: boolean;
+  timeline?: string | null;
+  extra_data?: any;
   created_at: string;
 }
 
