@@ -1,0 +1,7 @@
+fix: frontend message batching and queuing to prevent AbortErrors
+
+- Completely rewrote ChatBot.tsx to maintain a local `pendingQueueRef` 
+- Uses a local 3-6s delay timer to batch consecutive fast user messages into a single combined AI turn
+- Safely overrides AI SDK's `append` interrupt logic that causes AbortErrors when spamming messages
+- Removed `isDisabled` block so user can chat continuously while the UI responds naturally
+- Removed problematic `setTimeout` hold from `api/chat/route.ts` that caused Vercel backend to hang and drop connections

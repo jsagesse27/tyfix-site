@@ -19,13 +19,9 @@ const WELCOME_TEXT = "Hey! 👋 I'm Ty from TyFix Used Cars. Whether you're look
  * Matches patterns like: <function=...>...</function> and <tool_call>...</tool_call>
  */
 function cleanBotMessage(text: string): string {
-  // Remove <function=...>{...}</function> blocks
   let cleaned = text.replace(/<function=\w+[^>]*>\s*\{[^}]*\}\s*<\/function>/gi, '');
-  // Remove <tool_call>...</tool_call> blocks
   cleaned = cleaned.replace(/<tool_call>[\s\S]*?<\/tool_call>/gi, '');
-  // Remove any remaining <function...> tags
   cleaned = cleaned.replace(/<\/?function[^>]*>/gi, '');
-  // Clean up extra whitespace/newlines left behind
   cleaned = cleaned.replace(/\n{3,}/g, '\n\n').trim();
   return cleaned;
 }
@@ -35,6 +31,12 @@ export default function ChatBot() {
   const [input, setInput] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(true);
   const [hasNewMessage, setHasNewMessage] = useState(false);
+  
+  // Custom batching logic variables
+  const pendingQueueRef = useRef<string[]>([]);
+  const [pendingRenderQueue, setPendingRenderQueue] = useState<string[]>([]);
+  const thinkingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -43,9 +45,10 @@ export default function ChatBot() {
   });
 
   const isStreaming = status === 'streaming';
-
-  // Removed the client-side delay overlap logic.
-  // The delay is now handled naturally on the backend API route.
+  const isTypingDelay = pendingRenderQueue.length > 0;
+  
+  // Show typing indicator when we are in a simulated delay OR when the API is processing
+  const showTypingBubble = isTypingDelay || status === 'submitted' || status === 'streaming';
 
   // Auto-scroll to bottom
   const scrollToBottom = useCallback(() => {
@@ -54,7 +57,7 @@ export default function ChatBot() {
 
   useEffect(() => {
     if (isOpen) scrollToBottom();
-  }, [messages, isOpen, scrollToBottom]);
+  }, [messages, pendingRenderQueue, showTypingBubble, isOpen, scrollToBottom]);
 
   // Flash notification when new message arrives while closed
   useEffect(() => {
@@ -71,18 +74,51 @@ export default function ChatBot() {
     }
   }, [isOpen]);
 
-  const handleSend = () => {
-    const trimmed = input.trim();
+  // Cleanup timer on unmount
+  useEffect(() => {
+    return () => {
+      if (thinkingTimerRef.current) clearTimeout(thinkingTimerRef.current);
+    };
+  }, []);
+
+  // Handler for sending messages with frontend queue/delay
+  // Allows the user to keep sending concurrent messages. We batch them and send ONE API request after context settles.
+  const handleSend = (overrideText?: string) => {
+    const text = typeof overrideText === 'string' ? overrideText : input;
+    const trimmed = text.trim();
     if (!trimmed) return;
 
-    sendMessage({ text: trimmed });
-    setInput('');
+    // 1. Optimistic UI update instantly
+    pendingQueueRef.current.push(trimmed);
+    setPendingRenderQueue([...pendingQueueRef.current]);
+
+    // 2. Clear visual state
+    if (!overrideText || overrideText === input) setInput('');
     setShowSuggestions(false);
+
+    // 3. Clear previous timers so rapid messages batch together safely
+    if (thinkingTimerRef.current) clearTimeout(thinkingTimerRef.current);
+
+    // 4. Set 3-6 second randomized delay before firing to backend API
+    const delay = 3000 + Math.random() * 3000;
+    thinkingTimerRef.current = setTimeout(() => {
+      const combinedArr = pendingQueueRef.current;
+      if (combinedArr.length === 0) return;
+
+      // Combine multiple fast messages into a single chat turn naturally
+      const combinedText = combinedArr.join('\n\n');
+      
+      // Send batched request via Vercel AI SDK
+      sendMessage({ text: combinedText });
+
+      // Clear the local queue
+      pendingQueueRef.current = [];
+      setPendingRenderQueue([]);
+    }, delay);
   };
 
   const handleSuggestionClick = (message: string) => {
-    sendMessage({ text: message });
-    setShowSuggestions(false);
+    handleSend(message);
   };
 
   const handleRetry = () => {
@@ -110,8 +146,8 @@ export default function ChatBot() {
     return raw;
   };
 
-  // Show typing indicator when the message is sent but not yet complete
-  const showTypingBubble = status === 'submitted' || status === 'streaming';
+  // Skip rendering standard 'AbortError' exceptions since they are expected if the API gets interrupted
+  const shouldShowError = error && error.name !== 'AbortError';
 
   return (
     <>
@@ -307,7 +343,34 @@ export default function ChatBot() {
               );
             })}
 
-            {/* Typing indicator — shows during thinking delay AND streaming */}
+            {/* Pending User Queued Messages */}
+            {pendingRenderQueue.map((text, i) => (
+              <div
+                key={'pending-' + i}
+                className="flex justify-end"
+                style={{ animation: 'messageIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards' }}
+              >
+                <div
+                  className="max-w-[78%] px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap opacity-90 transition-opacity"
+                  style={{
+                    background: 'linear-gradient(135deg, #8B0000, #A91C1C)',
+                    color: 'white',
+                    borderRadius: '18px 18px 4px 18px',
+                    boxShadow: '0 2px 8px rgba(139, 0, 0, 0.2)',
+                  }}
+                >
+                  {text}
+                </div>
+                <div
+                  className="w-7 h-7 rounded-full flex items-center justify-center shrink-0 ml-2 mt-1"
+                  style={{ background: '#E2E8F0' }}
+                >
+                  <User size={14} color="#64748B" />
+                </div>
+              </div>
+            ))}
+
+            {/* Typing indicator — shows during local delay OR Vercel AI API streaming */}
             {showTypingBubble && (
               <div className="flex justify-start" style={{ animation: 'messageIn 0.3s ease forwards' }}>
                 <div
@@ -332,7 +395,7 @@ export default function ChatBot() {
             )}
 
             {/* Error state */}
-            {error && (
+            {shouldShowError && (
               <div
                 className="flex items-center gap-2 px-4 py-3 rounded-xl text-sm"
                 style={{
@@ -405,7 +468,7 @@ export default function ChatBot() {
             />
             <button
               id="chatbot-send"
-              onClick={handleSend}
+              onClick={() => handleSend(input)}
               disabled={!input.trim()}
               className="w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95 disabled:opacity-30 disabled:hover:scale-100 shrink-0"
               style={{
