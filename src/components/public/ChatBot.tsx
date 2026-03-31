@@ -1,155 +1,457 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
-import { MessageSquare, X, Send, Bot, User } from 'lucide-react';
+import { useState, useRef, useEffect, useCallback } from 'react';
+import { useChat } from '@ai-sdk/react';
+import { DefaultChatTransport } from 'ai';
+import { MessageSquare, X, Send, Bot, User, Sparkles, Car, Calendar, Phone, ChevronRight, RefreshCw } from 'lucide-react';
 
-interface Message {
-  id: string;
-  text: string;
-  sender: 'bot' | 'user';
-  timestamp: Date;
-}
+/* ── Quick‑reply suggestion chips ─────────────── */
+const SUGGESTIONS = [
+  { label: 'Browse Cars', icon: Car, message: 'What cars do you have available right now?' },
+  { label: 'Book a Visit', icon: Calendar, message: "I'd like to schedule a visit to see some cars." },
+  { label: 'Contact Info', icon: Phone, message: 'What are your hours and how do I get to the lot?' },
+];
+
+const WELCOME_TEXT = "Hey there! 👋 I'm Ty, your TyFix assistant. I can help you find the perfect car, book a visit, or answer any questions. What are you looking for today?";
 
 export default function ChatBot() {
   const [isOpen, setIsOpen] = useState(false);
   const [input, setInput] = useState('');
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: '1',
-      text: 'Hi! I am Ty, your TyFix assistant. How can I help you today?',
-      sender: 'bot',
-      timestamp: new Date(),
-    },
-  ]);
+  const [showSuggestions, setShowSuggestions] = useState(true);
+  const [hasNewMessage, setHasNewMessage] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  const scrollToBottom = () => {
+  const { messages, sendMessage, status, error, setMessages } = useChat({
+    transport: new DefaultChatTransport({ api: '/api/chat' }),
+  });
+
+  const isStreaming = status === 'streaming';
+
+  // Auto-scroll to bottom
+  const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
+  }, []);
 
   useEffect(() => {
-    if (isOpen) {
-      scrollToBottom();
+    if (isOpen) scrollToBottom();
+  }, [messages, isOpen, scrollToBottom]);
+
+  // Flash notification when new message arrives while closed
+  useEffect(() => {
+    if (!isOpen && messages.length > 1) {
+      setHasNewMessage(true);
     }
   }, [messages, isOpen]);
 
+  // Focus input when opened
+  useEffect(() => {
+    if (isOpen) {
+      setTimeout(() => inputRef.current?.focus(), 300);
+      setHasNewMessage(false);
+    }
+  }, [isOpen]);
+
   const handleSend = () => {
-    if (!input.trim()) return;
-
-    const userMsg: Message = {
-      id: Date.now().toString(),
-      text: input,
-      sender: 'user',
-      timestamp: new Date(),
-    };
-
-    setMessages((prev) => [...prev, userMsg]);
+    const trimmed = input.trim();
+    if (!trimmed || isStreaming) return;
+    sendMessage({ text: trimmed });
     setInput('');
+    setShowSuggestions(false);
+  };
 
-    // Mock bot response logic
-    setTimeout(() => {
-      const lower = input.toLowerCase();
-      let botText = "I'm not sure about that. Would you like to speak with one of our specialists? You can call us at (555) 123-4567.";
+  const handleSuggestionClick = (message: string) => {
+    sendMessage({ text: message });
+    setShowSuggestions(false);
+  };
 
-      if (lower.includes('inventory') || lower.includes('cars') || lower.includes('stock')) {
-        botText = "We have a great selection of quality vehicles under $5,000! You can browse our current inventory right here on the site. Is there a specific make or model you're looking for?";
-      } else if (lower.includes('location') || lower.includes('address') || lower.includes('where')) {
-        botText = "We are located in Coney Island, Brooklyn, NY. Come visit us today!";
-      } else if (lower.includes('phone') || lower.includes('call') || lower.includes('contact')) {
-        botText = "You can reach us at (555) 123-4567. We're happy to answer any questions!";
-      } else if (lower.includes('price') || lower.includes('cost') || lower.includes('money')) {
-        botText = "All our cars are priced to sell, mostly under $5,000. We deal in cash to keep prices low and transparent—no interest, no credit checks!";
-      } else if (lower.includes('hello') || lower.includes('hi')) {
-        botText = "Hello! How can I assist you with your car search today?";
+  const handleRetry = () => {
+    // Remove the last user message and re-send
+    const lastUserMsg = [...messages].reverse().find(m => m.role === 'user');
+    if (lastUserMsg) {
+      const text = lastUserMsg.parts?.find(p => p.type === 'text');
+      if (text && 'text' in text) {
+        sendMessage({ text: text.text });
       }
+    }
+  };
 
-      const botMsg: Message = {
-        id: (Date.now() + 1).toString(),
-        text: botText,
-        sender: 'bot',
-        timestamp: new Date(),
-      };
-      setMessages((prev) => [...prev, botMsg]);
-    }, 1000);
+  /* ── Extract text from message parts ─────────── */
+  const getMessageText = (msg: typeof messages[0]): string => {
+    return (
+      msg.parts
+        ?.filter((p): p is { type: 'text'; text: string } => p.type === 'text')
+        .map((p) => p.text)
+        .join('') || ''
+    );
   };
 
   return (
     <>
-      {/* Floating Button */}
+      {/* ── Floating Trigger Button ─────────────── */}
       <button
+        id="chatbot-trigger"
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-6 right-6 z-50 w-14 h-14 bg-primary text-white rounded-full shadow-2xl flex items-center justify-center hover:scale-110 active:scale-95 transition-all duration-300 group"
-        aria-label="Open chat"
+        className="fixed bottom-6 right-6 z-50 group"
+        aria-label={isOpen ? 'Close chat' : 'Open chat'}
+        style={{ WebkitTapHighlightColor: 'transparent' }}
       >
-        {isOpen ? <X size={24} /> : <MessageSquare size={24} className="group-hover:rotate-12 transition-transform" />}
+        <div
+          className="relative w-[60px] h-[60px] rounded-full flex items-center justify-center shadow-2xl transition-all duration-300 hover:scale-110 active:scale-95"
+          style={{
+            background: isOpen
+              ? 'linear-gradient(135deg, #4B0000, #6B0000)'
+              : 'linear-gradient(135deg, #8B0000, #B91C1C)',
+            boxShadow: '0 8px 32px rgba(139, 0, 0, 0.4)',
+          }}
+        >
+          {isOpen ? (
+            <X size={24} color="white" />
+          ) : (
+            <>
+              <MessageSquare size={24} color="white" className="group-hover:rotate-12 transition-transform duration-300" />
+              {hasNewMessage && (
+                <span className="absolute -top-1 -right-1 w-4 h-4 bg-green-400 rounded-full border-2 border-white animate-pulse" />
+              )}
+            </>
+          )}
+        </div>
+
+        {/* Tooltip */}
         {!isOpen && (
-          <span className="absolute right-full mr-4 bg-white text-gray-900 px-4 py-2 rounded-xl text-sm font-bold shadow-xl whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none border border-slate-100">
-            Have a question?
+          <span
+            className="absolute right-full mr-4 top-1/2 -translate-y-1/2 bg-white text-gray-900 px-4 py-2 rounded-xl text-sm font-bold shadow-xl whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none border border-slate-100"
+            style={{ filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.1))' }}
+          >
+            Chat with Ty 💬
           </span>
         )}
       </button>
 
-      {/* Chat Window */}
+      {/* ── Chat Window ─────────────────────────── */}
       {isOpen && (
-        <div className="fixed bottom-24 right-6 z-50 w-[350px] h-[500px] bg-white rounded-2xl shadow-2xl border border-slate-100 flex flex-col overflow-hidden animate-fade-in">
-          {/* Header */}
-          <div className="bg-primary p-4 text-white flex justify-between items-center">
+        <div
+          id="chatbot-window"
+          className="fixed z-50 flex flex-col overflow-hidden"
+          style={{
+            bottom: '100px',
+            right: '24px',
+            width: 'min(400px, calc(100vw - 48px))',
+            height: 'min(560px, calc(100vh - 140px))',
+            borderRadius: '20px',
+            boxShadow: '0 24px 80px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0,0,0,0.05)',
+            animation: 'chatWindowIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+            background: '#FAFBFC',
+          }}
+        >
+          {/* ── Header ──────────────────────────── */}
+          <div
+            className="flex items-center justify-between px-5 py-4 shrink-0"
+            style={{
+              background: 'linear-gradient(135deg, #8B0000 0%, #6B0000 100%)',
+              borderBottom: '1px solid rgba(255,255,255,0.1)',
+            }}
+          >
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
-                <Bot size={20} />
+              {/* Bot Avatar */}
+              <div
+                className="w-10 h-10 rounded-full flex items-center justify-center shrink-0"
+                style={{
+                  background: 'rgba(255,255,255,0.15)',
+                  backdropFilter: 'blur(10px)',
+                  border: '1px solid rgba(255,255,255,0.2)',
+                }}
+              >
+                <Sparkles size={18} color="white" />
               </div>
               <div>
-                <p className="font-bold text-sm">TyFix Assistant</p>
-                <p className="text-[10px] text-white/70 flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse" /> Always online
-                </p>
+                <h3 className="text-white font-bold text-sm tracking-wide">Ty — TyFix AI</h3>
+                <div className="flex items-center gap-1.5 mt-0.5">
+                  <span
+                    className="w-2 h-2 rounded-full"
+                    style={{
+                      background: isStreaming ? '#FBBF24' : '#34D399',
+                      animation: isStreaming ? 'pulse 1s ease-in-out infinite' : 'none',
+                      boxShadow: isStreaming
+                        ? '0 0 6px rgba(251, 191, 36, 0.6)'
+                        : '0 0 6px rgba(52, 211, 153, 0.6)',
+                    }}
+                  />
+                  <span className="text-white/60 text-[11px] font-medium">
+                    {isStreaming ? 'Typing...' : 'Online'}
+                  </span>
+                </div>
               </div>
             </div>
-            <button onClick={() => setIsOpen(false)} className="hover:bg-white/10 p-1 rounded-lg">
-              <X size={20} />
+            <button
+              onClick={() => setIsOpen(false)}
+              className="w-8 h-8 rounded-lg flex items-center justify-center transition-colors hover:bg-white/10"
+              aria-label="Close chat"
+            >
+              <X size={18} color="white" />
             </button>
           </div>
 
-          {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-hide">
-            {messages.map((msg) => (
+          {/* ── Messages Area ───────────────────── */}
+          <div
+            className="flex-1 overflow-y-auto px-4 py-4 space-y-3 scrollbar-hide"
+            style={{ overscrollBehavior: 'contain' }}
+          >
+            {/* Welcome message (static) */}
+            <div
+              className="flex justify-start"
+              style={{ animation: 'messageIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards' }}
+            >
               <div
-                key={msg.id}
-                className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+                className="w-7 h-7 rounded-full flex items-center justify-center shrink-0 mr-2 mt-1"
+                style={{ background: 'linear-gradient(135deg, #8B0000, #B91C1C)' }}
               >
+                <Bot size={14} color="white" />
+              </div>
+              <div
+                className="max-w-[78%] px-4 py-3 text-sm leading-relaxed"
+                style={{
+                  background: 'white',
+                  color: '#1E293B',
+                  borderRadius: '18px 18px 18px 4px',
+                  border: '1px solid #E2E8F0',
+                  boxShadow: '0 1px 4px rgba(0, 0, 0, 0.04)',
+                }}
+              >
+                {WELCOME_TEXT}
+              </div>
+            </div>
+
+            {messages.map((msg) => {
+              const text = getMessageText(msg);
+              if (!text) return null;
+
+              const isUser = msg.role === 'user';
+
+              return (
                 <div
-                  className={`max-w-[80%] p-3 rounded-2xl text-sm ${
-                    msg.sender === 'user'
-                      ? 'bg-primary text-white rounded-tr-none'
-                      : 'bg-slate-100 text-slate-800 rounded-tl-none'
-                  }`}
+                  key={msg.id}
+                  className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}
+                  style={{ animation: 'messageIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards' }}
                 >
-                  {msg.text}
+                  {/* Bot avatar */}
+                  {!isUser && (
+                    <div
+                      className="w-7 h-7 rounded-full flex items-center justify-center shrink-0 mr-2 mt-1"
+                      style={{
+                        background: 'linear-gradient(135deg, #8B0000, #B91C1C)',
+                      }}
+                    >
+                      <Bot size={14} color="white" />
+                    </div>
+                  )}
+
+                  <div
+                    className="max-w-[78%] px-4 py-3 text-sm leading-relaxed"
+                    style={
+                      isUser
+                        ? {
+                            background: 'linear-gradient(135deg, #8B0000, #A91C1C)',
+                            color: 'white',
+                            borderRadius: '18px 18px 4px 18px',
+                            boxShadow: '0 2px 8px rgba(139, 0, 0, 0.2)',
+                          }
+                        : {
+                            background: 'white',
+                            color: '#1E293B',
+                            borderRadius: '18px 18px 18px 4px',
+                            border: '1px solid #E2E8F0',
+                            boxShadow: '0 1px 4px rgba(0, 0, 0, 0.04)',
+                          }
+                    }
+                  >
+                    {text}
+                  </div>
+
+                  {/* User avatar */}
+                  {isUser && (
+                    <div
+                      className="w-7 h-7 rounded-full flex items-center justify-center shrink-0 ml-2 mt-1"
+                      style={{ background: '#E2E8F0' }}
+                    >
+                      <User size={14} color="#64748B" />
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+
+            {/* Typing indicator */}
+            {isStreaming && (
+              <div className="flex justify-start" style={{ animation: 'messageIn 0.3s ease forwards' }}>
+                <div
+                  className="w-7 h-7 rounded-full flex items-center justify-center shrink-0 mr-2"
+                  style={{ background: 'linear-gradient(135deg, #8B0000, #B91C1C)' }}
+                >
+                  <Bot size={14} color="white" />
+                </div>
+                <div
+                  className="px-4 py-3 flex gap-1.5 items-center"
+                  style={{
+                    background: 'white',
+                    borderRadius: '18px 18px 18px 4px',
+                    border: '1px solid #E2E8F0',
+                  }}
+                >
+                  <span className="w-2 h-2 rounded-full bg-gray-400 animate-bounce" style={{ animationDelay: '0ms' }} />
+                  <span className="w-2 h-2 rounded-full bg-gray-400 animate-bounce" style={{ animationDelay: '150ms' }} />
+                  <span className="w-2 h-2 rounded-full bg-gray-400 animate-bounce" style={{ animationDelay: '300ms' }} />
                 </div>
               </div>
-            ))}
+            )}
+
+            {/* Error state */}
+            {error && (
+              <div
+                className="flex items-center gap-2 px-4 py-3 rounded-xl text-sm"
+                style={{
+                  background: '#FEF2F2',
+                  border: '1px solid #FEE2E2',
+                  color: '#991B1B',
+                }}
+              >
+                <span>Something went wrong.</span>
+                <button
+                  onClick={handleRetry}
+                  className="flex items-center gap-1 font-semibold underline hover:no-underline"
+                >
+                  <RefreshCw size={14} /> Retry
+                </button>
+              </div>
+            )}
+
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Input */}
-          <div className="p-4 border-t border-slate-100 flex gap-2">
+          {/* ── Quick-Reply Suggestions ──────────── */}
+          {showSuggestions && messages.length === 0 && (
+            <div className="px-4 pb-2 flex gap-2 flex-wrap shrink-0">
+              {SUGGESTIONS.map((s) => (
+                <button
+                  key={s.label}
+                  onClick={() => handleSuggestionClick(s.message)}
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-semibold transition-all duration-200 hover:scale-105 active:scale-95"
+                  style={{
+                    background: 'white',
+                    border: '1px solid #E2E8F0',
+                    color: '#8B0000',
+                    boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+                  }}
+                >
+                  <s.icon size={14} />
+                  {s.label}
+                  <ChevronRight size={12} className="opacity-50" />
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* ── Input Area ──────────────────────── */}
+          <div
+            className="px-4 py-3 shrink-0 flex gap-2 items-center"
+            style={{
+              borderTop: '1px solid #E2E8F0',
+              background: 'white',
+            }}
+          >
             <input
+              ref={inputRef}
+              id="chatbot-input"
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && handleSend()}
-              placeholder="Type your message..."
-              className="flex-1 bg-slate-50 border-none rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-primary/20 outline-none"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  handleSend();
+                }
+              }}
+              placeholder={isStreaming ? 'Ty is typing...' : 'Type your message...'}
+              disabled={isStreaming}
+              className="flex-1 bg-transparent text-sm outline-none placeholder:text-gray-400 disabled:opacity-50"
+              style={{ color: '#1E293B' }}
+              autoComplete="off"
             />
             <button
+              id="chatbot-send"
               onClick={handleSend}
-              className="w-10 h-10 bg-primary text-white rounded-xl flex items-center justify-center hover:bg-primary-dark transition-colors"
+              disabled={!input.trim() || isStreaming}
+              className="w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95 disabled:opacity-30 disabled:hover:scale-100 shrink-0"
+              style={{
+                background: input.trim() && !isStreaming
+                  ? 'linear-gradient(135deg, #8B0000, #B91C1C)'
+                  : '#E2E8F0',
+                color: input.trim() && !isStreaming ? 'white' : '#94A3B8',
+                boxShadow: input.trim() && !isStreaming
+                  ? '0 4px 12px rgba(139, 0, 0, 0.3)'
+                  : 'none',
+              }}
+              aria-label="Send message"
             >
-              <Send size={18} />
+              <Send size={16} />
             </button>
+          </div>
+
+          {/* ── Powered-by footer ───────────────── */}
+          <div
+            className="text-center py-1.5 text-[10px] font-medium shrink-0"
+            style={{
+              color: '#94A3B8',
+              borderTop: '1px solid #F1F5F9',
+              background: 'white',
+              borderRadius: '0 0 20px 20px',
+            }}
+          >
+            Powered by TyFix AI
           </div>
         </div>
       )}
+
+      {/* ── Inline Styles ───────────────────────── */}
+      <style jsx global>{`
+        @keyframes chatWindowIn {
+          from {
+            opacity: 0;
+            transform: translateY(16px) scale(0.95);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+          }
+        }
+
+        @keyframes messageIn {
+          from {
+            opacity: 0;
+            transform: translateY(8px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        /* Mobile full-screen */
+        @media (max-width: 480px) {
+          #chatbot-window {
+            bottom: 0 !important;
+            right: 0 !important;
+            width: 100vw !important;
+            height: calc(100vh - 60px) !important;
+            border-radius: 20px 20px 0 0 !important;
+          }
+
+          #chatbot-trigger {
+            bottom: 16px !important;
+            right: 16px !important;
+          }
+        }
+      `}</style>
     </>
   );
 }

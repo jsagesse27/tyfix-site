@@ -125,3 +125,42 @@ export interface InventoryFilters {
   maxMileage: number;
   search: string;
 }
+
+// ============================================================
+// AI Bot Types
+// ============================================================
+
+export interface Conversation {
+  id: string;
+  session_id: string;
+  lead_id: string | null;
+  source_channel: 'web_chat' | 'phone' | 'sms' | 'instagram';
+  context: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ChatMessageRecord {
+  id: string;
+  conversation_id: string;
+  role: 'user' | 'assistant' | 'system' | 'tool';
+  content: string;
+  tool_calls: Record<string, unknown>[] | null;
+  tool_results: Record<string, unknown>[] | null;
+  tokens_used: number | null;
+  provider: string | null;
+  created_at: string;
+}
+
+export interface Appointment {
+  id: string;
+  lead_id: string | null;
+  name: string;
+  phone: string;
+  preferred_date: string;
+  preferred_time: string;
+  vehicle_interest: string | null;
+  status: 'pending' | 'confirmed' | 'cancelled' | 'completed';
+  notes: string | null;
+  created_at: string;
+}
