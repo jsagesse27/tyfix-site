@@ -12,21 +12,49 @@ const SUGGESTIONS = [
   { label: 'Contact Info', icon: Phone, message: 'What are your hours and how do I get to the lot?' },
 ];
 
-const WELCOME_TEXT = "Hey there! 👋 I'm Ty, your TyFix assistant. I can help you find the perfect car, book a visit, or answer any questions. What are you looking for today?";
+const WELCOME_TEXT = "Hey! 👋 I'm Ty from TyFix Used Cars. Whether you're looking for a specific ride or just browsing, I got you. What's on your mind?";
+
+/**
+ * Strip raw tool/function call artifacts that may leak from the LLM.
+ * Matches patterns like: <function=...>...</function> and <tool_call>...</tool_call>
+ */
+function cleanBotMessage(text: string): string {
+  // Remove <function=...>{...}</function> blocks
+  let cleaned = text.replace(/<function=\w+[^>]*>\s*\{[^}]*\}\s*<\/function>/gi, '');
+  // Remove <tool_call>...</tool_call> blocks
+  cleaned = cleaned.replace(/<tool_call>[\s\S]*?<\/tool_call>/gi, '');
+  // Remove any remaining <function...> tags
+  cleaned = cleaned.replace(/<\/?function[^>]*>/gi, '');
+  // Clean up extra whitespace/newlines left behind
+  cleaned = cleaned.replace(/\n{3,}/g, '\n\n').trim();
+  return cleaned;
+}
 
 export default function ChatBot() {
   const [isOpen, setIsOpen] = useState(false);
   const [input, setInput] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(true);
   const [hasNewMessage, setHasNewMessage] = useState(false);
+  const [isThinking, setIsThinking] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const thinkingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const { messages, sendMessage, status, error, setMessages } = useChat({
+  const { messages, sendMessage, status, error } = useChat({
     transport: new DefaultChatTransport({ api: '/api/chat' }),
   });
 
   const isStreaming = status === 'streaming';
+
+  // Show typing indicator for a natural delay before the stream starts
+  // When status changes to 'streaming', we're already past the delay
+  useEffect(() => {
+    if (isStreaming) {
+      // Stream started, hide thinking after a brief overlap
+      const timer = setTimeout(() => setIsThinking(false), 400);
+      return () => clearTimeout(timer);
+    }
+  }, [isStreaming]);
 
   // Auto-scroll to bottom
   const scrollToBottom = useCallback(() => {
@@ -35,11 +63,11 @@ export default function ChatBot() {
 
   useEffect(() => {
     if (isOpen) scrollToBottom();
-  }, [messages, isOpen, scrollToBottom]);
+  }, [messages, isOpen, isThinking, scrollToBottom]);
 
   // Flash notification when new message arrives while closed
   useEffect(() => {
-    if (!isOpen && messages.length > 1) {
+    if (!isOpen && messages.length > 0) {
       setHasNewMessage(true);
     }
   }, [messages, isOpen]);
@@ -52,21 +80,42 @@ export default function ChatBot() {
     }
   }, [isOpen]);
 
+  // Cleanup timer on unmount
+  useEffect(() => {
+    return () => {
+      if (thinkingTimerRef.current) clearTimeout(thinkingTimerRef.current);
+    };
+  }, []);
+
   const handleSend = () => {
     const trimmed = input.trim();
-    if (!trimmed || isStreaming) return;
-    sendMessage({ text: trimmed });
+    if (!trimmed || isStreaming || isThinking) return;
+
+    // Show thinking indicator with a natural delay (1.2–2.5s)
+    setIsThinking(true);
+    const delay = 1200 + Math.random() * 1300;
+
+    thinkingTimerRef.current = setTimeout(() => {
+      sendMessage({ text: trimmed });
+    }, delay);
+
     setInput('');
     setShowSuggestions(false);
   };
 
   const handleSuggestionClick = (message: string) => {
-    sendMessage({ text: message });
+    if (isStreaming || isThinking) return;
+    setIsThinking(true);
+    const delay = 1000 + Math.random() * 1000;
+
+    thinkingTimerRef.current = setTimeout(() => {
+      sendMessage({ text: message });
+    }, delay);
+
     setShowSuggestions(false);
   };
 
   const handleRetry = () => {
-    // Remove the last user message and re-send
     const lastUserMsg = [...messages].reverse().find(m => m.role === 'user');
     if (lastUserMsg) {
       const text = lastUserMsg.parts?.find(p => p.type === 'text');
@@ -76,15 +125,22 @@ export default function ChatBot() {
     }
   };
 
-  /* ── Extract text from message parts ─────────── */
+  /* ── Extract clean text from message parts ───── */
   const getMessageText = (msg: typeof messages[0]): string => {
-    return (
+    const raw =
       msg.parts
         ?.filter((p): p is { type: 'text'; text: string } => p.type === 'text')
         .map((p) => p.text)
-        .join('') || ''
-    );
+        .join('') || '';
+
+    // For assistant messages, clean out any leaked tool call XML
+    if (msg.role === 'assistant') {
+      return cleanBotMessage(raw);
+    }
+    return raw;
   };
+
+  const showTypingBubble = isThinking || isStreaming;
 
   return (
     <>
@@ -153,7 +209,6 @@ export default function ChatBot() {
             }}
           >
             <div className="flex items-center gap-3">
-              {/* Bot Avatar */}
               <div
                 className="w-10 h-10 rounded-full flex items-center justify-center shrink-0"
                 style={{
@@ -170,15 +225,15 @@ export default function ChatBot() {
                   <span
                     className="w-2 h-2 rounded-full"
                     style={{
-                      background: isStreaming ? '#FBBF24' : '#34D399',
-                      animation: isStreaming ? 'pulse 1s ease-in-out infinite' : 'none',
-                      boxShadow: isStreaming
+                      background: showTypingBubble ? '#FBBF24' : '#34D399',
+                      animation: showTypingBubble ? 'pulse 1s ease-in-out infinite' : 'none',
+                      boxShadow: showTypingBubble
                         ? '0 0 6px rgba(251, 191, 36, 0.6)'
                         : '0 0 6px rgba(52, 211, 153, 0.6)',
                     }}
                   />
                   <span className="text-white/60 text-[11px] font-medium">
-                    {isStreaming ? 'Typing...' : 'Online'}
+                    {showTypingBubble ? 'Typing...' : 'Online'}
                   </span>
                 </div>
               </div>
@@ -247,7 +302,7 @@ export default function ChatBot() {
                   )}
 
                   <div
-                    className="max-w-[78%] px-4 py-3 text-sm leading-relaxed"
+                    className="max-w-[78%] px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap"
                     style={
                       isUser
                         ? {
@@ -281,8 +336,8 @@ export default function ChatBot() {
               );
             })}
 
-            {/* Typing indicator */}
-            {isStreaming && (
+            {/* Typing indicator — shows during thinking delay AND streaming */}
+            {showTypingBubble && (
               <div className="flex justify-start" style={{ animation: 'messageIn 0.3s ease forwards' }}>
                 <div
                   className="w-7 h-7 rounded-full flex items-center justify-center shrink-0 mr-2"
@@ -371,8 +426,8 @@ export default function ChatBot() {
                   handleSend();
                 }
               }}
-              placeholder={isStreaming ? 'Ty is typing...' : 'Type your message...'}
-              disabled={isStreaming}
+              placeholder={showTypingBubble ? 'Ty is typing...' : 'Type your message...'}
+              disabled={isStreaming || isThinking}
               className="flex-1 bg-transparent text-sm outline-none placeholder:text-gray-400 disabled:opacity-50"
               style={{ color: '#1E293B' }}
               autoComplete="off"
@@ -380,14 +435,14 @@ export default function ChatBot() {
             <button
               id="chatbot-send"
               onClick={handleSend}
-              disabled={!input.trim() || isStreaming}
+              disabled={!input.trim() || isStreaming || isThinking}
               className="w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95 disabled:opacity-30 disabled:hover:scale-100 shrink-0"
               style={{
-                background: input.trim() && !isStreaming
+                background: input.trim() && !isStreaming && !isThinking
                   ? 'linear-gradient(135deg, #8B0000, #B91C1C)'
                   : '#E2E8F0',
-                color: input.trim() && !isStreaming ? 'white' : '#94A3B8',
-                boxShadow: input.trim() && !isStreaming
+                color: input.trim() && !isStreaming && !isThinking ? 'white' : '#94A3B8',
+                boxShadow: input.trim() && !isStreaming && !isThinking
                   ? '0 4px 12px rgba(139, 0, 0, 0.3)'
                   : 'none',
               }}
