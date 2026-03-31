@@ -35,10 +35,8 @@ export default function ChatBot() {
   const [input, setInput] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(true);
   const [hasNewMessage, setHasNewMessage] = useState(false);
-  const [isThinking, setIsThinking] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const thinkingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const { messages, sendMessage, status, error } = useChat({
     transport: new DefaultChatTransport({ api: '/api/chat' }),
@@ -46,15 +44,8 @@ export default function ChatBot() {
 
   const isStreaming = status === 'streaming';
 
-  // Show typing indicator for a natural delay before the stream starts
-  // When status changes to 'streaming', we're already past the delay
-  useEffect(() => {
-    if (isStreaming) {
-      // Stream started, hide thinking after a brief overlap
-      const timer = setTimeout(() => setIsThinking(false), 400);
-      return () => clearTimeout(timer);
-    }
-  }, [isStreaming]);
+  // Removed the client-side delay overlap logic.
+  // The delay is now handled naturally on the backend API route.
 
   // Auto-scroll to bottom
   const scrollToBottom = useCallback(() => {
@@ -63,7 +54,7 @@ export default function ChatBot() {
 
   useEffect(() => {
     if (isOpen) scrollToBottom();
-  }, [messages, isOpen, isThinking, scrollToBottom]);
+  }, [messages, isOpen, scrollToBottom]);
 
   // Flash notification when new message arrives while closed
   useEffect(() => {
@@ -80,38 +71,17 @@ export default function ChatBot() {
     }
   }, [isOpen]);
 
-  // Cleanup timer on unmount
-  useEffect(() => {
-    return () => {
-      if (thinkingTimerRef.current) clearTimeout(thinkingTimerRef.current);
-    };
-  }, []);
-
   const handleSend = () => {
     const trimmed = input.trim();
-    if (!trimmed || isStreaming || isThinking) return;
+    if (!trimmed) return;
 
-    // Show thinking indicator with a natural delay (1.2–2.5s)
-    setIsThinking(true);
-    const delay = 7000 + Math.random() * 5000;
-
-    thinkingTimerRef.current = setTimeout(() => {
-      sendMessage({ text: trimmed });
-    }, delay);
-
+    sendMessage({ text: trimmed });
     setInput('');
     setShowSuggestions(false);
   };
 
   const handleSuggestionClick = (message: string) => {
-    if (isStreaming || isThinking) return;
-    setIsThinking(true);
-    const delay = 7000 + Math.random() * 5000;
-
-    thinkingTimerRef.current = setTimeout(() => {
-      sendMessage({ text: message });
-    }, delay);
-
+    sendMessage({ text: message });
     setShowSuggestions(false);
   };
 
@@ -140,7 +110,8 @@ export default function ChatBot() {
     return raw;
   };
 
-  const showTypingBubble = isThinking || isStreaming;
+  // Show typing indicator when the message is sent but not yet complete
+  const showTypingBubble = status === 'submitted' || status === 'streaming';
 
   return (
     <>
@@ -426,8 +397,8 @@ export default function ChatBot() {
                   handleSend();
                 }
               }}
-              placeholder={showTypingBubble ? 'Ty is typing...' : 'Type your message...'}
-              disabled={isStreaming || isThinking}
+              placeholder="Type your message..."
+              disabled={false}
               className="flex-1 bg-transparent text-sm outline-none placeholder:text-gray-400 disabled:opacity-50"
               style={{ color: '#1E293B' }}
               autoComplete="off"
@@ -435,14 +406,14 @@ export default function ChatBot() {
             <button
               id="chatbot-send"
               onClick={handleSend}
-              disabled={!input.trim() || isStreaming || isThinking}
+              disabled={!input.trim()}
               className="w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95 disabled:opacity-30 disabled:hover:scale-100 shrink-0"
               style={{
-                background: input.trim() && !isStreaming && !isThinking
+                background: input.trim()
                   ? 'linear-gradient(135deg, #8B0000, #B91C1C)'
                   : '#E2E8F0',
-                color: input.trim() && !isStreaming && !isThinking ? 'white' : '#94A3B8',
-                boxShadow: input.trim() && !isStreaming && !isThinking
+                color: input.trim() ? 'white' : '#94A3B8',
+                boxShadow: input.trim()
                   ? '0 4px 12px rgba(139, 0, 0, 0.3)'
                   : 'none',
               }}

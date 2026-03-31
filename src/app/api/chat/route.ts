@@ -23,6 +23,10 @@ export async function POST(req: Request) {
       return new Response('Messages are required', { status: 400 });
     }
 
+    // Natural typing delay before responding (3 to 6 seconds)
+    const delayMs = 3000 + Math.random() * 3000;
+    await new Promise(resolve => setTimeout(resolve, delayMs));
+
     // Try up to 3 providers
     const providers = ['primary', 'fallback', 'overflow'] as const;
     let lastError: Error | null = null;
