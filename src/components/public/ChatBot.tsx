@@ -93,7 +93,7 @@ export default function ChatBot() {
 
     // Show thinking indicator with a natural delay (1.2–2.5s)
     setIsThinking(true);
-    const delay = 1200 + Math.random() * 1300;
+    const delay = 7000 + Math.random() * 5000;
 
     thinkingTimerRef.current = setTimeout(() => {
       sendMessage({ text: trimmed });
@@ -106,7 +106,7 @@ export default function ChatBot() {
   const handleSuggestionClick = (message: string) => {
     if (isStreaming || isThinking) return;
     setIsThinking(true);
-    const delay = 1000 + Math.random() * 1000;
+    const delay = 7000 + Math.random() * 5000;
 
     thinkingTimerRef.current = setTimeout(() => {
       sendMessage({ text: message });

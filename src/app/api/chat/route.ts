@@ -37,7 +37,7 @@ export async function POST(req: Request) {
           messages: await convertToModelMessages(messages),
           tools: dealershipTools,
           stopWhen: stepCountIs(5),
-          maxOutputTokens: 800,
+          maxOutputTokens: 300,
           temperature: 0.8,
           onError: ({ error }) => {
             console.error(`[AI Bot] ${providerName} error:`, error);
