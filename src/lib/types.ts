@@ -130,6 +130,32 @@ export interface InventoryFilters {
 // AI Bot Types
 // ============================================================
 
+export interface BotSettings {
+  id: string;
+  // Simple Settings
+  bot_name: string;
+  bot_personality: string;
+  dealership_name: string;
+  dealership_location: string;
+  payment_model: 'cash-only' | 'financing' | 'both';
+  price_range: string;
+  greeting_message: string;
+  allow_price_negotiation: boolean;
+  collect_leads: boolean;
+  bot_enabled: boolean;
+  // Advanced Settings
+  system_prompt_override: string | null;
+  banned_phrases: string;
+  appointment_nudges: string;
+  custom_instructions: string | null;
+  temperature: number;
+  max_tokens: number;
+  frequency_penalty: number;
+  presence_penalty: number;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface Conversation {
   id: string;
   session_id: string;

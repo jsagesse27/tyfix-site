@@ -16,6 +16,7 @@ import {
   Menu,
   X,
   ExternalLink,
+  Bot,
 } from 'lucide-react';
 
 const NAV_ITEMS = [
@@ -23,6 +24,7 @@ const NAV_ITEMS = [
   { label: 'Inventory', href: '/admin/inventory', icon: <Car size={20} /> },
   { label: 'Leads', href: '/admin/leads', icon: <Users size={20} /> },
   { label: 'Reviews', href: '/admin/testimonials', icon: <Star size={20} /> },
+  { label: 'AI Bot', href: '/admin/bot', icon: <Bot size={20} /> },
   { label: 'Settings', href: '/admin/settings', icon: <Settings size={20} /> },
   { label: 'Content', href: '/admin/content', icon: <FileText size={20} /> },
 ];

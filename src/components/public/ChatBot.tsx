@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useChat } from '@ai-sdk/react';
 import { DefaultChatTransport } from 'ai';
+import { createClient } from '@/lib/supabase/client';
 import { MessageSquare, X, Send, Bot, User, Sparkles, Car, Calendar, Phone, ChevronRight, RefreshCw } from 'lucide-react';
 
 /* ── Quick‑reply suggestion chips ─────────────── */
@@ -12,11 +13,13 @@ const SUGGESTIONS = [
   { label: 'Contact Info', icon: Phone, message: 'What are your hours and how do I get to the lot?' },
 ];
 
-const WELCOME_TEXT = "Hey! 👋 I'm Ty from TyFix Used Cars. Whether you're looking for a specific ride or just browsing, I got you. What's on your mind?";
+const DEFAULT_GREETING = "Hey! 👋 I'm Ty from TyFix Used Cars. Whether you're looking for a specific ride or just browsing, I got you. What's on your mind?";
+
+/* ── Safety timeout (ms) — auto-recover from stuck states ── */
+const STUCK_TIMEOUT_MS = 30_000;
 
 /**
  * Strip raw tool/function call artifacts that may leak from the LLM.
- * Matches patterns like: <function=...>...</function> and <tool_call>...</tool_call>
  */
 function cleanBotMessage(text: string): string {
   let cleaned = text.replace(/<function=\w+[^>]*>\s*\{[^}]*\}\s*<\/function>/gi, '');
@@ -31,33 +34,113 @@ export default function ChatBot() {
   const [input, setInput] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(true);
   const [hasNewMessage, setHasNewMessage] = useState(false);
-  
-  // Custom batching logic variables
-  const pendingQueueRef = useRef<string[]>([]);
-  const [pendingRenderQueue, setPendingRenderQueue] = useState<string[]>([]);
-  const thinkingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [stuckError, setStuckError] = useState(false);
+  const [greeting, setGreeting] = useState(DEFAULT_GREETING);
+  const [botEnabled, setBotEnabled] = useState(true);
+
+  // Fetch greeting + enabled state from bot_settings on mount
+  useEffect(() => {
+    (async () => {
+      try {
+        const supabase = createClient();
+        const { data } = await supabase
+          .from('bot_settings')
+          .select('greeting_message, bot_enabled')
+          .limit(1)
+          .single();
+        if (data) {
+          if (data.greeting_message) setGreeting(data.greeting_message);
+          if (data.bot_enabled === false) setBotEnabled(false);
+        }
+      } catch { /* use defaults */ }
+    })();
+  }, []);
+
+  // If the bot is disabled via admin, don't render anything
+  if (!botEnabled) return null;
+
+  // Queue for messages typed while the bot is responding
+  const queuedMessageRef = useRef<string | null>(null);
+  const stuckTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const { messages, sendMessage, status, error } = useChat({
+  const { messages, sendMessage, status, error, regenerate, stop } = useChat({
     transport: new DefaultChatTransport({ api: '/api/chat' }),
+    onError: (err) => {
+      console.error('[ChatBot] Stream error:', err);
+      clearStuckTimer();
+    },
+    onFinish: () => {
+      clearStuckTimer();
+    },
   });
 
-  const isStreaming = status === 'streaming';
-  const isTypingDelay = pendingRenderQueue.length > 0;
-  
-  // Show typing indicator when we are in a simulated delay OR when the API is processing
-  const showTypingBubble = isTypingDelay || status === 'submitted' || status === 'streaming';
+  const isReady = status === 'ready';
+  const isBusy = status === 'submitted' || status === 'streaming';
+  const showTypingBubble = isBusy && !stuckError;
 
-  // Auto-scroll to bottom
+  /* ── Stuck-state safety timer ─────────────────── */
+  const clearStuckTimer = useCallback(() => {
+    if (stuckTimerRef.current) {
+      clearTimeout(stuckTimerRef.current);
+      stuckTimerRef.current = null;
+    }
+  }, []);
+
+  const startStuckTimer = useCallback(() => {
+    clearStuckTimer();
+    stuckTimerRef.current = setTimeout(() => {
+      console.warn('[ChatBot] Response timed out — recovering');
+      setStuckError(true);
+      try { stop(); } catch { /* ignore */ }
+    }, STUCK_TIMEOUT_MS);
+  }, [clearStuckTimer, stop]);
+
+  // Clear stuck error when status goes back to ready
+  useEffect(() => {
+    if (isReady && stuckError) {
+      // Small delay so the error message is visible briefly
+      const t = setTimeout(() => setStuckError(false), 100);
+      return () => clearTimeout(t);
+    }
+  }, [isReady, stuckError]);
+
+  // When status goes busy, start the safety timer
+  useEffect(() => {
+    if (isBusy) {
+      startStuckTimer();
+    } else {
+      clearStuckTimer();
+    }
+  }, [isBusy, startStuckTimer, clearStuckTimer]);
+
+  // When the bot finishes and we have a queued message, send it
+  useEffect(() => {
+    if (isReady && queuedMessageRef.current) {
+      const queued = queuedMessageRef.current;
+      queuedMessageRef.current = null;
+      // Small delay to let the UI settle
+      setTimeout(() => {
+        sendMessage({ text: queued });
+      }, 150);
+    }
+  }, [isReady, sendMessage]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => clearStuckTimer();
+  }, [clearStuckTimer]);
+
+  /* ── Auto-scroll ─────────────────────────────── */
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, []);
 
   useEffect(() => {
     if (isOpen) scrollToBottom();
-  }, [messages, pendingRenderQueue, showTypingBubble, isOpen, scrollToBottom]);
+  }, [messages, showTypingBubble, isOpen, scrollToBottom]);
 
   // Flash notification when new message arrives while closed
   useEffect(() => {
@@ -74,47 +157,27 @@ export default function ChatBot() {
     }
   }, [isOpen]);
 
-  // Cleanup timer on unmount
-  useEffect(() => {
-    return () => {
-      if (thinkingTimerRef.current) clearTimeout(thinkingTimerRef.current);
-    };
-  }, []);
-
-  // Handler for sending messages with frontend queue/delay
-  // Allows the user to keep sending concurrent messages. We batch them and send ONE API request after context settles.
+  /* ── Send handler ────────────────────────────── */
   const handleSend = (overrideText?: string) => {
     const text = typeof overrideText === 'string' ? overrideText : input;
     const trimmed = text.trim();
     if (!trimmed) return;
 
-    // 1. Optimistic UI update instantly
-    pendingQueueRef.current.push(trimmed);
-    setPendingRenderQueue([...pendingQueueRef.current]);
-
-    // 2. Clear visual state
+    // Clear input immediately for snappy UX
     if (!overrideText || overrideText === input) setInput('');
     setShowSuggestions(false);
+    setStuckError(false);
 
-    // 3. Clear previous timers so rapid messages batch together safely
-    if (thinkingTimerRef.current) clearTimeout(thinkingTimerRef.current);
+    // If the bot is busy, queue the message to send when it finishes
+    if (!isReady) {
+      queuedMessageRef.current = queuedMessageRef.current
+        ? `${queuedMessageRef.current}\n\n${trimmed}`
+        : trimmed;
+      return;
+    }
 
-    // 4. Set 3-6 second randomized delay before firing to backend API
-    const delay = 3000 + Math.random() * 3000;
-    thinkingTimerRef.current = setTimeout(() => {
-      const combinedArr = pendingQueueRef.current;
-      if (combinedArr.length === 0) return;
-
-      // Combine multiple fast messages into a single chat turn naturally
-      const combinedText = combinedArr.join('\n\n');
-      
-      // Send batched request via Vercel AI SDK
-      sendMessage({ text: combinedText });
-
-      // Clear the local queue
-      pendingQueueRef.current = [];
-      setPendingRenderQueue([]);
-    }, delay);
+    // Send immediately — no artificial delay
+    sendMessage({ text: trimmed });
   };
 
   const handleSuggestionClick = (message: string) => {
@@ -122,13 +185,8 @@ export default function ChatBot() {
   };
 
   const handleRetry = () => {
-    const lastUserMsg = [...messages].reverse().find(m => m.role === 'user');
-    if (lastUserMsg) {
-      const text = lastUserMsg.parts?.find(p => p.type === 'text');
-      if (text && 'text' in text) {
-        sendMessage({ text: text.text });
-      }
-    }
+    setStuckError(false);
+    regenerate();
   };
 
   /* ── Extract clean text from message parts ───── */
@@ -139,15 +197,14 @@ export default function ChatBot() {
         .map((p) => p.text)
         .join('') || '';
 
-    // For assistant messages, clean out any leaked tool call XML
     if (msg.role === 'assistant') {
       return cleanBotMessage(raw);
     }
     return raw;
   };
 
-  // Skip rendering standard 'AbortError' exceptions since they are expected if the API gets interrupted
-  const shouldShowError = error && error.name !== 'AbortError';
+  // Show error for real errors or stuck timeouts (skip AbortErrors)
+  const shouldShowError = stuckError || (error && error.name !== 'AbortError');
 
   return (
     <>
@@ -280,7 +337,7 @@ export default function ChatBot() {
                   boxShadow: '0 1px 4px rgba(0, 0, 0, 0.04)',
                 }}
               >
-                {WELCOME_TEXT}
+                {greeting}
               </div>
             </div>
 
@@ -343,34 +400,7 @@ export default function ChatBot() {
               );
             })}
 
-            {/* Pending User Queued Messages */}
-            {pendingRenderQueue.map((text, i) => (
-              <div
-                key={'pending-' + i}
-                className="flex justify-end"
-                style={{ animation: 'messageIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards' }}
-              >
-                <div
-                  className="max-w-[78%] px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap opacity-90 transition-opacity"
-                  style={{
-                    background: 'linear-gradient(135deg, #8B0000, #A91C1C)',
-                    color: 'white',
-                    borderRadius: '18px 18px 4px 18px',
-                    boxShadow: '0 2px 8px rgba(139, 0, 0, 0.2)',
-                  }}
-                >
-                  {text}
-                </div>
-                <div
-                  className="w-7 h-7 rounded-full flex items-center justify-center shrink-0 ml-2 mt-1"
-                  style={{ background: '#E2E8F0' }}
-                >
-                  <User size={14} color="#64748B" />
-                </div>
-              </div>
-            ))}
-
-            {/* Typing indicator — shows during local delay OR Vercel AI API streaming */}
+            {/* Typing indicator */}
             {showTypingBubble && (
               <div className="flex justify-start" style={{ animation: 'messageIn 0.3s ease forwards' }}>
                 <div
@@ -404,7 +434,7 @@ export default function ChatBot() {
                   color: '#991B1B',
                 }}
               >
-                <span>Something went wrong.</span>
+                <span>{stuckError ? 'Response took too long.' : 'Something went wrong.'}</span>
                 <button
                   onClick={handleRetry}
                   className="flex items-center gap-1 font-semibold underline hover:no-underline"
@@ -460,9 +490,8 @@ export default function ChatBot() {
                   handleSend();
                 }
               }}
-              placeholder="Type your message..."
-              disabled={false}
-              className="flex-1 bg-transparent text-sm outline-none placeholder:text-gray-400 disabled:opacity-50"
+              placeholder={isBusy ? 'Ty is typing...' : 'Type your message...'}
+              className="flex-1 bg-transparent text-sm outline-none placeholder:text-gray-400"
               style={{ color: '#1E293B' }}
               autoComplete="off"
             />
