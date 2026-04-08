@@ -10,6 +10,7 @@ import {
   DRIVETRAINS, CYLINDERS, EXTERIOR_COLORS, INTERIOR_COLORS,
   DOORS, FEATURED_LABELS, LISTING_STATUSES,
 } from '@/lib/constants';
+import { generateVehicleSlug } from '@/lib/slug';
 
 // Reusable dropdown component
 function SelectField({ label, value, onChange, options, required }: {
@@ -137,6 +138,13 @@ export default function EditVehiclePage() {
       history_report_url: form.history_report_url || null,
       featured_label: form.featured_label || null,
       updated_at: new Date().toISOString(),
+      slug: generateVehicleSlug({
+        year: form.year,
+        make: form.make,
+        model: form.model,
+        trim: form.trim || null,
+        stock_number: form.stock_number || null,
+      }),
     };
 
     if (isNew) {
@@ -166,6 +174,12 @@ export default function EditVehiclePage() {
         fuel_type: r.fuel_type, drivetrain: r.drivetrain,
         exterior_color: r.exterior_color || null,
         listing_status: r.listing_status,
+        slug: generateVehicleSlug({
+          year: r.year,
+          make: r.make,
+          model: r.model,
+          trim: r.trim || null,
+        }),
       }).select().single();
 
       // Upload photos for this vehicle

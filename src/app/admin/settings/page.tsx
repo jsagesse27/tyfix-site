@@ -70,6 +70,7 @@ export default function AdminSettingsPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div><label className="block text-xs font-bold text-gray-500 uppercase mb-1">Facebook URL</label><input className="input-field" value={settings.facebook_url || ''} onChange={(e) => u('facebook_url', e.target.value)} /></div>
           <div><label className="block text-xs font-bold text-gray-500 uppercase mb-1">Instagram URL</label><input className="input-field" value={settings.instagram_url || ''} onChange={(e) => u('instagram_url', e.target.value)} /></div>
+          <div><label className="block text-xs font-bold text-gray-500 uppercase mb-1">TikTok URL</label><input className="input-field" value={settings.tiktok_url || ''} onChange={(e) => u('tiktok_url', e.target.value)} placeholder="https://www.tiktok.com/@tyfix" /></div>
         </div>
       </div>
 

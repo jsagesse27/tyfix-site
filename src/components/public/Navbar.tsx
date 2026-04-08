@@ -8,10 +8,10 @@ import type { SiteSettings } from '@/lib/types';
 
 const NAV_LINKS = [
   { label: 'Inventory', href: '/inventory' },
+  { label: 'AutoConnect', href: '/autoconnect' },
   { label: 'Trade-In', href: '/trade-in' },
-  { label: 'AutoConnect', href: '/#autoconnect' },
-  { label: 'Reviews', href: '/#reviews' },
-  { label: 'Contact', href: '/#contact' },
+  { label: 'Visit Us', href: '/visit-us' },
+  { label: 'Blog', href: '/blog' },
 ];
 
 export default function Navbar({ settings }: { settings: SiteSettings | null }) {

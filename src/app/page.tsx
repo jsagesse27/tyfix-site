@@ -10,7 +10,12 @@ import ContactSection from '@/components/public/ContactSection';
 import Footer from '@/components/public/Footer';
 import MobileStickyBar from '@/components/public/MobileStickyBar';
 import LeadCapturePopup from '@/components/public/LeadCapturePopup';
+import SocialBridge from '@/components/public/SocialBridge';
+import { AutoDealerSchema } from '@/components/seo/JsonLd';
 import type { Vehicle, Testimonial, SiteSettings, SiteContent } from '@/lib/types';
+
+export const revalidate = 3600; // ISR: 1 hour
+
 
 async function getData() {
   const supabase = await createClient();
@@ -44,6 +49,7 @@ export default async function HomePage() {
 
   return (
     <div className="min-h-screen">
+      <AutoDealerSchema settings={settings} />
       <Navbar settings={settings} />
       <Hero settings={settings} content={content} soldCount={soldCount} />
       <TrustBadges content={content} />
@@ -51,6 +57,7 @@ export default async function HomePage() {
       <CashAdvantage content={content} />
       <AutoConnectProgram />
       <Testimonials testimonials={testimonials} showSection={settings?.show_reviews_section ?? true} />
+      <SocialBridge settings={settings} />
       <ContactSection settings={settings} />
       <Footer settings={settings} content={content} />
       <MobileStickyBar settings={settings} />

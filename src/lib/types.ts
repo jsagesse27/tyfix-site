@@ -5,6 +5,7 @@
 
 export interface Vehicle {
   id: string;
+  slug: string | null;
   year: string;
   make: string;
   model: string;
@@ -58,8 +59,8 @@ export interface Lead {
   email: string;
   message: string | null;
   vehicle_of_interest: string;
-  status: 'new' | 'contacted' | 'closed';
-  lead_type: 'inquiry' | 'trade-in' | 'autoconnect';
+  status: 'new' | 'contacted' | 'appointment_set' | 'showed' | 'sold' | 'lost' | 'closed';
+  lead_type: 'inquiry' | 'trade-in' | 'autoconnect' | 'chatbot';
   instagram?: string | null;
   contact_consent: boolean;
   timeline?: string | null;
@@ -73,6 +74,8 @@ export interface Testimonial {
   star_rating: number;
   review_text: string;
   date_label: string | null;
+  source: 'site' | 'google' | 'yelp';
+  google_review_url: string | null;
   is_visible: boolean;
   sort_order: number;
   created_at: string;
@@ -91,6 +94,7 @@ export interface SiteSettings {
   legal_disclaimer: string | null;
   facebook_url: string | null;
   instagram_url: string | null;
+  tiktok_url: string | null;
   google_reviews_embed: string | null;
   show_reviews_section: boolean;
   show_price_tagline: boolean;
@@ -189,4 +193,24 @@ export interface Appointment {
   status: 'pending' | 'confirmed' | 'cancelled' | 'completed';
   notes: string | null;
   created_at: string;
+}
+
+// ============================================================
+// Blog Types
+// ============================================================
+
+export interface BlogPost {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt: string | null;
+  content: string;
+  featured_image_url: string | null;
+  author: string;
+  category: string | null;
+  tags: string[];
+  is_published: boolean;
+  published_at: string | null;
+  created_at: string;
+  updated_at: string;
 }

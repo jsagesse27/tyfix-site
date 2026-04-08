@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Gauge, Settings2, ChevronRight, ShieldCheck } from 'lucide-react';
 import type { Vehicle } from '@/lib/types';
 import { formatPrice, formatMileage, getHeroPhoto } from '@/lib/utils';
+import { getVehicleUrl } from '@/lib/slug';
 
 export default function VehicleCard({ 
   vehicle, 
@@ -33,7 +34,7 @@ export default function VehicleCard({
   const displayPhoto = photos.length > 0 ? photos[currentIdx].public_url : '/placeholder-car.jpg';
 
   return (
-    <Link href={`/vehicles/${vehicle.id}`} className="vehicle-card group block">
+    <Link href={getVehicleUrl(vehicle)} className="vehicle-card group block">
       {/* Image */}
       <div className="relative h-52 overflow-hidden bg-slate-100">
         <img
