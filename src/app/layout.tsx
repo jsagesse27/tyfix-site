@@ -60,6 +60,10 @@ import ChatBot from "@/components/public/ChatBot";
 import LoadingScreen from "@/components/public/LoadingScreen";
 import { GTMHead, GTMBody, GA4Script } from "@/components/analytics/GoogleTagManager";
 import { MetaPixel } from "@/components/analytics/MetaPixel";
+import { Analytics } from "@vercel/analytics/react";
+
+
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 export default function RootLayout({
   children,
@@ -78,6 +82,8 @@ export default function RootLayout({
         <LoadingScreen />
         {children}
         <ChatBot />
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );

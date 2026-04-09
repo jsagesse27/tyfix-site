@@ -110,11 +110,6 @@ export default function ContactSection({ settings }: ContactSectionProps) {
               </div>
             </div>
 
-            <div className="p-6 rounded-3xl bg-slate-50 border border-slate-100 text-slate-900 mb-6 transition-all hover:bg-white hover:shadow-lg hover:shadow-slate-200/50">
-              <h4 className="text-lg font-black mb-1">Sell Us Your Car</h4>
-              <p className="text-slate-500 text-sm mb-4 leading-relaxed">We buy cars for cash, even if you don't buy from us.</p>
-              <Link href="/trade-in" className="btn-primary w-full text-center block text-sm shadow-lg shadow-primary/20">Get Cash Offer</Link>
-            </div>
 
             <div className="p-8 rounded-3xl bg-white border border-gray-100 shadow-xl shadow-slate-200/50">
               <h4 className="text-xl font-bold mb-6 text-gray-900 border-b pb-4">Connect With Us</h4>

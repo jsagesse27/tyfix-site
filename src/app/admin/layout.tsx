@@ -19,6 +19,7 @@ import {
   Bot,
   PenSquare,
   BarChart3,
+  LayoutList,
 } from 'lucide-react';
 
 const NAV_ITEMS = [
@@ -29,9 +30,11 @@ const NAV_ITEMS = [
   { label: 'Blog', href: '/admin/blog', icon: <PenSquare size={20} /> },
   { label: 'AI Bot', href: '/admin/bot', icon: <Bot size={20} /> },
   { label: 'Analytics', href: '/admin/analytics', icon: <BarChart3 size={20} /> },
+  { label: 'Sections', href: '/admin/sections', icon: <LayoutList size={20} /> },
   { label: 'Settings', href: '/admin/settings', icon: <Settings size={20} /> },
   { label: 'Content', href: '/admin/content', icon: <FileText size={20} /> },
 ];
+
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();

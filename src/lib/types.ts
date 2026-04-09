@@ -214,3 +214,16 @@ export interface BlogPost {
   created_at: string;
   updated_at: string;
 }
+
+// ============================================================
+// Homepage Section Manager Types
+// ============================================================
+
+export interface HomepageSection {
+  id: string;
+  label: string;
+  sort_order: number;
+  is_visible: boolean;
+  updated_at: string;
+}
+

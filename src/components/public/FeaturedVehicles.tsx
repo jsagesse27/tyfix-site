@@ -1,12 +1,10 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
-import { ArrowRight, Car } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import type { Vehicle, SiteSettings } from '@/lib/types';
 import VehicleCard from './VehicleCard';
 import { useReveal, useStaggerReveal } from '@/lib/useReveal';
-import VehicleRequestFlow from './VehicleRequestFlow';
 
 interface FeaturedVehiclesProps {
   vehicles: Vehicle[];
@@ -14,12 +12,10 @@ interface FeaturedVehiclesProps {
 }
 
 export default function FeaturedVehicles({ vehicles, settings }: FeaturedVehiclesProps) {
-  const [isRequestOpen, setIsRequestOpen] = useState(false);
   const featured = vehicles.filter((v) => v.featured_label);
   const display = featured.length > 0 ? featured.slice(0, 6) : vehicles.slice(0, 6);
   const headingRef = useReveal();
   const gridRef = useStaggerReveal(0.05);
-  const ctaRef = useReveal();
 
   if (display.length === 0) return null;
 
@@ -54,25 +50,8 @@ export default function FeaturedVehicles({ vehicles, settings }: FeaturedVehicle
             </div>
           ))}
         </div>
-
-        {/* CTA */}
-        <div ref={ctaRef} className="mt-16 text-center reveal">
-          <div className="inline-block p-8 bg-white rounded-3xl border border-slate-100 shadow-sm transition-all hover:shadow-md">
-            <h3 className="text-xl font-bold text-gray-900 mb-2">Don't see what you're looking for?</h3>
-            <p className="text-slate-500 mb-6 max-w-sm mx-auto">
-              Our inventory changes daily. Tell us what you want and we'll track it down for you.
-            </p>
-            <button 
-              onClick={() => setIsRequestOpen(true)}
-              className="btn-outline px-10 py-4 text-base font-black uppercase tracking-widest inline-flex items-center gap-3 w-full sm:w-auto"
-            >
-              <Car size={20} /> Request a Vehicle
-            </button>
-          </div>
-        </div>
       </div>
-
-      <VehicleRequestFlow isOpen={isRequestOpen} onClose={() => setIsRequestOpen(false)} />
     </section>
   );
 }
+
