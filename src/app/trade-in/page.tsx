@@ -1,10 +1,9 @@
-import { createClient } from '@/lib/supabase/server';
 import Navbar from '@/components/public/Navbar';
 import Footer from '@/components/public/Footer';
 import MobileStickyBar from '@/components/public/MobileStickyBar';
 import TradeInCalculator from '@/components/public/TradeInCalculator';
 import Breadcrumbs from '@/components/public/Breadcrumbs';
-import type { SiteSettings, SiteContent } from '@/lib/types';
+import { getCachedSettings, getCachedContent } from '@/lib/cache';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -20,14 +19,11 @@ export const metadata: Metadata = {
 };
 
 async function getData() {
-  const supabase = await createClient();
-  const [settingsRes, contentRes] = await Promise.all([
-    supabase.from('site_settings').select('*').limit(1).single(),
-    supabase.from('site_content').select('*'),
+  const [settings, content] = await Promise.all([
+    getCachedSettings(),
+    getCachedContent(),
   ]);
-  const contentMap: Record<string, string> = {};
-  if (contentRes.data) (contentRes.data as SiteContent[]).forEach(c => { contentMap[c.content_key] = c.content_value; });
-  return { settings: (settingsRes.data as SiteSettings) || null, content: contentMap };
+  return { settings, content };
 }
 
 export default async function TradeInPage() {

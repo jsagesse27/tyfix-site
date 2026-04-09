@@ -1,4 +1,3 @@
-import { createClient } from '@/lib/supabase/server';
 import Navbar from '@/components/public/Navbar';
 import Footer from '@/components/public/Footer';
 import MobileStickyBar from '@/components/public/MobileStickyBar';
@@ -6,7 +5,7 @@ import Breadcrumbs from '@/components/public/Breadcrumbs';
 import AutoConnectForm from './AutoConnectForm';
 import { AutoDealerSchema } from '@/components/seo/JsonLd';
 import { Search, DollarSign, Truck, ShieldCheck, Clock, CheckCircle2 } from 'lucide-react';
-import type { SiteSettings, SiteContent } from '@/lib/types';
+import { getCachedSettings, getCachedContent } from '@/lib/cache';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -22,14 +21,10 @@ export const metadata: Metadata = {
 };
 
 export default async function AutoConnectPage() {
-  const supabase = await createClient();
-  const [settingsRes, contentRes] = await Promise.all([
-    supabase.from('site_settings').select('*').limit(1).single(),
-    supabase.from('site_content').select('*'),
+  const [settings, contentMap] = await Promise.all([
+    getCachedSettings(),
+    getCachedContent(),
   ]);
-  const settings = settingsRes.data as SiteSettings;
-  const contentMap: Record<string, string> = {};
-  if (contentRes.data) (contentRes.data as SiteContent[]).forEach(c => { contentMap[c.content_key] = c.content_value; });
 
   return (
     <div className="min-h-screen">

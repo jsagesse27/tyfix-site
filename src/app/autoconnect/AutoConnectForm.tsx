@@ -1,19 +1,45 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { Send, CheckCircle2 } from 'lucide-react';
+import { MAKES, YEARS } from '@/lib/constants';
 
 export default function AutoConnectForm() {
   const [form, setForm] = useState({
-    name: '',
-    phone: '',
-    email: '',
-    desiredVehicle: '',
-    budget: '',
-    timeline: 'flexible',
-    notes: '',
+    name: '', phone: '', email: '',
+    year: '', make: '', model: '',
+    budget: '', timeline: 'flexible', notes: '',
   });
+  
+  const [fetchedModels, setFetchedModels] = useState<string[]>([]);
+  const [modelsLoading, setModelsLoading] = useState(false);
+
+  useEffect(() => {
+    if (form.year && form.make) {
+      const fetchModels = async () => {
+        setModelsLoading(true);
+        try {
+          const res = await fetch(`https://vpic.nhtsa.dot.gov/api/vehicles/GetModelsForMakeYear/make/${form.make}/modelyear/${form.year}?format=json`);
+          if (res.ok) {
+            const data = await res.json();
+            if (data.Results) {
+              const modelNames = data.Results.map((r: any) => r.Model_Name);
+              setFetchedModels(Array.from(new Set(modelNames)).sort() as string[]);
+            }
+          }
+        } catch {
+          setFetchedModels([]);
+        } finally {
+          setModelsLoading(false);
+        }
+      };
+      const debounce = setTimeout(fetchModels, 300);
+      return () => clearTimeout(debounce);
+    } else {
+      setFetchedModels([]);
+    }
+  }, [form.year, form.make]);
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
@@ -22,11 +48,13 @@ export default function AutoConnectForm() {
     setSubmitting(true);
 
     const supabase = createClient();
+    const vehicle_of_interest = `${form.year} ${form.make} ${form.model}`.trim();
+    
     await supabase.from('leads').insert({
       name: form.name,
       phone: form.phone,
       email: form.email,
-      vehicle_of_interest: form.desiredVehicle,
+      vehicle_of_interest: vehicle_of_interest || 'Unspecified Vehicle',
       message: `AutoConnect Request | Budget: ${form.budget} | Timeline: ${form.timeline} | Notes: ${form.notes}`,
       status: 'new',
       lead_type: 'autoconnect',
@@ -86,15 +114,34 @@ export default function AutoConnectForm() {
         />
       </div>
 
-      <div>
-        <label className="block text-xs font-bold text-gray-500 uppercase mb-1">What Vehicle Are You Looking For? *</label>
-        <input
-          className="input-field"
-          required
-          value={form.desiredVehicle}
-          onChange={(e) => setForm({ ...form, desiredVehicle: e.target.value })}
-          placeholder="e.g., 2018 Honda Civic, white, under 80K miles"
-        />
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div>
+          <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Year *</label>
+          <select required className="input-field" value={form.year} onChange={(e) => setForm({ ...form, year: e.target.value, model: '' })}>
+            <option value="">Year</option>
+            {YEARS.map(y => <option key={y} value={y}>{y}</option>)}
+          </select>
+        </div>
+        <div>
+          <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Make *</label>
+          <select required className="input-field" value={form.make} onChange={(e) => setForm({ ...form, make: e.target.value, model: '' })}>
+            <option value="">Make</option>
+            {MAKES.map(m => <option key={m} value={m}>{m}</option>)}
+          </select>
+        </div>
+        <div>
+          <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Model *</label>
+          {modelsLoading ? (
+            <div className="input-field flex items-center text-slate-400 text-sm">Loading...</div>
+          ) : fetchedModels.length > 0 ? (
+            <select required className="input-field" value={form.model} onChange={(e) => setForm({ ...form, model: e.target.value })}>
+              <option value="">Select Model</option>
+              {fetchedModels.map(m => <option key={m} value={m}>{m}</option>)}
+            </select>
+          ) : (
+            <input required className="input-field" value={form.model} onChange={(e) => setForm({ ...form, model: e.target.value })} placeholder="e.g. Civic" />
+          )}
+        </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

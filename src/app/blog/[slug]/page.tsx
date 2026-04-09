@@ -1,10 +1,9 @@
 import { notFound } from 'next/navigation';
-import { createClient } from '@/lib/supabase/server';
 import Navbar from '@/components/public/Navbar';
 import Footer from '@/components/public/Footer';
 import MobileStickyBar from '@/components/public/MobileStickyBar';
 import Breadcrumbs from '@/components/public/Breadcrumbs';
-import type { SiteSettings, SiteContent, BlogPost } from '@/lib/types';
+import { getCachedSettings, getCachedContent, getCachedBlogPostBySlug } from '@/lib/cache';
 import type { Metadata } from 'next';
 import { Calendar, User, ArrowLeft, Share2 } from 'lucide-react';
 import Link from 'next/link';
@@ -17,11 +16,9 @@ interface PageProps {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
-  const supabase = await createClient();
-  const { data } = await supabase.from('blog_posts').select('*').eq('slug', slug).eq('is_published', true).single();
+  const post = await getCachedBlogPostBySlug(slug);
 
-  if (!data) return { title: 'Post Not Found' };
-  const post = data as BlogPost;
+  if (!post) return { title: 'Post Not Found' };
 
   return {
     title: post.title,
@@ -41,19 +38,14 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function BlogPostPage({ params }: PageProps) {
   const { slug } = await params;
-  const supabase = await createClient();
 
-  const [postRes, settingsRes, contentRes] = await Promise.all([
-    supabase.from('blog_posts').select('*').eq('slug', slug).eq('is_published', true).single(),
-    supabase.from('site_settings').select('*').limit(1).single(),
-    supabase.from('site_content').select('*'),
+  const [post, settings, contentMap] = await Promise.all([
+    getCachedBlogPostBySlug(slug),
+    getCachedSettings(),
+    getCachedContent(),
   ]);
 
-  if (!postRes.data) notFound();
-  const post = postRes.data as BlogPost;
-  const settings = settingsRes.data as SiteSettings;
-  const contentMap: Record<string, string> = {};
-  if (contentRes.data) (contentRes.data as SiteContent[]).forEach(c => { contentMap[c.content_key] = c.content_value; });
+  if (!post) notFound();
 
   return (
     <div className="min-h-screen">

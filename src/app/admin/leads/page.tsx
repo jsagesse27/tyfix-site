@@ -16,7 +16,17 @@ export default function AdminLeadsPage() {
 
   const loadLeads = async () => {
     setLoading(true);
-    const { data } = await supabase.from('leads').select('*').order('created_at', { ascending: false });
+    
+    // First fetch settings to get the pagination cap
+    const { data: settingsData } = await supabase.from('site_settings').select('admin_leads_per_page').limit(1).single();
+    const limit = settingsData?.admin_leads_per_page || 150;
+
+    const { data } = await supabase
+      .from('leads')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(limit);
+      
     setLeads((data as Lead[]) || []);
     setLoading(false);
   };

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { Save, CheckCircle2 } from 'lucide-react';
 import type { SiteSettings } from '@/lib/types';
+import SignaturePad from '@/components/admin/SignaturePad';
 
 export default function AdminSettingsPage() {
   const [settings, setSettings] = useState<SiteSettings | null>(null);
@@ -130,6 +131,62 @@ export default function AdminSettingsPage() {
               </div>
             </div>
           )}
+        </div>
+      </div>
+
+      {/* Admin Performance Settings */}
+      <div className="admin-card">
+        <h2 className="text-lg font-bold mb-4">Dashboard Performance</h2>
+        <p className="text-xs text-gray-400 mb-4">
+          Limit how many records are loaded at once to keep the admin dashboard fast and to reduce database usage.
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Max Leads to Load</label>
+            <input 
+              type="number" 
+              className="input-field" 
+              value={settings.admin_leads_per_page} 
+              onChange={(e) => u('admin_leads_per_page', parseInt(e.target.value) || 10)} 
+              min={10} 
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Max Vehicles to Load</label>
+            <input 
+              type="number" 
+              className="input-field" 
+              value={settings.admin_inventory_per_page} 
+              onChange={(e) => u('admin_inventory_per_page', parseInt(e.target.value) || 10)} 
+              min={10} 
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Bill of Sale Settings */}
+      <div className="admin-card">
+        <h2 className="text-lg font-bold mb-4">Bill of Sale Settings</h2>
+        <div className="space-y-6">
+          <div>
+            <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Dealer Printed Name</label>
+            <input 
+              className="input-field" 
+              value={settings.dealer_printed_name || ''} 
+              onChange={(e) => u('dealer_printed_name', e.target.value)} 
+              placeholder="e.g. Elite Motors"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Dealer Signature</label>
+            <p className="text-xs text-gray-400 mb-4">This signature will be automatically applied to the "Seller's Signature" line on all generated bills of sale.</p>
+            <div className="max-w-md">
+              <SignaturePad 
+                initialSignature={settings.dealer_signature_data} 
+                onSignatureChange={(v) => u('dealer_signature_data', v || '')} 
+              />
+            </div>
+          </div>
         </div>
       </div>
 

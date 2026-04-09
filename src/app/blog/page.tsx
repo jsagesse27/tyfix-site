@@ -1,11 +1,10 @@
-import { createClient } from '@/lib/supabase/server';
 import Link from 'next/link';
 import Image from 'next/image';
 import Navbar from '@/components/public/Navbar';
 import Footer from '@/components/public/Footer';
 import MobileStickyBar from '@/components/public/MobileStickyBar';
 import Breadcrumbs from '@/components/public/Breadcrumbs';
-import type { SiteSettings, SiteContent, BlogPost } from '@/lib/types';
+import { getCachedSettings, getCachedContent, getCachedBlogPosts } from '@/lib/cache';
 import type { Metadata } from 'next';
 import { Calendar, ArrowRight, BookOpen } from 'lucide-react';
 
@@ -19,17 +18,11 @@ export const metadata: Metadata = {
 export const revalidate = 600; // ISR: 10 minutes
 
 export default async function BlogPage() {
-  const supabase = await createClient();
-  const [settingsRes, contentRes, postsRes] = await Promise.all([
-    supabase.from('site_settings').select('*').limit(1).single(),
-    supabase.from('site_content').select('*'),
-    supabase.from('blog_posts').select('*').eq('is_published', true).order('published_at', { ascending: false }),
+  const [settings, contentMap, posts] = await Promise.all([
+    getCachedSettings(),
+    getCachedContent(),
+    getCachedBlogPosts(),
   ]);
-
-  const settings = settingsRes.data as SiteSettings;
-  const posts = (postsRes.data as BlogPost[]) || [];
-  const contentMap: Record<string, string> = {};
-  if (contentRes.data) (contentRes.data as SiteContent[]).forEach(c => { contentMap[c.content_key] = c.content_value; });
 
   return (
     <div className="min-h-screen">

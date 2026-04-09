@@ -4,10 +4,11 @@ import {
   stepCountIs,
   type UIMessage,
 } from 'ai';
+import { headers } from 'next/headers';
 import { getModel, markRateLimited, markSuccess } from '@/lib/ai/llm-router';
 import { dealershipTools } from '@/lib/ai/tools';
 import { getSystemPrompt } from '@/lib/ai/system-prompt';
-import { createAdminClient } from '@/lib/supabase/admin';
+import { getCachedBotSettings } from '@/lib/cache';
 import type { BotSettings } from '@/lib/types';
 
 export const maxDuration = 35;
@@ -15,17 +16,17 @@ export const maxDuration = 35;
 /** Timeout per LLM attempt — abort cleanly if the provider hangs */
 const PROVIDER_TIMEOUT_MS = 20_000;
 
-/**
- * Fetch bot settings from Supabase. Returns null if unavailable.
- */
-async function fetchBotSettings(): Promise<BotSettings | null> {
-  try {
-    const supabase = createAdminClient();
-    const { data } = await supabase.from('bot_settings').select('*').limit(1).single();
-    return data as BotSettings | null;
-  } catch {
-    return null;
-  }
+/* ── In-Memory Rate Limiter ─────────────────── */
+const ipMap = new Map<string, { count: number; resetAt: number }>();
+
+function isRateLimited(ip: string, maxRequests: number, windowMs: number): boolean {
+  const now = Date.now();
+  for (const [key, val] of ipMap) { if (now > val.resetAt) ipMap.delete(key); }
+  const entry = ipMap.get(ip);
+  if (!entry) { ipMap.set(ip, { count: 1, resetAt: now + windowMs }); return false; }
+  if (now > entry.resetAt) { ipMap.set(ip, { count: 1, resetAt: now + windowMs }); return false; }
+  entry.count++;
+  return entry.count > maxRequests;
 }
 
 /**
@@ -35,14 +36,30 @@ async function fetchBotSettings(): Promise<BotSettings | null> {
  */
 export async function POST(req: Request) {
   try {
+    // Fetch admin-configured bot settings from the ISR cache
+    const botSettings = await getCachedBotSettings() as BotSettings | null;
+
+    // Default rate limit params if not retrieved (failsafe)
+    const rlEnabled = botSettings?.rate_limit_enabled ?? true;
+    const rlReqs = botSettings?.rate_limit_requests ?? 10;
+    const rlWindowMin = botSettings?.rate_limit_window_minutes ?? 5;
+
+    if (rlEnabled) {
+      const headersList = await headers();
+      const ip = headersList.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
+      if (isRateLimited(ip, rlReqs, rlWindowMin * 60 * 1000)) {
+        return new Response(
+          JSON.stringify({ error: 'You are sending messages too quickly. Please wait a moment.' }),
+          { status: 429, headers: { 'Content-Type': 'application/json' } }
+        );
+      }
+    }
+
     const { messages }: { messages: UIMessage[] } = await req.json();
 
     if (!messages || !Array.isArray(messages) || messages.length === 0) {
       return new Response('Messages are required', { status: 400 });
     }
-
-    // Fetch admin-configured bot settings
-    const botSettings = await fetchBotSettings();
 
     // If the bot is disabled, return a friendly message
     if (botSettings && !botSettings.bot_enabled) {

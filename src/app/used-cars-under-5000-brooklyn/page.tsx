@@ -1,4 +1,3 @@
-import { createClient } from '@/lib/supabase/server';
 import Link from 'next/link';
 import Navbar from '@/components/public/Navbar';
 import Footer from '@/components/public/Footer';
@@ -7,7 +6,7 @@ import Breadcrumbs from '@/components/public/Breadcrumbs';
 import VehicleCard from '@/components/public/VehicleCard';
 import { AutoDealerSchema } from '@/components/seo/JsonLd';
 import { ArrowRight, Phone, Banknote, TrendingDown, Search } from 'lucide-react';
-import type { SiteSettings, SiteContent, Vehicle } from '@/lib/types';
+import { getCachedVehicles, getCachedSettings, getCachedContent } from '@/lib/cache';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -24,16 +23,12 @@ export const metadata: Metadata = {
 };
 
 export default async function UsedCarsUnder5000Page() {
-  const supabase = await createClient();
-  const [settingsRes, contentRes, vehiclesRes] = await Promise.all([
-    supabase.from('site_settings').select('*').limit(1).single(),
-    supabase.from('site_content').select('*'),
-    supabase.from('vehicles').select('*, photos:vehicle_photos(*)').eq('listing_status', 'active').lte('price', 5000).order('price', { ascending: true }).limit(6),
+  const [allVehicles, settings, contentMap] = await Promise.all([
+    getCachedVehicles(),
+    getCachedSettings(),
+    getCachedContent(),
   ]);
-  const settings = settingsRes.data as SiteSettings;
-  const vehicles = (vehiclesRes.data as Vehicle[]) || [];
-  const contentMap: Record<string, string> = {};
-  if (contentRes.data) (contentRes.data as SiteContent[]).forEach(c => { contentMap[c.content_key] = c.content_value; });
+  const vehicles = allVehicles.filter(v => v.price <= 5000).sort((a, b) => a.price - b.price).slice(0, 6);
 
   return (
     <div className="min-h-screen">

@@ -1,11 +1,10 @@
-import { createClient } from '@/lib/supabase/server';
 import Navbar from '@/components/public/Navbar';
 import Footer from '@/components/public/Footer';
 import MobileStickyBar from '@/components/public/MobileStickyBar';
 import InventoryClient from '@/components/public/InventoryClient';
 import Breadcrumbs from '@/components/public/Breadcrumbs';
 import { ItemListSchema } from '@/components/seo/JsonLd';
-import type { Vehicle, SiteSettings, SiteContent } from '@/lib/types';
+import { getCachedVehicles, getCachedSettings, getCachedContent } from '@/lib/cache';
 import type { Metadata } from 'next';
 
 export const revalidate = 300; // ISR: 5 minutes
@@ -28,28 +27,20 @@ interface PageProps {
 
 export default async function InventoryPage({ searchParams }: PageProps) {
   const params = await searchParams;
-  const supabase = await createClient();
 
-  const [vehiclesRes, settingsRes, contentRes] = await Promise.all([
-    supabase.from('vehicles').select('*, photos:vehicle_photos(*)').eq('listing_status', 'active').order('sort_order'),
-    supabase.from('site_settings').select('*').limit(1).single(),
-    supabase.from('site_content').select('*'),
+  const [vehicles, settings, content] = await Promise.all([
+    getCachedVehicles(),
+    getCachedSettings(),
+    getCachedContent(),
   ]);
-
-  const contentMap: Record<string, string> = {};
-  if (contentRes.data) {
-    (contentRes.data as SiteContent[]).forEach((c) => {
-      contentMap[c.content_key] = c.content_value;
-    });
-  }
 
   return (
     <div className="min-h-screen">
-      <Navbar settings={settingsRes.data as SiteSettings} />
+      <Navbar settings={settings} />
 
       <section className="pt-28 pb-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <ItemListSchema vehicles={(vehiclesRes.data as Vehicle[]) || []} />
+          <ItemListSchema vehicles={vehicles} />
           <Breadcrumbs items={[{ label: 'Inventory', href: '/inventory' }]} />
           <div className="mb-8">
             <h1 className="text-4xl font-black text-gray-900 mb-4">Used Cars Under $5,000 in Brooklyn</h1>
@@ -59,8 +50,8 @@ export default async function InventoryPage({ searchParams }: PageProps) {
           </div>
 
           <InventoryClient
-            vehicles={(vehiclesRes.data as Vehicle[]) || []}
-            settings={settingsRes.data as SiteSettings}
+            vehicles={vehicles}
+            settings={settings}
             initialFilters={{
               bodyType: params.bodyType,
               maxPrice: params.maxPrice,
@@ -69,8 +60,8 @@ export default async function InventoryPage({ searchParams }: PageProps) {
         </div>
       </section>
 
-      <Footer settings={settingsRes.data as SiteSettings} content={contentMap} />
-      <MobileStickyBar settings={settingsRes.data as SiteSettings} />
+      <Footer settings={settings} content={content} />
+      <MobileStickyBar settings={settings} />
     </div>
   );
 }

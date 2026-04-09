@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Gauge, Settings2, ChevronRight, ShieldCheck } from 'lucide-react';
 import type { Vehicle } from '@/lib/types';
 import { formatPrice, formatMileage, getHeroPhoto } from '@/lib/utils';
@@ -37,11 +38,13 @@ export default function VehicleCard({
     <Link href={getVehicleUrl(vehicle)} className="vehicle-card group block">
       {/* Image */}
       <div className="relative h-52 overflow-hidden bg-slate-100">
-        <img
+        <Image
           key={displayPhoto}
           src={displayPhoto}
           alt={`${vehicle.year} ${vehicle.make} ${vehicle.model}`}
-          className="w-full h-full object-cover transition-all duration-1000 group-hover:scale-105 animate-cross-fade"
+          fill
+          sizes="(max-width: 768px) 100vw, 400px"
+          className="object-cover transition-all duration-1000 group-hover:scale-105 animate-cross-fade"
         />
 
         {/* Overlay gradient */}

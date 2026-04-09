@@ -41,6 +41,9 @@ const DEFAULTS: Omit<BotSettings, 'id' | 'created_at' | 'updated_at'> = {
   max_tokens: 300,
   frequency_penalty: 0.5,
   presence_penalty: 0.4,
+  rate_limit_enabled: true,
+  rate_limit_requests: 10,
+  rate_limit_window_minutes: 5,
 };
 
 /* ── Toggle Switch ─────────────────────────────────────────── */
@@ -534,6 +537,46 @@ export default function AdminBotPage() {
               max={1}
               step={0.05}
             />
+          </div>
+
+          {/* Rate Limits */}
+          <div className="admin-card space-y-6">
+            <h2 className="text-lg font-bold">API Security & Rate Limits</h2>
+            <p className="text-xs text-gray-400">
+              Protect your LLM token usage by preventing users from spamming the chatbot.
+            </p>
+            <Toggle
+              checked={settings.rate_limit_enabled}
+              onChange={(v) => u('rate_limit_enabled', v)}
+              label="Enable Rate Limiting"
+              description="Throttle requests per IP address"
+            />
+            {settings.rate_limit_enabled && (
+              <div className="pt-2">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-xs font-bold text-gray-500 uppercase">Max Requests</label>
+                    <input
+                      type="number"
+                      className="input-field mt-1"
+                      value={settings.rate_limit_requests}
+                      onChange={(e) => u('rate_limit_requests', parseInt(e.target.value) || 1)}
+                      min={1}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-gray-500 uppercase">Per X Minutes</label>
+                    <input
+                      type="number"
+                      className="input-field mt-1"
+                      value={settings.rate_limit_window_minutes}
+                      onChange={(e) => u('rate_limit_window_minutes', parseInt(e.target.value) || 1)}
+                      min={1}
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Prompt Preview */}

@@ -1,4 +1,3 @@
-import { createClient } from '@/lib/supabase/server';
 import Navbar from '@/components/public/Navbar';
 import Hero from '@/components/public/Hero';
 import TrustBadges from '@/components/public/TrustBadges';
@@ -15,38 +14,31 @@ import SocialBridge from '@/components/public/SocialBridge';
 import RequestVehicleSection from '@/components/public/RequestVehicleSection';
 import SellYourCarSection from '@/components/public/SellYourCarSection';
 import { AutoDealerSchema } from '@/components/seo/JsonLd';
-import type { Vehicle, Testimonial, SiteSettings, SiteContent, HomepageSection } from '@/lib/types';
+import {
+  getCachedVehicles,
+  getCachedTestimonials,
+  getCachedSettings,
+  getCachedContent,
+  getCachedSoldCount,
+  getCachedHomepageSections,
+} from '@/lib/cache';
+import type { HomepageSection } from '@/lib/types';
 
 export const revalidate = 3600; // ISR: 1 hour
 
 
 async function getData() {
-  const supabase = await createClient();
+  const [vehicles, testimonials, settings, content, soldCount, sections] =
+    await Promise.all([
+      getCachedVehicles(),
+      getCachedTestimonials(),
+      getCachedSettings(),
+      getCachedContent(),
+      getCachedSoldCount(),
+      getCachedHomepageSections(),
+    ]);
 
-  const [vehiclesRes, testimonialsRes, settingsRes, contentRes, soldCountRes, sectionsRes] = await Promise.all([
-    supabase.from('vehicles').select('*, photos:vehicle_photos(*)').eq('listing_status', 'active').order('sort_order'),
-    supabase.from('testimonials').select('*').eq('is_visible', true).order('sort_order'),
-    supabase.from('site_settings').select('*').limit(1).single(),
-    supabase.from('site_content').select('*'),
-    supabase.from('vehicles').select('*', { count: 'exact', head: true }).eq('listing_status', 'sold'),
-    supabase.from('homepage_sections').select('*').order('sort_order'),
-  ]);
-
-  const contentMap: Record<string, string> = {};
-  if (contentRes.data) {
-    (contentRes.data as SiteContent[]).forEach((c) => {
-      contentMap[c.content_key] = c.content_value;
-    });
-  }
-
-  return {
-    vehicles: (vehiclesRes.data as Vehicle[]) || [],
-    testimonials: (testimonialsRes.data as Testimonial[]) || [],
-    settings: (settingsRes.data as SiteSettings) || null,
-    content: contentMap,
-    soldCount: soldCountRes.count || 0,
-    sections: (sectionsRes.data as HomepageSection[]) || [],
-  };
+  return { vehicles, testimonials, settings, content, soldCount, sections };
 }
 
 export default async function HomePage() {
@@ -76,7 +68,7 @@ export default async function HomePage() {
 
   // Use DB sections if available, otherwise default order
   const orderedSections = sections.length > 0
-    ? sections.filter((s) => s.is_visible).map((s) => s.id)
+    ? sections.filter((s: HomepageSection) => s.is_visible).map((s: HomepageSection) => s.id)
     : defaultOrder;
 
   return (
@@ -84,7 +76,7 @@ export default async function HomePage() {
       <AutoDealerSchema settings={settings} />
       <Navbar settings={settings} />
 
-      {orderedSections.map((id) => sectionComponents[id] || null)}
+      {orderedSections.map((id: string) => sectionComponents[id] || null)}
 
       <Footer settings={settings} content={content} />
       <MobileStickyBar settings={settings} />

@@ -104,6 +104,10 @@ export interface SiteSettings {
   font_family: string;
   auto_carousel_enabled: boolean;
   auto_carousel_interval: number;
+  admin_leads_per_page: number;
+  admin_inventory_per_page: number;
+  dealer_signature_data: string | null;
+  dealer_printed_name: string;
   updated_at: string;
 }
 
@@ -113,6 +117,28 @@ export interface SiteContent {
   content_value: string;
   content_type: 'text' | 'html' | 'image_url';
   updated_at: string;
+}
+
+export interface BillOfSale {
+  id: string;
+  vehicle_id: string | null;
+  vehicle_year: string;
+  vehicle_make: string;
+  vehicle_model: string;
+  vehicle_vin: string | null;
+  vehicle_stock_number: string | null;
+  vehicle_mileage: number | null;
+  vehicle_color: string | null;
+  vehicle_price: number;
+  buyer_name: string;
+  buyer_phone: string | null;
+  buyer_address: string | null;
+  sale_price: number;
+  sale_date: string;
+  pdf_storage_path: string;
+  pdf_public_url: string;
+  buyer_signature_data: string | null;
+  created_at: string;
 }
 
 // UI Filter state
@@ -156,6 +182,9 @@ export interface BotSettings {
   max_tokens: number;
   frequency_penalty: number;
   presence_penalty: number;
+  rate_limit_enabled: boolean;
+  rate_limit_requests: number;
+  rate_limit_window_minutes: number;
   created_at: string;
   updated_at: string;
 }

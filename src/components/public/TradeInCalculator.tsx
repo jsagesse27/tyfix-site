@@ -3,6 +3,8 @@
 import { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Car, ArrowRight, ArrowLeft, CheckCircle2, User, Phone, Mail, Send, Camera, AlertCircle } from 'lucide-react';
+import { decodeSingleVin } from '@/lib/vpic';
+import { MAKES } from '@/lib/constants';
 
 const EXTERIOR_LOOK = ['Excellent — like new', 'Good — minor wear', 'Fair — noticeable wear', 'Needs work'];
 const DENTS = ['None', 'Minor (1-2 small)', 'Moderate (several)', 'Significant'];
@@ -38,26 +40,58 @@ export default function TradeInCalculator() {
   const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState({
     vin: '', year: '', make: '', model: '', trim: '', engine: '', mileage: '', exteriorColor: '',
+    body_type: '', transmission: '', fuel_type: '', drivetrain: '', cylinders: '', doors: '',
     isOriginalOwner: '', ownershipDuration: '',
     exteriorLook: '', dentsScratches: '', windshield: '', tireCondition: '', rust: '',
     interiorCondition: '', odors: '', warningLights: '', workingFeatures: '', lastOilChange: '', accidentHistory: '',
     name: '', phone: '', email: '', notes: '',
   });
 
+  const [fetchedModels, setFetchedModels] = useState<string[]>([]);
+  const [modelsLoading, setModelsLoading] = useState(false);
+
   const u = useCallback((k: string, v: string) => setForm(p => ({ ...p, [k]: v })), []);
   const totalSteps = 6;
   const next = () => setStep(s => Math.min(s + 1, totalSteps));
   const prev = () => setStep(s => Math.max(s - 1, 1));
 
+  React.useEffect(() => {
+    if (!vinMode && form.year && form.make) {
+      const fetchModels = async () => {
+        setModelsLoading(true);
+        try {
+          const res = await fetch(`https://vpic.nhtsa.dot.gov/api/vehicles/GetModelsForMakeYear/make/${form.make}/modelyear/${form.year}?format=json`);
+          if (res.ok) {
+            const data = await res.json();
+            if (data.Results) {
+              const modelNames = data.Results.map((r: any) => r.Model_Name);
+              setFetchedModels(Array.from(new Set(modelNames)).sort() as string[]);
+            }
+          }
+        } catch {
+          setFetchedModels([]);
+        } finally {
+          setModelsLoading(false);
+        }
+      };
+      
+      const debounce = setTimeout(fetchModels, 300);
+      return () => clearTimeout(debounce);
+    }
+  }, [vinMode, form.year, form.make]);
+
   const decodeVin = async () => {
     if (vinInput.length < 11) { setVinError('Please enter a valid VIN (at least 11 characters)'); return; }
     setVinLoading(true); setVinError('');
     try {
-      const res = await fetch(`https://vpic.nhtsa.dot.gov/api/vehicles/decodevinvalues/${encodeURIComponent(vinInput)}?format=json`);
-      const data = await res.json();
-      const r = data.Results?.[0];
-      if (!r || r.ErrorCode?.includes('0')) {
-        setForm(p => ({ ...p, vin: vinInput, year: r?.ModelYear || '', make: r?.Make || '', model: r?.Model || '', trim: r?.Trim || '', engine: [r?.DisplacementL ? `${r.DisplacementL}L` : '', r?.EngineCylinders ? `${r.EngineCylinders}-cyl` : '', r?.FuelTypePrimary || ''].filter(Boolean).join(' ') }));
+      const result = await decodeSingleVin(vinInput);
+      if (!result.error) {
+        setForm(p => ({ 
+          ...p, vin: vinInput, year: result.year, make: result.make, model: result.model, 
+          trim: result.trim, engine: result.engine, body_type: result.body_type, 
+          transmission: result.transmission, fuel_type: result.fuel_type, 
+          drivetrain: result.drivetrain, cylinders: result.cylinders, doors: result.doors 
+        }));
         next();
       } else { setVinError('Could not decode this VIN. Please check and try again, or enter info manually.'); }
     } catch { setVinError('Network error. Please try again or enter info manually.'); }
@@ -128,11 +162,35 @@ export default function TradeInCalculator() {
                 ) : (
                   <div className="space-y-3">
                     <div className="grid grid-cols-2 gap-3">
-                      <div><Label>Year *</Label><input placeholder="e.g. 2018" className="input-field h-12" value={form.year} onChange={e => u('year', e.target.value)} /></div>
-                      <div><Label>Make *</Label><input placeholder="e.g. Honda" className="input-field h-12" value={form.make} onChange={e => u('make', e.target.value)} /></div>
+                      <div>
+                        <Label>Year *</Label>
+                        <select className="input-field h-12" value={form.year} onChange={e => { u('year', e.target.value); u('model', ''); }}>
+                          <option value="">Select Year</option>
+                          {Array.from({ length: 30 }, (_, i) => String(2026 - i)).map(y => <option key={y} value={y}>{y}</option>)}
+                        </select>
+                      </div>
+                      <div>
+                        <Label>Make *</Label>
+                        <select className="input-field h-12" value={form.make} onChange={e => { u('make', e.target.value); u('model', ''); }}>
+                          <option value="">Select Make</option>
+                          {MAKES.map(m => <option key={m} value={m}>{m}</option>)}
+                        </select>
+                      </div>
                     </div>
                     <div className="grid grid-cols-2 gap-3">
-                      <div><Label>Model *</Label><input placeholder="e.g. Civic" className="input-field h-12" value={form.model} onChange={e => u('model', e.target.value)} /></div>
+                      <div>
+                        <Label>Model *</Label>
+                        {modelsLoading ? (
+                          <div className="input-field h-12 flex items-center text-slate-400 text-sm">Loading...</div>
+                        ) : fetchedModels.length > 0 ? (
+                          <select className="input-field h-12" value={form.model} onChange={e => u('model', e.target.value)}>
+                            <option value="">Select Model</option>
+                            {fetchedModels.map(m => <option key={m} value={m}>{m}</option>)}
+                          </select>
+                        ) : (
+                          <input placeholder="e.g. Civic" className="input-field h-12" value={form.model} onChange={e => u('model', e.target.value)} />
+                        )}
+                      </div>
                       <div><Label>Trim</Label><input placeholder="e.g. EX" className="input-field h-12" value={form.trim} onChange={e => u('trim', e.target.value)} /></div>
                     </div>
                     <button onClick={next} disabled={!form.year || !form.make || !form.model} className="btn-primary w-full h-14 disabled:opacity-50">

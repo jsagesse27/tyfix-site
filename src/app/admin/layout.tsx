@@ -20,11 +20,13 @@ import {
   PenSquare,
   BarChart3,
   LayoutList,
+  FolderOpen
 } from 'lucide-react';
 
 const NAV_ITEMS = [
   { label: 'Dashboard', href: '/admin', icon: <LayoutDashboard size={20} /> },
   { label: 'Inventory', href: '/admin/inventory', icon: <Car size={20} /> },
+  { label: 'File Cabinet', href: '/admin/file-cabinet', icon: <FolderOpen size={20} /> },
   { label: 'Leads', href: '/admin/leads', icon: <Users size={20} /> },
   { label: 'Reviews', href: '/admin/testimonials', icon: <Star size={20} /> },
   { label: 'Blog', href: '/admin/blog', icon: <PenSquare size={20} /> },

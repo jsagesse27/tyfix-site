@@ -19,7 +19,10 @@ export const BODY_TYPES = [
   'Wagon', 'Convertible', 'Crossover',
 ];
 
-export const TRANSMISSIONS = ['Automatic', 'Manual', 'CVT'];
+export const TRANSMISSIONS = ['Automatic', 'Manual', 'CVT', 'DCT'];
+
+export const DEFAULT_LISTING_STATUS = 'hidden';
+export const STOCK_NUMBER_PREFIX = 'TF-';
 
 export const FUEL_TYPES = ['Gasoline', 'Diesel', 'Hybrid', 'Electric', 'Flex Fuel'];
 

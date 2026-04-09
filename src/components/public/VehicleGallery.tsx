@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import { ChevronLeft, ChevronRight, ZoomIn } from 'lucide-react';
 import type { VehiclePhoto } from '@/lib/types';
 
@@ -27,11 +28,14 @@ export default function VehicleGallery({ photos, alt }: VehicleGalleryProps) {
   return (
     <>
       {/* Main Image */}
-      <div className="relative rounded-2xl overflow-hidden bg-gray-100 group">
-        <img
+      <div className="relative w-full h-[350px] md:h-[450px] rounded-2xl overflow-hidden bg-gray-100 group">
+        <Image
           src={photos[activeIndex].public_url}
           alt={`${alt} - Photo ${activeIndex + 1}`}
-          className="w-full h-[350px] md:h-[450px] object-cover cursor-pointer"
+          fill
+          priority
+          sizes="(max-width: 768px) 100vw, 800px"
+          className="object-cover cursor-pointer"
           onClick={() => setIsZoomed(true)}
         />
         {photos.length > 1 && (
@@ -59,11 +63,11 @@ export default function VehicleGallery({ photos, alt }: VehicleGalleryProps) {
             <button
               key={photo.id}
               onClick={() => setActiveIndex(i)}
-              className={`flex-shrink-0 w-20 h-16 rounded-lg overflow-hidden border-2 transition-all ${
+              className={`relative flex-shrink-0 w-20 h-16 rounded-lg overflow-hidden border-2 transition-all ${
                 i === activeIndex ? 'border-primary shadow-md' : 'border-transparent opacity-60 hover:opacity-100'
               }`}
             >
-              <img src={photo.public_url} alt={`Thumbnail ${i + 1}`} className="w-full h-full object-cover" />
+              <Image src={photo.public_url} alt={`Thumbnail ${i + 1}`} fill sizes="80px" className="object-cover" />
             </button>
           ))}
         </div>

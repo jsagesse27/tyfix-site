@@ -1,23 +1,37 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import Link from 'next/link';
-import { Plus, Search, Eye, Pencil, Trash2, Copy } from 'lucide-react';
+import { Plus, Search, Eye, Pencil, Trash2, Copy, FileText } from 'lucide-react';
 import { formatPrice, formatMileage } from '@/lib/utils';
 import type { Vehicle } from '@/lib/types';
+import BillOfSaleModal from '@/components/admin/BillOfSaleModal';
 
 export default function AdminInventoryPage() {
+  const router = useRouter();
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [selectedVehicleForBill, setSelectedVehicleForBill] = useState<Vehicle | null>(null);
 
   const supabase = createClient();
 
   const loadVehicles = async () => {
     setLoading(true);
-    const query = supabase.from('vehicles').select('*, photos:vehicle_photos(id, public_url, sort_order)').order('created_at', { ascending: false });
+    
+    // First fetch settings to get the pagination cap
+    const { data: settingsData } = await supabase.from('site_settings').select('admin_inventory_per_page').limit(1).single();
+    const limit = settingsData?.admin_inventory_per_page || 200;
+
+    const query = supabase
+      .from('vehicles')
+      .select('*, photos:vehicle_photos(id, public_url, sort_order)')
+      .order('created_at', { ascending: false })
+      .limit(limit);
+      
     const { data } = await query;
     setVehicles((data as Vehicle[]) || []);
     setLoading(false);
@@ -42,8 +56,12 @@ export default function AdminInventoryPage() {
 
   const duplicateVehicle = async (vehicle: Vehicle) => {
     const { id, created_at, updated_at, photos, ...rest } = vehicle;
-    await supabase.from('vehicles').insert({ ...rest, stock_number: null, vin: null, listing_status: 'hidden' });
-    loadVehicles();
+    const { data } = await supabase.from('vehicles').insert({ ...rest, stock_number: null, vin: null, listing_status: 'hidden' }).select().single();
+    if (data) {
+      router.push(`/admin/inventory/${data.id}`);
+    } else {
+      loadVehicles(); // fallback
+    }
   };
 
   const deleteVehicle = async (id: string) => {
@@ -159,6 +177,9 @@ export default function AdminInventoryPage() {
                         <button onClick={() => deleteVehicle(v.id)} className="p-2 text-gray-400 hover:text-red-500 rounded-lg hover:bg-red-50" title="Delete">
                           <Trash2 size={16} />
                         </button>
+                        <button onClick={() => setSelectedVehicleForBill(v)} className="p-2 text-gray-400 hover:text-green-500 rounded-lg hover:bg-green-50 ml-2" title="Generate Bill of Sale">
+                          <FileText size={16} />
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -170,6 +191,16 @@ export default function AdminInventoryPage() {
       </div>
 
       <p className="text-xs text-gray-400 text-center">{filtered.length} vehicle{filtered.length !== 1 ? 's' : ''}</p>
+      
+      {selectedVehicleForBill && (
+        <BillOfSaleModal
+          vehicle={selectedVehicleForBill}
+          onClose={() => setSelectedVehicleForBill(null)}
+          onSuccess={() => {
+            loadVehicles(); // Reload to capture status changes
+          }}
+        />
+      )}
     </div>
   );
 }

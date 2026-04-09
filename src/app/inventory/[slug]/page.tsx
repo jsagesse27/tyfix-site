@@ -1,7 +1,6 @@
-import { notFound, redirect } from 'next/navigation';
+import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { createClient } from '@/lib/supabase/server';
 import Navbar from '@/components/public/Navbar';
 import Footer from '@/components/public/Footer';
 import MobileStickyBar from '@/components/public/MobileStickyBar';
@@ -12,7 +11,8 @@ import SimilarVehicles from '@/components/public/SimilarVehicles';
 import { CarSchema } from '@/components/seo/JsonLd';
 import { formatPrice, formatMileage } from '@/lib/utils';
 import { ArrowLeft, Phone, MessageCircle, ShieldCheck, ExternalLink, Zap, Palette, Settings2, Gauge, Calendar, Share2, Copy, Check } from 'lucide-react';
-import type { Vehicle, SiteSettings, SiteContent } from '@/lib/types';
+import { getCachedVehicleBySlug, getCachedSettings, getCachedContent } from '@/lib/cache';
+import { getSafetyRating } from '@/lib/vpic';
 import type { Metadata } from 'next';
 
 export const revalidate = 600; // ISR: 10 minutes
@@ -21,20 +21,9 @@ interface PageProps {
   params: Promise<{ slug: string }>;
 }
 
-async function getVehicleBySlug(slug: string) {
-  const supabase = await createClient();
-  // Try by slug first
-  const { data } = await supabase
-    .from('vehicles')
-    .select('*, photos:vehicle_photos(*)')
-    .eq('slug', slug)
-    .single();
-  return data as Vehicle | null;
-}
-
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
-  const vehicle = await getVehicleBySlug(slug);
+  const vehicle = await getCachedVehicleBySlug(slug);
   if (!vehicle) return { title: 'Vehicle Not Found' };
 
   const title = `${vehicle.year} ${vehicle.make} ${vehicle.model}${vehicle.trim ? ` ${vehicle.trim}` : ''} — ${formatPrice(vehicle.price)} | TyFix Auto Sales Brooklyn`;
@@ -66,26 +55,21 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function VehicleDetailPage({ params }: PageProps) {
   const { slug } = await params;
-  const supabase = await createClient();
 
-  const vehicle = await getVehicleBySlug(slug);
-  if (!vehicle) notFound();
-
-  const [settingsRes, contentRes] = await Promise.all([
-    supabase.from('site_settings').select('*').limit(1).single(),
-    supabase.from('site_content').select('*'),
+  const [vehicle, settings, content] = await Promise.all([
+    getCachedVehicleBySlug(slug),
+    getCachedSettings(),
+    getCachedContent(),
   ]);
 
-  const settings = settingsRes.data as SiteSettings;
+  if (!vehicle) notFound();
+
+  // Optionally fetch the safety rating from NHTSA without blocking the main render heavily
+  // If it errors or doesn't exist, it returns null.
+  const safetyRating = await getSafetyRating(vehicle.year, vehicle.make, vehicle.model).catch(() => null);
+
   const smsNumber = settings?.sms_number || '';
   const phone = settings?.phone_number || '';
-
-  const contentMap: Record<string, string> = {};
-  if (contentRes.data) {
-    (contentRes.data as SiteContent[]).forEach((c) => {
-      contentMap[c.content_key] = c.content_value;
-    });
-  }
 
   const photos = vehicle.photos?.sort((a, b) => a.sort_order - b.sort_order) || [];
   const vehicleTitle = `${vehicle.year} ${vehicle.make} ${vehicle.model}`;
@@ -181,8 +165,13 @@ export default async function VehicleDetailPage({ params }: PageProps) {
                 </div>
               )}
 
-              {/* Inspection + History */}
+              {/* Inspection + History + Safety Ratings */}
               <div className="mt-8 flex flex-wrap gap-4">
+                {safetyRating && !isNaN(parseInt(safetyRating.overall)) && (
+                  <div className="flex items-center gap-2 px-4 py-2 bg-yellow-50 border border-yellow-200 text-yellow-800 rounded-full font-bold text-sm">
+                    ⭐ NHTSA {safetyRating.overall}-Star Safety
+                  </div>
+                )}
                 {vehicle.inspection_status === 'pass' && (
                   <div className="flex items-center gap-2 px-4 py-2 bg-green-50 text-green-700 rounded-full font-bold text-sm">
                     <ShieldCheck size={18} />
@@ -288,7 +277,7 @@ export default async function VehicleDetailPage({ params }: PageProps) {
         </div>
       </section>
 
-      <Footer settings={settings} content={contentMap} />
+      <Footer settings={settings} content={content} />
       <MobileStickyBar settings={settings} />
     </div>
   );
