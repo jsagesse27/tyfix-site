@@ -56,9 +56,6 @@ export default function ChatBot() {
     })();
   }, []);
 
-  // If the bot is disabled via admin, don't render anything
-  if (!botEnabled) return null;
-
   // Queue for messages typed while the bot is responding
   const queuedMessageRef = useRef<string | null>(null);
   const stuckTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -205,6 +202,9 @@ export default function ChatBot() {
 
   // Show error for real errors or stuck timeouts (skip AbortErrors)
   const shouldShowError = stuckError || (error && error.name !== 'AbortError');
+
+  // If the bot is disabled via admin, don't render anything
+  if (!botEnabled) return null;
 
   return (
     <>

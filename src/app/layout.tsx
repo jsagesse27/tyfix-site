@@ -78,7 +78,7 @@ export default function RootLayout({
         <GA4Script />
         <MetaPixel />
       </head>
-      <body className="min-h-screen antialiased">
+      <body className="min-h-screen antialiased" suppressHydrationWarning>
         <GTMBody />
         <LoadingScreen />
         {children}
