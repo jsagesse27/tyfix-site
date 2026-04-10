@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { Send, CheckCircle2 } from 'lucide-react';
 import { MAKES, YEARS } from '@/lib/constants';

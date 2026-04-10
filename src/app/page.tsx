@@ -1,3 +1,4 @@
+import React from 'react';
 import Navbar from '@/components/public/Navbar';
 import Hero from '@/components/public/Hero';
 import TrustBadges from '@/components/public/TrustBadges';

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Send, CheckCircle2 } from 'lucide-react';
 
 interface InquiryFormProps {

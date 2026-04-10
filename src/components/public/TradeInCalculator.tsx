@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Car, ArrowRight, ArrowLeft, CheckCircle2, User, Phone, Mail, Send, Camera, AlertCircle } from 'lucide-react';
 import { decodeSingleVin } from '@/lib/vpic';
@@ -55,7 +55,7 @@ export default function TradeInCalculator() {
   const next = () => setStep(s => Math.min(s + 1, totalSteps));
   const prev = () => setStep(s => Math.max(s - 1, 1));
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!vinMode && form.year && form.make) {
       const fetchModels = async () => {
         setModelsLoading(true);

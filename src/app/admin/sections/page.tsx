@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { Save, CheckCircle2, GripVertical, Eye, EyeOff, Lock } from 'lucide-react';
 import type { HomepageSection } from '@/lib/types';

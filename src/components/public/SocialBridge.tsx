@@ -1,3 +1,6 @@
+'use client';
+
+import React from 'react';
 import { Instagram, Facebook } from 'lucide-react';
 import type { SiteSettings } from '@/lib/types';
 
