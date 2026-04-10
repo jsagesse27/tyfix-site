@@ -8,6 +8,7 @@ import { Plus, Search, Eye, Pencil, Trash2, Copy, FileText } from 'lucide-react'
 import { formatPrice, formatMileage } from '@/lib/utils';
 import type { Vehicle } from '@/lib/types';
 import BillOfSaleModal from '@/components/admin/BillOfSaleModal';
+import { clearCacheByKey } from '../actions';
 
 export default function AdminInventoryPage() {
   const router = useRouter();
@@ -51,12 +52,14 @@ export default function AdminInventoryPage() {
 
   const updateStatus = async (id: string, status: string) => {
     await supabase.from('vehicles').update({ listing_status: status, updated_at: new Date().toISOString() }).eq('id', id);
+    await clearCacheByKey('vehicles');
     loadVehicles();
   };
 
   const duplicateVehicle = async (vehicle: Vehicle) => {
     const { id, created_at, updated_at, photos, ...rest } = vehicle;
     const { data } = await supabase.from('vehicles').insert({ ...rest, stock_number: null, vin: null, listing_status: 'hidden' }).select().single();
+    await clearCacheByKey('vehicles');
     if (data) {
       router.push(`/admin/inventory/${data.id}`);
     } else {
@@ -67,6 +70,7 @@ export default function AdminInventoryPage() {
   const deleteVehicle = async (id: string) => {
     if (!confirm('Are you sure you want to permanently delete this vehicle?')) return;
     await supabase.from('vehicles').delete().eq('id', id);
+    await clearCacheByKey('vehicles');
     loadVehicles();
   };
 
@@ -115,9 +119,9 @@ export default function AdminInventoryPage() {
             {search || statusFilter !== 'all' ? 'No vehicles match your filters.' : 'No vehicles yet. Add your first vehicle!'}
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
+          <div className="overflow-hidden md:overflow-visible">
+            <table className="w-full text-sm block md:table">
+              <thead className="hidden md:table-header-group">
                 <tr className="text-left text-xs text-gray-400 uppercase border-b border-gray-100 bg-gray-50/50">
                   <th className="p-3 font-bold">Vehicle</th>
                   <th className="p-3 font-bold">Price</th>
@@ -127,10 +131,10 @@ export default function AdminInventoryPage() {
                   <th className="p-3 font-bold text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-50">
+              <tbody className="block md:table-row-group divide-y divide-gray-100 md:divide-y md:divide-gray-50">
                 {filtered.map((v) => (
-                  <tr key={v.id} className="hover:bg-gray-50/50">
-                    <td className="p-3">
+                  <tr key={v.id} className="block md:table-row bg-white md:bg-transparent hover:bg-gray-50/50 border md:border-0 rounded-xl mb-4 md:mb-0 shadow-sm md:shadow-none p-4 md:p-0">
+                    <td className="block md:table-cell p-0 md:p-3 pb-3 md:pb-0 mb-3 md:mb-0 border-b border-gray-50 md:border-0">
                       <div className="flex items-center gap-3">
                         {v.photos && v.photos.length > 0 ? (
                           <img src={v.photos.sort((a, b) => a.sort_order - b.sort_order)[0].public_url} alt="" className="w-14 h-10 rounded-md object-cover" />
@@ -143,11 +147,18 @@ export default function AdminInventoryPage() {
                         </div>
                       </div>
                     </td>
-                    <td className="p-3 font-bold text-gray-900">{formatPrice(v.price)}</td>
-                    <td className="p-3 text-gray-600">{formatMileage(v.mileage)} mi</td>
-                    <td className="p-3">
+                    <td className="flex md:table-cell items-center justify-between p-1 md:p-3 font-bold text-gray-900">
+                      <span className="md:hidden text-xs text-gray-400 uppercase font-normal">Price</span>
+                      {formatPrice(v.price)}
+                    </td>
+                    <td className="flex md:table-cell items-center justify-between p-1 md:p-3 text-gray-600">
+                      <span className="md:hidden text-xs text-gray-400 uppercase font-normal">Mileage</span>
+                      {formatMileage(v.mileage)} mi
+                    </td>
+                    <td className="flex md:table-cell items-center justify-between p-1 md:p-3">
+                      <span className="md:hidden text-xs text-gray-400 uppercase font-normal">Status</span>
                       <select
-                        className="text-xs font-bold rounded-full px-2 py-1 border-0 cursor-pointer bg-transparent"
+                        className="text-sm md:text-xs font-bold rounded-full px-2 py-1 md:px-2 md:py-1 border-0 cursor-pointer bg-transparent text-right md:text-left -mr-2 md:mr-0"
                         value={v.listing_status}
                         onChange={(e) => updateStatus(v.id, e.target.value)}
                       >
@@ -156,14 +167,16 @@ export default function AdminInventoryPage() {
                         <option value="hidden">⬜ Hidden</option>
                       </select>
                     </td>
-                    <td className="p-3">
+                    <td className="flex md:table-cell items-center justify-between p-1 md:p-3">
+                      <span className="md:hidden text-xs text-gray-400 uppercase font-normal">Label</span>
                       {v.featured_label ? (
                         <span className="badge badge-featured">{v.featured_label}</span>
                       ) : (
                         <span className="text-gray-300">—</span>
                       )}
                     </td>
-                    <td className="p-3">
+                    <td className="flex md:table-cell items-center justify-between md:justify-end p-1 md:p-3 border-t border-gray-50 md:border-0 mt-3 md:mt-0 pt-3 md:pt-3">
+                      <span className="md:hidden text-xs text-gray-400 uppercase font-normal">Actions</span>
                       <div className="flex items-center justify-end gap-1">
                         <Link href={`/vehicles/${v.id}`} target="_blank" className="p-2 text-gray-400 hover:text-gray-700 rounded-lg hover:bg-gray-100" title="View on site">
                           <Eye size={16} />

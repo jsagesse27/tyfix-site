@@ -20,8 +20,10 @@ import {
   PenSquare,
   BarChart3,
   LayoutList,
-  FolderOpen
+  FolderOpen,
+  RefreshCw
 } from 'lucide-react';
+import { clearAllCaches } from './actions';
 
 const NAV_ITEMS = [
   { label: 'Dashboard', href: '/admin', icon: <LayoutDashboard size={20} /> },
@@ -42,6 +44,18 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const pathname = usePathname();
   const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [clearing, setClearing] = useState(false);
+
+  const handleClearCache = async () => {
+    setClearing(true);
+    try {
+      await clearAllCaches();
+      alert('Global cache cleared successfully! The live site now shows your latest updates.');
+    } catch (e) {
+      alert('Failed to clear cache.');
+    }
+    setClearing(false);
+  };
 
   const handleLogout = async () => {
     const supabase = createClient();
@@ -125,16 +139,28 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       {/* Main Content */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Top bar */}
-        <header className="bg-white border-b border-gray-200 px-4 py-3 lg:px-6 flex items-center gap-4 sticky top-0 z-20">
+        <header className="bg-white border-b border-gray-200 px-4 py-3 lg:px-6 flex items-center justify-between sticky top-0 z-20">
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => setSidebarOpen(true)}
+              className="lg:hidden text-gray-500 hover:text-gray-900"
+            >
+              <Menu size={24} />
+            </button>
+            <h1 className="text-lg font-bold text-gray-900 truncate">
+              {NAV_ITEMS.find((item) => isActive(item.href))?.label || 'Admin'}
+            </h1>
+          </div>
+          
           <button
-            onClick={() => setSidebarOpen(true)}
-            className="lg:hidden text-gray-500 hover:text-gray-900"
+            onClick={handleClearCache}
+            disabled={clearing}
+            className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-900 font-medium px-3 py-1.5 rounded-lg hover:bg-gray-100 disabled:opacity-50 transition-colors"
+            title="Force refresh the public website's data cache globally"
           >
-            <Menu size={24} />
+            <RefreshCw size={16} className={clearing ? 'animate-spin' : ''} />
+            <span className="hidden sm:inline">{clearing ? 'Purging Cache...' : 'Clear Cache'}</span>
           </button>
-          <h1 className="text-lg font-bold text-gray-900 truncate">
-            {NAV_ITEMS.find((item) => isActive(item.href))?.label || 'Admin'}
-          </h1>
         </header>
 
         {/* Page Content */}

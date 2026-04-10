@@ -5,6 +5,7 @@ import { useRouter, useParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { Save, ArrowLeft, Upload, X, Plus, Trash2, ImagePlus, Search } from 'lucide-react';
 import type { Vehicle, VehiclePhoto } from '@/lib/types';
+import { clearCacheByKey } from '../actions';
 import {
   YEARS, MAKES, BODY_TYPES, TRANSMISSIONS, FUEL_TYPES,
   DRIVETRAINS, CYLINDERS, EXTERIOR_COLORS, INTERIOR_COLORS,
@@ -407,11 +408,13 @@ export default function EditVehiclePage() {
             }
           }
         }
+        await clearCacheByKey('vehicles');
         router.push(`/admin/inventory/${data.id}`);
         router.refresh();
       }
     } else {
       await supabase.from('vehicles').update(payload).eq('id', params.id);
+      await clearCacheByKey('vehicles');
     }
     setSaving(false);
   };
@@ -471,6 +474,7 @@ export default function EditVehiclePage() {
       }
       setBatchSaved(i + 1);
     }
+    await clearCacheByKey('vehicles');
     setBatchStatus('');
     setSaving(false);
     router.push('/admin/inventory');

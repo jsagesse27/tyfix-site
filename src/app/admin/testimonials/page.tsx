@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { Plus, Save, Trash2, Star, Eye, EyeOff } from 'lucide-react';
+import { clearCacheByKey } from '../actions';
 import type { Testimonial } from '@/lib/types';
 
 export default function AdminTestimonialsPage() {
@@ -27,17 +28,20 @@ export default function AdminTestimonialsPage() {
       is_visible: true, sort_order: testimonials.length,
     });
     setForm({ name: '', star_rating: 5, review_text: '', date_label: '' });
+    await clearCacheByKey('testimonials');
     load();
   };
 
   const update = async (id: string, fields: Partial<Testimonial>) => {
     await supabase.from('testimonials').update(fields).eq('id', id);
+    await clearCacheByKey('testimonials');
     load();
   };
 
   const remove = async (id: string) => {
     if (!confirm('Delete this testimonial?')) return;
     await supabase.from('testimonials').delete().eq('id', id);
+    await clearCacheByKey('testimonials');
     load();
   };
 

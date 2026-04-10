@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { Save, CheckCircle2 } from 'lucide-react';
+import { clearCacheByKey } from '../actions';
 import type { SiteSettings } from '@/lib/types';
 import SignaturePad from '@/components/admin/SignaturePad';
 
@@ -25,6 +26,7 @@ export default function AdminSettingsPage() {
     if (!settings) return;
     setSaving(true);
     await supabase.from('site_settings').update({ ...settings, updated_at: new Date().toISOString() }).eq('id', settings.id);
+    await clearCacheByKey('settings');
     setSaving(false);
     setSaved(true);
     setTimeout(() => setSaved(false), 3000);

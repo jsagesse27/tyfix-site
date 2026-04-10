@@ -1,8 +1,10 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { Save, CheckCircle2, GripVertical, Eye, EyeOff, Lock } from 'lucide-react';
+import { Reorder } from 'framer-motion';
+import { clearCacheByKey } from '../actions';
 import type { HomepageSection } from '@/lib/types';
 
 export default function AdminSectionsPage() {
@@ -10,9 +12,6 @@ export default function AdminSectionsPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
-  const [dragIndex, setDragIndex] = useState<number | null>(null);
-  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
-  const dragNode = useRef<HTMLDivElement | null>(null);
   const supabase = createClient();
 
   useEffect(() => {
@@ -39,6 +38,7 @@ export default function AdminSectionsPage() {
     );
 
     await Promise.all(updates);
+    await clearCacheByKey('sections');
     setSaving(false);
     setSaved(true);
     setTimeout(() => setSaved(false), 3000);
@@ -53,48 +53,6 @@ export default function AdminSectionsPage() {
   };
 
   // ───── Drag & Drop ─────
-
-  const handleDragStart = (index: number, e: React.DragEvent<HTMLDivElement>) => {
-    // Don't allow dragging hero
-    if (sections[index].id === 'hero') {
-      e.preventDefault();
-      return;
-    }
-    setDragIndex(index);
-    dragNode.current = e.currentTarget;
-    e.dataTransfer.effectAllowed = 'move';
-    // Make the drag image semi-transparent
-    setTimeout(() => {
-      if (dragNode.current) dragNode.current.style.opacity = '0.4';
-    }, 0);
-  };
-
-  const handleDragOver = (index: number, e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    // Don't allow dropping on hero position (index 0)
-    if (index === 0) return;
-    if (dragIndex === null || dragIndex === index) return;
-    setDragOverIndex(index);
-  };
-
-  const handleDragEnd = () => {
-    if (dragNode.current) dragNode.current.style.opacity = '1';
-
-    if (dragIndex !== null && dragOverIndex !== null && dragIndex !== dragOverIndex) {
-      const updated = [...sections];
-      const [removed] = updated.splice(dragIndex, 1);
-      updated.splice(dragOverIndex, 0, removed);
-      setSections(updated);
-    }
-
-    setDragIndex(null);
-    setDragOverIndex(null);
-    dragNode.current = null;
-  };
-
-  const handleDragLeave = () => {
-    setDragOverIndex(null);
-  };
 
   // Section descriptions for the admin UI
   const descriptions: Record<string, string> = {
@@ -149,70 +107,94 @@ export default function AdminSectionsPage() {
         </div>
 
         <div className="space-y-2">
-          {sections.map((section, index) => {
-            const isHero = section.id === 'hero';
-            const isDragging = dragIndex === index;
-            const isDragOver = dragOverIndex === index;
+          {(() => {
+            const heroSection = sections.find(s => s.id === 'hero');
+            const draggableSections = sections.filter(s => s.id !== 'hero');
 
+            const handleReorder = (newOrder: HomepageSection[]) => {
+              if (heroSection) {
+                setSections([heroSection, ...newOrder]);
+              } else {
+                setSections(newOrder);
+              }
+            };
+            
             return (
-              <div
-                key={section.id}
-                draggable={!isHero}
-                onDragStart={(e) => handleDragStart(index, e)}
-                onDragOver={(e) => handleDragOver(index, e)}
-                onDragEnd={handleDragEnd}
-                onDragLeave={handleDragLeave}
-                className={`
-                  flex items-center gap-4 p-4 rounded-xl border transition-all duration-200
-                  ${isHero ? 'bg-gray-50 border-gray-200 cursor-default' : 'bg-white border-gray-100 cursor-grab active:cursor-grabbing'}
-                  ${!section.is_visible ? 'opacity-50' : ''}
-                  ${isDragging ? 'shadow-lg scale-[1.02] ring-2 ring-primary/30' : ''}
-                  ${isDragOver ? 'border-primary border-dashed bg-primary/5' : ''}
-                  ${!isHero ? 'hover:shadow-md hover:border-gray-200' : ''}
-                `}
-              >
-                {/* Drag Handle */}
-                <div className={`flex-shrink-0 ${isHero ? 'text-gray-300' : 'text-gray-400 hover:text-gray-600'}`}>
-                  {isHero ? <Lock size={18} /> : <GripVertical size={18} />}
-                </div>
-
-                {/* Icon */}
-                <span className="text-xl flex-shrink-0">{icons[section.id] || '📦'}</span>
-
-                {/* Label & Description */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <span className={`font-bold text-sm ${!section.is_visible ? 'line-through text-gray-400' : 'text-gray-900'}`}>
-                      {section.label}
-                    </span>
-                    {isHero && (
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">
-                        Pinned
-                      </span>
-                    )}
+              <>
+                {/* Hero section rendered fixed outside Reorder Group */}
+                {heroSection && (
+                  <div className="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 rounded-xl border transition-all duration-200 bg-gray-50 border-gray-200">
+                    <div className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 flex-shrink-0 w-8 sm:w-auto text-gray-300">
+                      <Lock size={18} />
+                    </div>
+                    <span className="text-xl flex-shrink-0">{icons[heroSection.id] || '📦'}</span>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold text-sm text-gray-900">{heroSection.label}</span>
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">Pinned</span>
+                      </div>
+                      <p className="text-xs text-gray-400 mt-0.5 truncate">{descriptions[heroSection.id] || ''}</p>
+                    </div>
+                    <button disabled className="flex-shrink-0 p-2 rounded-lg text-gray-300">
+                      <Eye size={18} />
+                    </button>
                   </div>
-                  <p className="text-xs text-gray-400 mt-0.5 truncate">
-                    {descriptions[section.id] || ''}
-                  </p>
-                </div>
+                )}
+                
+                <Reorder.Group axis="y" values={draggableSections} onReorder={handleReorder} className="space-y-2">
+                  {draggableSections.map((section, index) => {
+                    const realIndex = heroSection ? index + 1 : index;
+                    return (
+                      <Reorder.Item
+                        key={section.id}
+                        value={section}
+                        className={`
+                          flex items-center gap-3 sm:gap-4 p-3 sm:p-4 rounded-xl border transition-all duration-200
+                          bg-white border-gray-100 cursor-grab active:cursor-grabbing hover:shadow-md hover:border-gray-200
+                          ${!section.is_visible ? 'opacity-50' : ''}
+                        `}
+                      >
+                        {/* Drag Handle */}
+                        <div className="flex items-center justify-center flex-shrink-0 w-8 sm:w-auto text-gray-400">
+                          <GripVertical size={18} />
+                        </div>
 
-                {/* Visibility Toggle */}
-                <button
-                  onClick={() => toggleVisibility(index)}
-                  disabled={isHero}
-                  className={`
-                    flex-shrink-0 p-2 rounded-lg transition-colors
-                    ${isHero ? 'text-gray-300 cursor-default' : ''}
-                    ${!isHero && section.is_visible ? 'text-green-600 hover:bg-green-50' : ''}
-                    ${!isHero && !section.is_visible ? 'text-red-400 hover:bg-red-50' : ''}
-                  `}
-                  title={section.is_visible ? 'Click to hide' : 'Click to show'}
-                >
-                  {section.is_visible ? <Eye size={18} /> : <EyeOff size={18} />}
-                </button>
-              </div>
+                        {/* Icon */}
+                        <span className="text-xl flex-shrink-0">{icons[section.id] || '📦'}</span>
+
+                        {/* Label & Description */}
+                        <div className="flex-1 min-w-0 select-none">
+                          <div className="flex items-center gap-2">
+                            <span className={`font-bold text-sm ${!section.is_visible ? 'line-through text-gray-400' : 'text-gray-900'}`}>
+                              {section.label}
+                            </span>
+                          </div>
+                          <p className="text-xs text-gray-400 mt-0.5 truncate pointer-events-none">
+                            {descriptions[section.id] || ''}
+                          </p>
+                        </div>
+
+                        {/* Visibility Toggle */}
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleVisibility(realIndex);
+                          }}
+                          className={`
+                            flex-shrink-0 p-2 rounded-lg transition-colors cursor-pointer relative z-10
+                            ${section.is_visible ? 'text-green-600 hover:bg-green-50' : 'text-red-400 hover:bg-red-50'}
+                          `}
+                          title={section.is_visible ? 'Click to hide' : 'Click to show'}
+                        >
+                          {section.is_visible ? <Eye size={18} /> : <EyeOff size={18} />}
+                        </button>
+                      </Reorder.Item>
+                    );
+                  })}
+                </Reorder.Group>
+              </>
             );
-          })}
+          })()}
         </div>
       </div>
 

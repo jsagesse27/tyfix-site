@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { Save, CheckCircle2 } from 'lucide-react';
+import { clearCacheByKey } from '../actions';
 import type { SiteContent } from '@/lib/types';
 
 const CONTENT_SECTIONS = [
@@ -74,6 +75,7 @@ export default function AdminContentPage() {
       supabase.from('site_content').update({ content_value: c.content_value, updated_at: new Date().toISOString() }).eq('id', c.id)
     );
     await Promise.all(updates);
+    await clearCacheByKey('content');
     setSaving(false);
     setSaved(true);
     setTimeout(() => setSaved(false), 3000);
