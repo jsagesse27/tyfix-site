@@ -8,7 +8,7 @@ import { revalidateTag, revalidatePath } from 'next/cache';
  * pages get the fresh data immediately.
  */
 export async function clearCacheByKey(tag: string) {
-  revalidateTag(tag);
+  revalidateTag(tag, 'max');
 }
 
 /**
@@ -27,7 +27,7 @@ export async function clearAllCaches() {
   ];
   
   tags.forEach(tag => {
-    revalidateTag(tag);
+    revalidateTag(tag, 'max');
   });
   
   // Clear full route cache recursively for the entire public site
