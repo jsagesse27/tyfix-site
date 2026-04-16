@@ -65,17 +65,47 @@ export default function AdminContentPage() {
   const updateValue = (key: string, value: string) => {
     setContent((prev) => ({
       ...prev,
-      [key]: { ...prev[key], content_value: value },
+      [key]: {
+        ...(prev[key] || { content_key: key, content_type: 'text' }),
+        content_value: value,
+      } as SiteContent,
     }));
   };
 
   const handleSave = async () => {
     setSaving(true);
-    const updates = Object.values(content).map((c) =>
-      supabase.from('site_content').update({ content_value: c.content_value, updated_at: new Date().toISOString() }).eq('id', c.id)
-    );
-    await Promise.all(updates);
+
+    const ops = CONTENT_SECTIONS.map(async (section) => {
+      const entry = content[section.key];
+      if (!entry || !entry.content_value) return; // skip empty/untouched fields
+
+      if (entry.id) {
+        // Row exists — update it
+        await supabase
+          .from('site_content')
+          .update({ content_value: entry.content_value, updated_at: new Date().toISOString() })
+          .eq('id', entry.id);
+      } else {
+        // Row doesn't exist yet — insert it
+        await supabase
+          .from('site_content')
+          .insert({
+            content_key: section.key,
+            content_value: entry.content_value,
+            content_type: 'text',
+          });
+      }
+    });
+
+    await Promise.all(ops);
     await clearCacheByKey('content');
+
+    // Re-fetch so newly-created rows now have their IDs in state
+    const { data } = await supabase.from('site_content').select('*');
+    const map: Record<string, SiteContent> = {};
+    if (data) (data as SiteContent[]).forEach((c) => { map[c.content_key] = c; });
+    setContent(map);
+
     setSaving(false);
     setSaved(true);
     setTimeout(() => setSaved(false), 3000);
