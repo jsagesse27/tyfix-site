@@ -44,7 +44,7 @@ export default function TradeInCalculator() {
     isOriginalOwner: '', ownershipDuration: '',
     exteriorLook: '', dentsScratches: '', windshield: '', tireCondition: '', rust: '',
     interiorCondition: '', odors: '', warningLights: '', workingFeatures: '', lastOilChange: '', accidentHistory: '',
-    name: '', phone: '', email: '', notes: '',
+    name: '', phone: '', email: '', notes: '', company_url: '',
   });
 
   const [fetchedModels, setFetchedModels] = useState<string[]>([]);
@@ -101,7 +101,7 @@ export default function TradeInCalculator() {
   const handleSubmit = async () => {
     setSubmitting(true);
     try {
-      const res = await fetch('/api/trade-in', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form) });
+      const res = await fetch('/api/trade-in', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...form }) });
       if (!res.ok) throw new Error();
       setSubmitted(true);
     } catch { alert('Failed to submit. Please call us directly.'); }
@@ -278,6 +278,8 @@ export default function TradeInCalculator() {
                   <div className="relative"><User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" size={18} /><input required placeholder="Full Name" className="input-field pl-12 h-14" value={form.name} onChange={e => u('name', e.target.value)} /></div>
                   <div className="relative"><Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" size={18} /><input required type="tel" placeholder="Phone Number" className="input-field pl-12 h-14" value={form.phone} onChange={e => u('phone', e.target.value)} /></div>
                   <div className="relative"><Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" size={18} /><input type="email" placeholder="Email (Optional)" className="input-field pl-12 h-14" value={form.email} onChange={e => u('email', e.target.value)} /></div>
+                  {/* Honeypot */}
+                  <input name="company_url" value={form.company_url} onChange={e => u('company_url', e.target.value)} tabIndex={-1} autoComplete="off" aria-hidden="true" style={{ position: 'absolute', left: '-9999px', opacity: 0, pointerEvents: 'none' }} />
                 </div>
                 <div><Label>Anything else we should know?</Label><textarea rows={2} placeholder="Additional notes about your vehicle..." className="input-field resize-none p-4" value={form.notes} onChange={e => u('notes', e.target.value)} /></div>
                 <div className="flex gap-4 pt-2">

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ClipboardList, Handshake, Banknote, Search, Truck, ChevronRight, ChevronLeft, User, Phone, Mail, CheckCircle2, Send, Zap } from 'lucide-react';
 import { useReveal } from '@/lib/useReveal';
@@ -22,16 +22,19 @@ export default function AutoConnectProgram() {
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState({
-    budget: '', vehicleType: '', preferences: '', yearRange: '', maxMileage: '', colorPref: '', flexibility: '', name: '', phone: '', email: '', depositAck: false,
+    budget: '', vehicleType: '', preferences: '', yearRange: '', maxMileage: '', colorPref: '', flexibility: '', name: '', phone: '', email: '', depositAck: false, company_url: '',
   });
 
   const sectionRef = useReveal();
   const u = (k: string, v: string | boolean) => setForm(p => ({ ...p, [k]: v }));
+  const [turnstileToken, setTurnstileToken] = useState('');
+  const turnstileRef = useRef<HTMLDivElement>(null);
+  const turnstileLoaded = useRef(false);
 
   const handleSubmit = async () => {
     setSubmitting(true);
     try {
-      const res = await fetch('/api/autoconnect', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form) });
+      const res = await fetch('/api/autoconnect', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...form, turnstileToken }) });
       if (!res.ok) throw new Error();
       setSubmitted(true);
     } catch { alert('Failed to submit. Please call us directly.'); }
@@ -139,6 +142,27 @@ export default function AutoConnectProgram() {
                 initial={{ opacity: 0, scale: 0.9, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                onAnimationComplete={() => {
+                  // Load Turnstile when modal opens
+                  if (turnstileLoaded.current) return;
+                  const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
+                  if (!siteKey) return;
+                  const script = document.createElement('script');
+                  script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onTurnstileLoadAC&render=explicit';
+                  script.async = true;
+                  (window as any).onTurnstileLoadAC = () => {
+                    if (turnstileRef.current && (window as any).turnstile) {
+                      (window as any).turnstile.render(turnstileRef.current, {
+                        sitekey: siteKey,
+                        callback: (token: string) => setTurnstileToken(token),
+                        theme: 'light',
+                        size: 'invisible',
+                      });
+                    }
+                  };
+                  document.head.appendChild(script);
+                  turnstileLoaded.current = true;
+                }}
                 className="relative w-full max-w-lg bg-white rounded-[2rem] shadow-2xl overflow-hidden text-slate-900 max-h-[90vh] overflow-y-auto"
               >
                 <div className="px-5 sm:px-8 py-4 sm:py-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
@@ -203,6 +227,8 @@ export default function AutoConnectProgram() {
                           <div className="relative"><User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" size={18} /><input required placeholder="Full Name" className="input-field pl-12 h-14" value={form.name} onChange={e => u('name', e.target.value)} /></div>
                           <div className="relative"><Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" size={18} /><input required type="tel" placeholder="Phone Number" className="input-field pl-12 h-14" value={form.phone} onChange={e => u('phone', e.target.value)} /></div>
                           <div className="relative"><Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" size={18} /><input type="email" placeholder="Email (Optional)" className="input-field pl-12 h-14" value={form.email} onChange={e => u('email', e.target.value)} /></div>
+                          {/* Honeypot */}
+                          <input name="company_url" value={form.company_url} onChange={e => u('company_url', e.target.value)} tabIndex={-1} autoComplete="off" aria-hidden="true" style={{ position: 'absolute', left: '-9999px', opacity: 0, pointerEvents: 'none' }} />
                         </div>
                         <label className="flex items-start gap-2 cursor-pointer pt-2">
                           <input type="checkbox" checked={form.depositAck} onChange={e => u('depositAck', e.target.checked)} className="mt-1 accent-primary w-4 h-4" />
@@ -214,6 +240,8 @@ export default function AutoConnectProgram() {
                             {submitting ? 'Submitting...' : 'Submit Enrollment'} <Send size={18} />
                           </button>
                         </div>
+                        {/* Turnstile invisible widget */}
+                        <div ref={turnstileRef} />
                       </motion.div>
                     )}
                   </AnimatePresence>

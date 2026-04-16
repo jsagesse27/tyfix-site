@@ -16,6 +16,7 @@ export default function InquiryForm({ vehicleOfInterest, vehicleId }: InquiryFor
     message: '',
     vehicle_of_interest: vehicleOfInterest || '',
     vehicle_id: vehicleId || '',
+    company_url: '', // honeypot
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -61,6 +62,16 @@ export default function InquiryForm({ vehicleOfInterest, vehicleId }: InquiryFor
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      {/* Honeypot — hidden from real users */}
+      <input
+        name="company_url"
+        value={formData.company_url}
+        onChange={(e) => setFormData({ ...formData, company_url: e.target.value })}
+        tabIndex={-1}
+        autoComplete="off"
+        aria-hidden="true"
+        style={{ position: 'absolute', left: '-9999px', opacity: 0, pointerEvents: 'none' }}
+      />
       <div>
         <input
           type="text"

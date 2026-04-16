@@ -22,7 +22,7 @@ export default function VehicleRequestFlow({ isOpen, onClose }: VehicleRequestFl
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [showAutoConnect, setShowAutoConnect] = useState(false);
   const [formData, setFormData] = useState({
-    vehicleType: '', budget: '', name: '', phone: '', email: '', notes: '', timeline: '',
+    vehicleType: '', budget: '', name: '', phone: '', email: '', notes: '', timeline: '', company_url: '',
   });
 
   const totalSteps = 4;
@@ -50,6 +50,7 @@ export default function VehicleRequestFlow({ isOpen, onClose }: VehicleRequestFl
         body: JSON.stringify({
           name: formData.name, phone: formData.phone, email: formData.email,
           message, vehicle_of_interest: 'Vehicle Request', vehicle_id: null,
+          company_url: formData.company_url,
         }),
       });
       if (!res.ok) throw new Error('Failed');

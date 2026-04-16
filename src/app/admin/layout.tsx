@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import Image from 'next/image';
@@ -45,6 +45,32 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [clearing, setClearing] = useState(false);
+
+  // ── Admin Idle Session Timeout (30 min) ─────────────────────────
+  const IDLE_TIMEOUT_MS = 30 * 60 * 1000; // 30 minutes
+  const idleTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const resetIdleTimer = useCallback(() => {
+    if (idleTimer.current) clearTimeout(idleTimer.current);
+    idleTimer.current = setTimeout(async () => {
+      const supabase = createClient();
+      await supabase.auth.signOut();
+      router.push('/login?reason=idle');
+      router.refresh();
+    }, IDLE_TIMEOUT_MS);
+  }, [router]);
+
+  useEffect(() => {
+    const events = ['mousemove', 'mousedown', 'keydown', 'touchstart', 'scroll'];
+    events.forEach(e => window.addEventListener(e, resetIdleTimer));
+    resetIdleTimer(); // start the timer
+
+    return () => {
+      events.forEach(e => window.removeEventListener(e, resetIdleTimer));
+      if (idleTimer.current) clearTimeout(idleTimer.current);
+    };
+  }, [resetIdleTimer]);
+  // ── End Idle Timeout ────────────────────────────────────────────
 
   const handleClearCache = async () => {
     setClearing(true);

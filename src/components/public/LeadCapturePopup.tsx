@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Gift, Check } from 'lucide-react';
 import type { SiteSettings } from '@/lib/types';
@@ -13,11 +13,11 @@ export default function LeadCapturePopup({ settings }: LeadCapturePopupProps) {
   const [show, setShow] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [form, setForm] = useState({ firstName: '', lastName: '', email: '', phone: '', instagram: '', consent: false });
+  const [form, setForm] = useState({ firstName: '', lastName: '', email: '', phone: '', instagram: '', consent: false, company_url: '' });
+  const [turnstileToken, setTurnstileToken] = useState('');
+  const turnstileRef = useRef<HTMLDivElement>(null);
 
-  // Do not even show the popup if disabled in the settings.
   const isEnabled = settings?.show_lead_popup ?? true;
-
   const popupTitle = settings?.lead_popup_title || 'Get $250 Off Your Next Car';
   const popupText = settings?.lead_popup_text || 'Sign up for alerts when new cars hit the lot';
 
@@ -29,6 +29,32 @@ export default function LeadCapturePopup({ settings }: LeadCapturePopupProps) {
     return () => clearTimeout(t);
   }, [isEnabled]);
 
+  // Load Turnstile script when popup shows
+  const turnstileLoaded = useRef(false);
+  useEffect(() => {
+    if (!show || turnstileLoaded.current) return;
+    const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
+    if (!siteKey) return;
+
+    const script = document.createElement('script');
+    script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onTurnstileLoad';
+    script.async = true;
+
+    (window as any).onTurnstileLoad = () => {
+      if (turnstileRef.current && (window as any).turnstile) {
+        (window as any).turnstile.render(turnstileRef.current, {
+          sitekey: siteKey,
+          callback: (token: string) => setTurnstileToken(token),
+          theme: 'light',
+          size: 'invisible',
+        });
+      }
+    };
+
+    document.head.appendChild(script);
+    turnstileLoaded.current = true;
+  }, [show]);
+
   const close = () => { setShow(false); localStorage.setItem('tyfix_popup_dismissed', '1'); };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -36,13 +62,18 @@ export default function LeadCapturePopup({ settings }: LeadCapturePopupProps) {
     if (!form.consent) return;
     setSubmitting(true);
     try {
-      await fetch('/api/subscribers', {
+      const res = await fetch('/api/subscribers', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ ...form, turnstileToken }),
       });
-      setSubmitted(true);
-      localStorage.setItem('tyfix_popup_dismissed', '1');
+      if (!res.ok) {
+        const data = await res.json();
+        alert(data.error || 'Something went wrong. Please try again.');
+      } else {
+        setSubmitted(true);
+        localStorage.setItem('tyfix_popup_dismissed', '1');
+      }
     } catch { alert('Something went wrong. Please try again.'); }
     finally { setSubmitting(false); }
   };
@@ -79,6 +110,14 @@ export default function LeadCapturePopup({ settings }: LeadCapturePopupProps) {
                   <p className="text-white/80 text-sm">{popupText}</p>
                 </div>
                 <form onSubmit={handleSubmit} className="p-6 space-y-3">
+                  {/* Honeypot */}
+                  <input
+                    name="company_url"
+                    value={form.company_url}
+                    onChange={e => u('company_url', e.target.value)}
+                    tabIndex={-1} autoComplete="off" aria-hidden="true"
+                    style={{ position: 'absolute', left: '-9999px', opacity: 0, pointerEvents: 'none' }}
+                  />
                   <div className="grid grid-cols-2 gap-3">
                     <input required placeholder="First Name" className="input-field h-12 text-sm" value={form.firstName} onChange={e => u('firstName', e.target.value)} />
                     <input required placeholder="Last Name" className="input-field h-12 text-sm" value={form.lastName} onChange={e => u('lastName', e.target.value)} />
@@ -90,6 +129,8 @@ export default function LeadCapturePopup({ settings }: LeadCapturePopupProps) {
                     <input type="checkbox" checked={form.consent} onChange={e => u('consent', e.target.checked)} className="mt-1 accent-primary w-4 h-4" />
                     <span className="text-[11px] text-slate-500 leading-tight">I agree to receive calls, texts, and emails from TyFix Auto Sales about inventory updates and promotions.</span>
                   </label>
+                  {/* Turnstile invisible widget container */}
+                  <div ref={turnstileRef} />
                    <button type="submit" disabled={submitting || !form.consent} className="btn-primary w-full h-12 disabled:opacity-50 text-sm">
                     {submitting ? 'Signing Up...' : 'Claim My Offer'}
                   </button>

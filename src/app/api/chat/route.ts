@@ -4,30 +4,17 @@ import {
   stepCountIs,
   type UIMessage,
 } from 'ai';
-import { headers } from 'next/headers';
 import { getModel, markRateLimited, markSuccess } from '@/lib/ai/llm-router';
 import { dealershipTools } from '@/lib/ai/tools';
 import { getSystemPrompt } from '@/lib/ai/system-prompt';
 import { getCachedBotSettings } from '@/lib/cache';
+import { isRateLimited, getClientIp } from '@/lib/rate-limiter';
 import type { BotSettings } from '@/lib/types';
 
 export const maxDuration = 35;
 
 /** Timeout per LLM attempt — abort cleanly if the provider hangs */
 const PROVIDER_TIMEOUT_MS = 20_000;
-
-/* ── In-Memory Rate Limiter ─────────────────── */
-const ipMap = new Map<string, { count: number; resetAt: number }>();
-
-function isRateLimited(ip: string, maxRequests: number, windowMs: number): boolean {
-  const now = Date.now();
-  for (const [key, val] of ipMap) { if (now > val.resetAt) ipMap.delete(key); }
-  const entry = ipMap.get(ip);
-  if (!entry) { ipMap.set(ip, { count: 1, resetAt: now + windowMs }); return false; }
-  if (now > entry.resetAt) { ipMap.set(ip, { count: 1, resetAt: now + windowMs }); return false; }
-  entry.count++;
-  return entry.count > maxRequests;
-}
 
 /**
  * POST /api/chat
@@ -45,9 +32,8 @@ export async function POST(req: Request) {
     const rlWindowMin = botSettings?.rate_limit_window_minutes ?? 5;
 
     if (rlEnabled) {
-      const headersList = await headers();
-      const ip = headersList.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
-      if (isRateLimited(ip, rlReqs, rlWindowMin * 60 * 1000)) {
+      const ip = await getClientIp();
+      if (isRateLimited(ip, 'chat', rlReqs, rlWindowMin * 60 * 1000)) {
         return new Response(
           JSON.stringify({ error: 'You are sending messages too quickly. Please wait a moment.' }),
           { status: 429, headers: { 'Content-Type': 'application/json' } }
