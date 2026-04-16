@@ -6,7 +6,7 @@ import MobileStickyBar from '@/components/public/MobileStickyBar';
 import Breadcrumbs from '@/components/public/Breadcrumbs';
 import { getCachedSettings, getCachedContent, getCachedBlogPosts } from '@/lib/cache';
 import type { Metadata } from 'next';
-import { Calendar, ArrowRight, BookOpen } from 'lucide-react';
+import { Calendar, ArrowRight, BookOpen, Car, DollarSign } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'Blog — Car Buying Tips & Guides | TyFix Auto Sales',
@@ -98,6 +98,40 @@ export default async function BlogPage() {
               ))}
             </div>
           )}
+
+          {/* Internal cross-link to inventory + trade-in */}
+          <div className="mt-16 grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Link
+              href="/inventory"
+              className="group p-6 rounded-2xl border border-gray-100 hover:border-primary/30 hover:shadow-lg transition-all"
+            >
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform flex-shrink-0">
+                  <Car size={24} />
+                </div>
+                <div>
+                  <h3 className="font-bold text-gray-900 group-hover:text-primary transition-colors">Browse Inventory</h3>
+                  <p className="text-gray-400 text-sm">Quality cash cars under $5,000 in Brooklyn</p>
+                </div>
+                <ArrowRight size={18} className="text-gray-300 group-hover:text-primary ml-auto transition-colors" />
+              </div>
+            </Link>
+            <Link
+              href="/trade-in"
+              className="group p-6 rounded-2xl border border-gray-100 hover:border-primary/30 hover:shadow-lg transition-all"
+            >
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-xl bg-green-500/10 flex items-center justify-center text-green-600 group-hover:scale-110 transition-transform flex-shrink-0">
+                  <DollarSign size={24} />
+                </div>
+                <div>
+                  <h3 className="font-bold text-gray-900 group-hover:text-primary transition-colors">Sell Us Your Car</h3>
+                  <p className="text-gray-400 text-sm">Get a fast, fair cash offer today</p>
+                </div>
+                <ArrowRight size={18} className="text-gray-300 group-hover:text-primary ml-auto transition-colors" />
+              </div>
+            </Link>
+          </div>
         </div>
       </section>
 

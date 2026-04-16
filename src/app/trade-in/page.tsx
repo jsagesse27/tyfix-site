@@ -1,9 +1,11 @@
+import Link from 'next/link';
 import Navbar from '@/components/public/Navbar';
 import Footer from '@/components/public/Footer';
 import MobileStickyBar from '@/components/public/MobileStickyBar';
 import TradeInCalculator from '@/components/public/TradeInCalculator';
 import Breadcrumbs from '@/components/public/Breadcrumbs';
 import { getCachedSettings, getCachedContent } from '@/lib/cache';
+import { ArrowRight, Car } from 'lucide-react';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -42,6 +44,25 @@ export default async function TradeInPage() {
           </div>
         </div>
         <TradeInCalculator />
+
+        {/* Internal cross-link to inventory */}
+        <div className="max-w-2xl mx-auto mt-16 text-center">
+          <div className="p-8 rounded-3xl bg-white border border-slate-100 shadow-lg">
+            <div className="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <Car size={28} className="text-primary" />
+            </div>
+            <h2 className="text-2xl font-black text-slate-900 mb-2">Browse What You Could Drive Next</h2>
+            <p className="text-slate-500 text-sm mb-6 max-w-md mx-auto">
+              Use the cash from your trade-in toward one of our quality-inspected vehicles — all priced under $5,000 with no hidden fees.
+            </p>
+            <Link
+              href="/inventory"
+              className="btn-primary inline-flex items-center gap-2 px-8"
+            >
+              View Full Inventory <ArrowRight size={18} />
+            </Link>
+          </div>
+        </div>
       </section>
       <Footer settings={settings} content={content} />
       <MobileStickyBar settings={settings} />

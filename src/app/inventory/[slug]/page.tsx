@@ -271,6 +271,22 @@ export default async function VehicleDetailPage({ params }: PageProps) {
                     vehicleId={vehicle.id}
                   />
                 </div>
+
+                {/* Trade-In Cross-Link */}
+                <Link
+                  href="/trade-in"
+                  className="block admin-card group hover:border-primary/30 transition-colors"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform flex-shrink-0">
+                      <ArrowLeft size={22} className="rotate-180" />
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-gray-900 text-sm group-hover:text-primary transition-colors">Have a Car to Trade?</h4>
+                      <p className="text-gray-400 text-xs mt-0.5">Get a fast cash offer for your current vehicle</p>
+                    </div>
+                  </div>
+                </Link>
               </div>
             </div>
           </div>
