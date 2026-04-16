@@ -36,11 +36,31 @@ export default function Testimonials({ testimonials, settings }: TestimonialsPro
 
         {hasEmbed ? (
           /* Option 1: Real GBP Reviews Rendered Here */
-          <div className="google-reviews-wrapper overflow-hidden rounded-[2.5rem] bg-white border border-slate-100 shadow-sm min-h-[400px]">
-            <div
-              className="px-4 py-8 md:px-8"
-              dangerouslySetInnerHTML={{ __html: settings?.google_reviews_embed || '' }}
-            />
+          <div className="google-reviews-wrapper overflow-hidden rounded-[2.5rem] bg-white border border-slate-100 shadow-sm">
+            {(() => {
+              const embedHTML = settings?.google_reviews_embed || '';
+              const match = embedHTML.match(/src=["']([^"']+)["']/i);
+              const extractedSrc = match ? match[1] : '';
+
+              if (extractedSrc) {
+                return (
+                  <iframe 
+                    src={extractedSrc}
+                    style={{ border: 0, width: '100%', height: '650px' }}
+                    scrolling="yes"
+                    className="w-full"
+                  />
+                );
+              }
+
+              // Fallback just in case it's a different kind of embed
+              return (
+                <div
+                  className="px-4 py-8 md:px-8 min-h-[400px]"
+                  dangerouslySetInnerHTML={{ __html: embedHTML }}
+                />
+              );
+            })()}
           </div>
         ) : (
           /* Option 2: Fallback to Manual DB Reviews (the ones you saw initially) */
