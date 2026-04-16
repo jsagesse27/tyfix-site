@@ -5,7 +5,7 @@ import { useRouter, useParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { Save, ArrowLeft, Upload, X, Plus, Trash2, ImagePlus, Search } from 'lucide-react';
 import type { Vehicle, VehiclePhoto } from '@/lib/types';
-import { clearCacheByKey } from '../actions';
+import { clearCacheByKey } from '../../actions';
 import {
   YEARS, MAKES, BODY_TYPES, TRANSMISSIONS, FUEL_TYPES,
   DRIVETRAINS, CYLINDERS, EXTERIOR_COLORS, INTERIOR_COLORS,
