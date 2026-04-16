@@ -3,19 +3,31 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Gift, Check } from 'lucide-react';
+import type { SiteSettings } from '@/lib/types';
 
-export default function LeadCapturePopup() {
+interface LeadCapturePopupProps {
+  settings: SiteSettings | null;
+}
+
+export default function LeadCapturePopup({ settings }: LeadCapturePopupProps) {
   const [show, setShow] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState({ firstName: '', lastName: '', email: '', phone: '', instagram: '', consent: false });
 
+  // Do not even show the popup if disabled in the settings.
+  const isEnabled = settings?.show_lead_popup ?? true;
+
+  const popupTitle = settings?.lead_popup_title || 'Get $250 Off Your Next Car';
+  const popupText = settings?.lead_popup_text || 'Sign up for alerts when new cars hit the lot';
+
   useEffect(() => {
     if (typeof window === 'undefined') return;
+    if (!isEnabled) return;
     if (localStorage.getItem('tyfix_popup_dismissed')) return;
     const t = setTimeout(() => setShow(true), 4000);
     return () => clearTimeout(t);
-  }, []);
+  }, [isEnabled]);
 
   const close = () => { setShow(false); localStorage.setItem('tyfix_popup_dismissed', '1'); };
 
@@ -37,6 +49,8 @@ export default function LeadCapturePopup() {
 
   const u = (k: string, v: string | boolean) => setForm(p => ({ ...p, [k]: v }));
 
+  if (!isEnabled) return null;
+
   return (
     <AnimatePresence>
       {show && (
@@ -54,15 +68,15 @@ export default function LeadCapturePopup() {
               <div className="p-10 text-center">
                 <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4"><Check size={32} /></div>
                 <h3 className="text-2xl font-black text-slate-900 mb-2">You're In! 🎉</h3>
-                 <p className="text-slate-500 text-sm">We'll notify you when new cars hit the lot. Your $250 discount will be applied at purchase.</p>
+                 <p className="text-slate-500 text-sm">We'll notify you when new cars hit the lot. Your discount will be applied at purchase.</p>
                 <button onClick={close} className="btn-primary mt-6 w-full">Got It</button>
               </div>
             ) : (
               <>
                 <div className="bg-gradient-to-br from-primary to-red-900 p-8 text-center text-white">
                   <div className="w-14 h-14 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mx-auto mb-4"><Gift size={28} /></div>
-                  <h3 className="text-2xl font-black mb-1">Get $250 Off Your Next Car</h3>
-                  <p className="text-white/80 text-sm">Sign up for alerts when new cars hit the lot</p>
+                  <h3 className="text-2xl font-black mb-1">{popupTitle}</h3>
+                  <p className="text-white/80 text-sm">{popupText}</p>
                 </div>
                 <form onSubmit={handleSubmit} className="p-6 space-y-3">
                   <div className="grid grid-cols-2 gap-3">
@@ -77,7 +91,7 @@ export default function LeadCapturePopup() {
                     <span className="text-[11px] text-slate-500 leading-tight">I agree to receive calls, texts, and emails from TyFix Auto Sales about inventory updates and promotions.</span>
                   </label>
                    <button type="submit" disabled={submitting || !form.consent} className="btn-primary w-full h-12 disabled:opacity-50 text-sm">
-                    {submitting ? 'Signing Up...' : 'Claim My $250 Discount'}
+                    {submitting ? 'Signing Up...' : 'Claim My Offer'}
                   </button>
                 </form>
               </>

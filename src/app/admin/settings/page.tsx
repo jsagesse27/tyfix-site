@@ -97,6 +97,45 @@ export default function AdminSettingsPage() {
         <div><label className="block text-xs font-bold text-gray-500 uppercase mb-1">Google Reviews Embed Code</label><textarea className="input-field resize-none" rows={3} value={settings.google_reviews_embed || ''} onChange={(e) => u('google_reviews_embed', e.target.value)} placeholder="Paste embed code here..." /></div>
       </div>
 
+      {/* Lead Capture Popup */}
+      <div className="admin-card">
+        <h2 className="text-lg font-bold mb-4">Lead Capture Popup (CTA)</h2>
+        <div className="space-y-4">
+          <label className="flex items-center gap-2 text-sm cursor-pointer">
+            <input 
+              type="checkbox" 
+              checked={settings.show_lead_popup} 
+              onChange={(e) => u('show_lead_popup', e.target.checked)} 
+              className="w-4 h-4 accent-primary" 
+            />
+            Show popup offer to new visitors
+          </label>
+          
+          {settings.show_lead_popup && (
+            <>
+              <div>
+                <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Headline</label>
+                <input 
+                  className="input-field" 
+                  value={settings.lead_popup_title || ''} 
+                  onChange={(e) => u('lead_popup_title', e.target.value)} 
+                  placeholder="e.g. Get $250 Off Your Next Car" 
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Subtext / Description</label>
+                <input 
+                  className="input-field" 
+                  value={settings.lead_popup_text || ''} 
+                  onChange={(e) => u('lead_popup_text', e.target.value)} 
+                  placeholder="e.g. Sign up for alerts when new cars hit the lot" 
+                />
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+
       {/* Site Experience */}
       <div className="admin-card">
         <h2 className="text-lg font-bold mb-4">Site Experience</h2>

@@ -81,7 +81,7 @@ export default async function HomePage() {
 
       <Footer settings={settings} content={content} />
       <MobileStickyBar settings={settings} />
-      <LeadCapturePopup />
+      <LeadCapturePopup settings={settings} />
     </div>
   );
 }

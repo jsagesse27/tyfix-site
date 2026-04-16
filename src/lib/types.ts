@@ -108,6 +108,9 @@ export interface SiteSettings {
   admin_inventory_per_page: number;
   dealer_signature_data: string | null;
   dealer_printed_name: string;
+  show_lead_popup: boolean;
+  lead_popup_title: string;
+  lead_popup_text: string;
   updated_at: string;
 }
 
