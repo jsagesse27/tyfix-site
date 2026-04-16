@@ -189,16 +189,16 @@ export default function CashCalculator() {
               {includeFinancing && (
                 <div className="flex gap-4 animate-fade-in">
                   <label className="flex items-center gap-2">
-                    <span className="text-xs text-slate-400">APR</span>
-                    <select
+                    <span className="text-xs text-slate-400">APR (%)</span>
+                    <input
+                      type="number"
+                      step="0.1"
+                      min="0"
+                      max="100"
                       value={apr}
                       onChange={(e) => setApr(Number(e.target.value))}
-                      className="bg-white/10 border border-white/10 text-white text-sm rounded-lg px-2 py-1.5 cursor-pointer focus:ring-1 focus:ring-primary outline-none"
-                    >
-                      {[6.9, 9.9, 12.9, 14.9, 18.9, 24.9].map((r) => (
-                        <option key={r} value={r} className="bg-gray-900">{r}%</option>
-                      ))}
-                    </select>
+                      className="bg-white/10 border border-white/10 text-white text-sm rounded-lg px-2 py-1.5 focus:ring-1 focus:ring-primary outline-none w-20 text-center"
+                    />
                   </label>
                   <label className="flex items-center gap-2">
                     <span className="text-xs text-slate-400">Term</span>
