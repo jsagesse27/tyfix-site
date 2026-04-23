@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client';
 import { Save, ArrowLeft, Upload, X, Plus, Trash2, ImagePlus, Search, Camera } from 'lucide-react';
 import type { Vehicle, VehiclePhoto } from '@/lib/types';
 import { clearCacheByKey } from '../../actions';
+import { getOptimizedImageUrl } from '@/lib/utils';
 import {
   YEARS, MAKES, BODY_TYPES, TRANSMISSIONS, FUEL_TYPES,
   DRIVETRAINS, CYLINDERS, EXTERIOR_COLORS, INTERIOR_COLORS,
@@ -1082,7 +1083,7 @@ export default function EditVehiclePage() {
                 onDrop={(e) => handleDropReorder(e, i)}
                 className="relative group rounded-lg overflow-hidden border border-gray-200 cursor-move"
               >
-                <img src={photo.public_url} alt={`Photo ${i + 1}`} className="w-full h-28 object-cover pointer-events-none" />
+                <img src={getOptimizedImageUrl(photo.public_url)} alt={`Photo ${i + 1}`} className="w-full h-28 object-cover pointer-events-none" />
                 {i === 0 && <span className="absolute top-1 left-1 bg-primary text-white text-[10px] font-bold px-2 py-0.5 rounded-full">HERO</span>}
                 <button type="button" onClick={(e) => { e.preventDefault(); deletePhoto(photo); }} className="absolute top-1 right-1 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10">
                   <X size={12} />

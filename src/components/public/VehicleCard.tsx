@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Gauge, Settings2, ChevronRight, ShieldCheck } from 'lucide-react';
 import type { Vehicle } from '@/lib/types';
-import { formatPrice, formatMileage, getHeroPhoto } from '@/lib/utils';
+import { formatPrice, formatMileage, getHeroPhoto, getOptimizedImageUrl } from '@/lib/utils';
 import { getVehicleUrl } from '@/lib/slug';
 
 export default function VehicleCard({ 
@@ -32,7 +32,7 @@ export default function VehicleCard({
     return () => clearInterval(timer);
   }, [autoCarousel, interval, photos.length]);
 
-  const displayPhoto = photos.length > 0 ? photos[currentIdx].public_url : '/placeholder-car.jpg';
+  const displayPhoto = photos.length > 0 ? getOptimizedImageUrl(photos[currentIdx].public_url) : '/placeholder-car.jpg';
 
   return (
     <Link href={getVehicleUrl(vehicle)} className="vehicle-card group block">

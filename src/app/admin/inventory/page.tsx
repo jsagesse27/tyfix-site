@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import Link from 'next/link';
 import { Plus, Search, Eye, Pencil, Trash2, Copy, FileText } from 'lucide-react';
-import { formatPrice, formatMileage } from '@/lib/utils';
+import { formatPrice, formatMileage, getOptimizedImageUrl } from '@/lib/utils';
 import type { Vehicle } from '@/lib/types';
 import BillOfSaleModal from '@/components/admin/BillOfSaleModal';
 import { clearCacheByKey } from '../actions';
@@ -137,7 +137,7 @@ export default function AdminInventoryPage() {
                     <td className="block md:table-cell p-0 md:p-3 pb-3 md:pb-0 mb-3 md:mb-0 border-b border-gray-50 md:border-0">
                       <div className="flex items-center gap-3">
                         {v.photos && v.photos.length > 0 ? (
-                          <img src={v.photos.sort((a, b) => a.sort_order - b.sort_order)[0].public_url} alt="" className="w-14 h-10 rounded-md object-cover" />
+                          <img src={getOptimizedImageUrl(v.photos.sort((a, b) => a.sort_order - b.sort_order)[0].public_url)} alt="" className="w-14 h-10 rounded-md object-cover" />
                         ) : (
                           <div className="w-14 h-10 rounded-md bg-gray-100 flex items-center justify-center text-gray-300 text-xs">No img</div>
                         )}

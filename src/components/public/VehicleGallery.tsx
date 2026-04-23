@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Image from 'next/image';
 import { ChevronLeft, ChevronRight, ZoomIn } from 'lucide-react';
 import type { VehiclePhoto } from '@/lib/types';
+import { getOptimizedImageUrl } from '@/lib/utils';
 
 interface VehicleGalleryProps {
   photos: VehiclePhoto[];
@@ -30,7 +31,7 @@ export default function VehicleGallery({ photos, alt }: VehicleGalleryProps) {
       {/* Main Image */}
       <div className="relative w-full h-[350px] md:h-[450px] rounded-2xl overflow-hidden bg-gray-100 group">
         <Image
-          src={photos[activeIndex].public_url}
+          src={getOptimizedImageUrl(photos[activeIndex].public_url)}
           alt={`${alt} - Photo ${activeIndex + 1}`}
           fill
           priority
@@ -67,7 +68,7 @@ export default function VehicleGallery({ photos, alt }: VehicleGalleryProps) {
                 i === activeIndex ? 'border-primary shadow-md' : 'border-transparent opacity-60 hover:opacity-100'
               }`}
             >
-              <Image src={photo.public_url} alt={`Thumbnail ${i + 1}`} fill sizes="80px" className="object-cover" />
+              <Image src={getOptimizedImageUrl(photo.public_url)} alt={`Thumbnail ${i + 1}`} fill sizes="80px" className="object-cover" />
             </button>
           ))}
         </div>
@@ -90,7 +91,7 @@ export default function VehicleGallery({ photos, alt }: VehicleGalleryProps) {
             </>
           )}
           <img
-            src={photos[activeIndex].public_url}
+            src={getOptimizedImageUrl(photos[activeIndex].public_url)}
             alt={`${alt} - Full size`}
             className="max-w-full max-h-[90vh] object-contain rounded-lg"
             onClick={(e) => e.stopPropagation()}

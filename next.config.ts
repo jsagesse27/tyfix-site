@@ -6,6 +6,7 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       { protocol: 'https', hostname: 'images.unsplash.com' },
       { protocol: 'https', hostname: 'orzvwpiqsvjzbbxiejfu.supabase.co' },
+      { protocol: 'https', hostname: 'cdn.tyfixautosales.com' },
       { protocol: 'https', hostname: 'i.pravatar.cc' },
     ],
   },
@@ -36,7 +37,7 @@ const nextConfig: NextConfig = {
               // Fonts
               "font-src 'self' https://fonts.gstatic.com",
               // Images: self + Supabase + Unsplash + data URIs + tiles
-              "img-src 'self' data: blob: https://orzvwpiqsvjzbbxiejfu.supabase.co https://images.unsplash.com https://*.basemaps.cartocdn.com https://i.pravatar.cc",
+              "img-src 'self' data: blob: https://cdn.tyfixautosales.com https://orzvwpiqsvjzbbxiejfu.supabase.co https://images.unsplash.com https://*.basemaps.cartocdn.com https://i.pravatar.cc",
               // Frames: Calendly + EmbedSocial + Turnstile
               "frame-src 'self' https://calendly.com https://embedsocial.com https://challenges.cloudflare.com",
               // API/fetch calls: self + Supabase + NHTSA + Turnstile + AI providers

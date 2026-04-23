@@ -11,12 +11,23 @@ export function formatMileage(mileage: number): string {
   return new Intl.NumberFormat('en-US').format(mileage);
 }
 
+export function getOptimizedImageUrl(fullUrl: string): string {
+  // Hardcoding the domain mapping for the CDN optimization
+  // because process.env in Next.js might not inject cleanly for client components without NEXT_PUBLIC
+  if (!fullUrl) return fullUrl;
+  
+  if (fullUrl.includes('orzvwpiqsvjzbbxiejfu.supabase.co')) {
+    return fullUrl.replace('orzvwpiqsvjzbbxiejfu.supabase.co', 'cdn.tyfixautosales.com');
+  }
+  return fullUrl;
+}
+
 export function getHeroPhoto(photos?: { public_url: string; sort_order: number }[]): string {
   if (!photos || photos.length === 0) {
     return '/placeholder-car.svg';
   }
   const sorted = [...photos].sort((a, b) => a.sort_order - b.sort_order);
-  return sorted[0].public_url;
+  return getOptimizedImageUrl(sorted[0].public_url);
 }
 
 export function cn(...classes: (string | false | null | undefined)[]): string {

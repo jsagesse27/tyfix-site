@@ -9,9 +9,9 @@ import VehicleGallery from '@/components/public/VehicleGallery';
 import Breadcrumbs from '@/components/public/Breadcrumbs';
 import SimilarVehicles from '@/components/public/SimilarVehicles';
 import { CarSchema } from '@/components/seo/JsonLd';
-import { formatPrice, formatMileage } from '@/lib/utils';
 import { ArrowLeft, Phone, MessageCircle, ShieldCheck, ExternalLink, Zap, Palette, Settings2, Gauge, Calendar, Share2, Copy, Check } from 'lucide-react';
 import { getCachedVehicleBySlug, getCachedSettings, getCachedContent } from '@/lib/cache';
+import { formatPrice, formatMileage, getOptimizedImageUrl } from '@/lib/utils';
 import { getSafetyRating } from '@/lib/vpic';
 import type { Metadata } from 'next';
 
@@ -29,7 +29,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const title = `${vehicle.year} ${vehicle.make} ${vehicle.model}${vehicle.trim ? ` ${vehicle.trim}` : ''} — ${formatPrice(vehicle.price)} | TyFix Auto Sales Brooklyn`;
   const description = `${vehicle.year} ${vehicle.make} ${vehicle.model} for ${formatPrice(vehicle.price)} at TyFix Auto Sales in Brooklyn, NY. ${vehicle.condition_notes || 'Quality inspected vehicle.'} Cash price, no hidden fees.`;
   const photos = vehicle.photos?.sort((a, b) => a.sort_order - b.sort_order) || [];
-  const ogImage = photos.length > 0 ? photos[0].public_url : undefined;
+  const ogImage = photos.length > 0 ? getOptimizedImageUrl(photos[0].public_url) : undefined;
 
   return {
     title,

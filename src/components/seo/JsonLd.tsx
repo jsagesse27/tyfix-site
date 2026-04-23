@@ -4,7 +4,7 @@
 // ============================================================
 
 import type { Vehicle, SiteSettings, VehiclePhoto } from '@/lib/types';
-import { formatPrice } from '@/lib/utils';
+import { formatPrice, getOptimizedImageUrl } from '@/lib/utils';
 import { getVehicleUrl } from '@/lib/slug';
 
 const BASE_URL = 'https://tyfixautosales.com';
@@ -111,7 +111,7 @@ export function CarSchema({
     ...(vehicle.fuel_type && { fuelType: vehicle.fuel_type }),
     ...(vehicle.drivetrain && { driveWheelConfiguration: vehicle.drivetrain }),
     ...(vehicle.doors && { numberOfDoors: vehicle.doors }),
-    image: photos.map((p: VehiclePhoto) => p.public_url),
+    image: photos.map((p: VehiclePhoto) => getOptimizedImageUrl(p.public_url)),
     url: vehicleUrl,
     offers: {
       '@type': 'Offer',
