@@ -36,7 +36,7 @@ export default function InquiryForm({ vehicleOfInterest, vehicleId }: InquiryFor
 
       if (!res.ok) throw new Error('Failed to submit');
       setIsSubmitted(true);
-      setFormData({ name: '', phone: '', email: '', message: '', vehicle_of_interest: vehicleOfInterest || '', vehicle_id: vehicleId || '' });
+      setFormData({ name: '', phone: '', email: '', message: '', vehicle_of_interest: vehicleOfInterest || '', vehicle_id: vehicleId || '', company_url: '' });
     } catch {
       setError('Something went wrong. Please call us directly.');
     } finally {

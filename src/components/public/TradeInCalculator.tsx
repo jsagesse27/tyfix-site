@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Car, ArrowRight, ArrowLeft, CheckCircle2, User, Phone, Mail, Send, Camera, AlertCircle } from 'lucide-react';
 import { decodeSingleVin } from '@/lib/vpic';
 import { MAKES } from '@/lib/constants';
+import VinScannerButton from '@/components/admin/VinScannerButton';
 
 const EXTERIOR_LOOK = ['Excellent — like new', 'Good — minor wear', 'Fair — noticeable wear', 'Needs work'];
 const DENTS = ['None', 'Minor (1-2 small)', 'Moderate (several)', 'Significant'];
@@ -158,6 +159,36 @@ export default function TradeInCalculator() {
                     <button onClick={decodeVin} disabled={vinLoading || vinInput.length < 11} className="btn-primary w-full h-14 disabled:opacity-50">
                       {vinLoading ? 'Decoding...' : 'Decode VIN'} <ArrowRight size={18} />
                     </button>
+                    <div className="flex items-center gap-3">
+                      <div className="flex-1 border-t border-slate-200" />
+                      <span className="text-xs text-slate-400 font-bold uppercase">or scan it</span>
+                      <div className="flex-1 border-t border-slate-200" />
+                    </div>
+                    <VinScannerButton
+                      onScan={(vin) => {
+                        setVinInput(vin);
+                        // Auto-decode after scan
+                        setTimeout(async () => {
+                          setVinLoading(true); setVinError('');
+                          try {
+                            const result = await decodeSingleVin(vin);
+                            if (!result.error) {
+                              setForm(p => ({ 
+                                ...p, vin, year: result.year, make: result.make, model: result.model, 
+                                trim: result.trim, engine: result.engine, body_type: result.body_type, 
+                                transmission: result.transmission, fuel_type: result.fuel_type, 
+                                drivetrain: result.drivetrain, cylinders: result.cylinders, doors: result.doors 
+                              }));
+                              next();
+                            } else { setVinError('Could not decode scanned VIN. Try again or enter manually.'); }
+                          } catch { setVinError('Network error. Please try again.'); }
+                          finally { setVinLoading(false); }
+                        }, 100);
+                      }}
+                      variant="public"
+                      className="w-full justify-center"
+                    />
+                    <p className="text-[10px] text-slate-400 text-center">📱 Point your camera at the VIN plate for instant accuracy</p>
                   </div>
                 ) : (
                   <div className="space-y-3">

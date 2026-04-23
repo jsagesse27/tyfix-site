@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
-import { Save, ArrowLeft, Upload, X, Plus, Trash2, ImagePlus, Search } from 'lucide-react';
+import { Save, ArrowLeft, Upload, X, Plus, Trash2, ImagePlus, Search, Camera } from 'lucide-react';
 import type { Vehicle, VehiclePhoto } from '@/lib/types';
 import { clearCacheByKey } from '../../actions';
 import {
@@ -15,6 +15,8 @@ import {
 import { generateVehicleSlug } from '@/lib/slug';
 import imageCompression from 'browser-image-compression';
 import { decodeSingleVin, decodeBatchVins, VinDecodeResult } from '@/lib/vpic';
+import VinScannerButton from '@/components/admin/VinScannerButton';
+import VinOverrideModal from '@/components/admin/VinOverrideModal';
 
 const compressImage = async (file: File) => {
   const options = {
@@ -248,6 +250,9 @@ export default function EditVehiclePage() {
   const [vinError, setVinError] = useState('');
   const [vinSuccess, setVinSuccess] = useState('');
 
+  // VIN Override Modal state
+  const [overrideModalData, setOverrideModalData] = useState<VinDecodeResult | null>(null);
+
   const [fetchedModels, setFetchedModels] = useState<string[]>([]);
   
   useEffect(() => {
@@ -287,25 +292,61 @@ export default function EditVehiclePage() {
         setVinError(result.error);
         return;
       }
-      
-      let fillCount = 0;
-      setForm(prev => {
-        const next = { ...prev };
-        Object.entries(result).forEach(([k, v]) => {
-          if (v && k !== 'vin' && k !== 'error') {
-            (next as any)[k] = v;
-            fillCount++;
-          }
+
+      // Check if this is an existing VDP with data already filled
+      const hasExistingData = !isNew && (form.model || form.make !== 'Honda' || form.year !== '2012');
+
+      if (hasExistingData) {
+        // Show override modal for user to choose which fields to update
+        setOverrideModalData(result);
+      } else {
+        // New vehicle or empty form — auto-fill everything
+        let fillCount = 0;
+        setForm(prev => {
+          const next = { ...prev };
+          Object.entries(result).forEach(([k, v]) => {
+            if (v && k !== 'vin' && k !== 'error') {
+              (next as any)[k] = v;
+              fillCount++;
+            }
+          });
+          return next;
         });
-        return next;
-      });
-      setVinSuccess(`✅ ${fillCount} fields auto-filled`);
-      setTimeout(() => setVinSuccess(''), 3000);
+        setVinSuccess(`✅ ${fillCount} fields auto-filled`);
+        setTimeout(() => setVinSuccess(''), 3000);
+      }
     } catch (e: any) {
       setVinError('Failed to decode VIN');
     } finally {
       setVinLoading(false);
     }
+  };
+
+  const handleOverrideApply = (selectedFields: Record<string, string>) => {
+    let count = 0;
+    setForm(prev => {
+      const next = { ...prev };
+      Object.entries(selectedFields).forEach(([k, v]) => {
+        if (k === 'doors') {
+          (next as any)[k] = parseInt(v) || 4;
+        } else {
+          (next as any)[k] = v;
+        }
+        count++;
+      });
+      return next;
+    });
+    setOverrideModalData(null);
+    setVinSuccess(`✅ ${count} field${count !== 1 ? 's' : ''} updated`);
+    setTimeout(() => setVinSuccess(''), 3000);
+  };
+
+  const handleVinScan = (vin: string, confidence: string) => {
+    setForm(prev => ({ ...prev, vin }));
+    // Auto-trigger VIN decode after a short delay to let state settle
+    setTimeout(() => {
+      handleVinLookup();
+    }, 100);
   };
 
   useEffect(() => {
@@ -629,19 +670,45 @@ export default function EditVehiclePage() {
             )}
 
             {activeTab === 'scanner' && (
-              <div className="space-y-3 text-center py-4">
-                <p className="text-sm text-gray-500 mb-2">Ensure your scanner cursor is in the box below before scanning.</p>
-                <form onSubmit={handleScannerSubmit}>
-                  <input
-                    autoFocus
-                    className="input-field max-w-sm mx-auto text-center font-mono uppercase text-lg h-14"
-                    placeholder="SCAN BARCODE HERE"
-                    value={scannerVin}
-                    onChange={e => setScannerVin(e.target.value.toUpperCase())}
-                    disabled={isDecodingBatch}
+              <div className="space-y-4 text-center py-4">
+                <p className="text-sm text-gray-500 mb-2">Scan with a barcode scanner or use your phone camera.</p>
+                <div className="flex flex-col sm:flex-row items-center gap-3 justify-center">
+                  <form onSubmit={handleScannerSubmit} className="flex-1 max-w-sm w-full">
+                    <input
+                      autoFocus
+                      className="input-field text-center font-mono uppercase text-lg h-14 w-full"
+                      placeholder="SCAN BARCODE HERE"
+                      value={scannerVin}
+                      onChange={e => setScannerVin(e.target.value.toUpperCase())}
+                      disabled={isDecodingBatch}
+                    />
+                    <button type="submit" className="hidden">Submit</button>
+                  </form>
+                  <div className="text-xs text-gray-400 font-bold uppercase">or</div>
+                  <VinScannerButton
+                    onScan={(vin) => {
+                      setScannerVin(vin);
+                      // Auto-submit after camera scan
+                      setTimeout(async () => {
+                        setIsDecodingBatch(true);
+                        setBatchDecodeMsg('');
+                        try {
+                          const results = await decodeBatchVins([vin]);
+                          appendDecodedVins(results);
+                          setBatchDecodeMsg(`✅ Camera scanned & added: ${vin}`);
+                          setTimeout(() => setBatchDecodeMsg(''), 2000);
+                          setScannerVin('');
+                        } catch {
+                          setBatchDecodeMsg('❌ Failed to decode scanned VIN');
+                          setTimeout(() => setBatchDecodeMsg(''), 3000);
+                        } finally {
+                          setIsDecodingBatch(false);
+                        }
+                      }, 100);
+                    }}
+                    variant="admin"
                   />
-                  <button type="submit" className="hidden">Submit</button>
-                </form>
+                </div>
               </div>
             )}
             
@@ -887,6 +954,17 @@ export default function EditVehiclePage() {
             <label className="block text-xs font-bold text-gray-500 uppercase mb-1">VIN</label>
             <div className="flex gap-2">
               <input className="input-field flex-1 uppercase" value={form.vin} onChange={(e) => u('vin', e.target.value.toUpperCase())} placeholder="1HGBH41JXMN109186" maxLength={17} />
+              <VinScannerButton
+                onScan={(vin) => {
+                  u('vin', vin);
+                  // Let state settle then trigger lookup
+                  setTimeout(() => {
+                    setForm(prev => ({ ...prev, vin }));
+                  }, 50);
+                }}
+                variant="admin"
+                compact
+              />
               <button 
                 type="button" 
                 onClick={handleVinLookup} 
@@ -1045,6 +1123,16 @@ export default function EditVehiclePage() {
           <Save size={16} /> {saving ? 'Saving...' : 'Save Vehicle'}
         </button>
       </div>
+
+      {/* VIN Override Modal */}
+      {overrideModalData && (
+        <VinOverrideModal
+          decoded={overrideModalData}
+          currentValues={form}
+          onApply={handleOverrideApply}
+          onCancel={() => setOverrideModalData(null)}
+        />
+      )}
     </div>
   );
 }
