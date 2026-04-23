@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { Search, Download, Trash2, FileText } from 'lucide-react';
-import { formatPrice } from '@/lib/utils';
+import { formatPrice, getOptimizedImageUrl } from '@/lib/utils';
 import type { BillOfSale } from '@/lib/types';
 
 export default function FileCabinetPage() {
@@ -121,7 +121,7 @@ export default function FileCabinetPage() {
                     <td className="p-4">
                       <div className="flex items-center justify-end gap-2">
                         <a 
-                          href={bill.pdf_public_url} 
+                          href={getOptimizedImageUrl(bill.pdf_public_url)} 
                           target="_blank" 
                           rel="noreferrer"
                           className="p-2 text-gray-500 hover:text-primary rounded-lg hover:bg-primary/5 transition-colors"

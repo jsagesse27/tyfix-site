@@ -2,13 +2,21 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   images: {
-    formats: ['image/avif', 'image/webp'],
+    unoptimized: true,
     remotePatterns: [
       { protocol: 'https', hostname: 'images.unsplash.com' },
       { protocol: 'https', hostname: 'orzvwpiqsvjzbbxiejfu.supabase.co' },
       { protocol: 'https', hostname: 'cdn.tyfixautosales.com' },
       { protocol: 'https', hostname: 'i.pravatar.cc' },
     ],
+  },
+  async rewrites() {
+    return [
+      {
+        source: '/storage/:path*',
+        destination: 'https://orzvwpiqsvjzbbxiejfu.supabase.co/storage/:path*',
+      },
+    ];
   },
 
   // ── Security Headers ────────────────────────────────────────────

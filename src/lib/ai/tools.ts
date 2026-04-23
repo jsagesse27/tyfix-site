@@ -1,6 +1,7 @@
 import { tool } from 'ai';
 import { z } from 'zod';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { getOptimizedImageUrl } from '@/lib/utils';
 
 /**
  * TyFix AI Bot — Dealership Tool Definitions
@@ -80,7 +81,7 @@ export const dealershipTools = {
         condition: v.condition_notes,
         featured: v.featured_label,
         photo_url: v.photos && (v.photos as Photo[]).length > 0
-          ? (v.photos as Photo[]).sort((a, b) => a.sort_order - b.sort_order)[0].public_url
+          ? getOptimizedImageUrl((v.photos as Photo[]).sort((a, b) => a.sort_order - b.sort_order)[0].public_url)
           : null,
       }));
 

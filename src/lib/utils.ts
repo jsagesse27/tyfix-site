@@ -12,8 +12,11 @@ export function formatMileage(mileage: number): string {
 }
 
 export function getOptimizedImageUrl(fullUrl: string): string {
-  // Disabling the CDN override temporarily.
-  // The 'cdn.tyfixautosales.com' DNS records are currently pointing to Vercel instead of Supabase.
+  if (!fullUrl) return fullUrl;
+
+  if (fullUrl.includes('orzvwpiqsvjzbbxiejfu.supabase.co')) {
+    return fullUrl.replace('orzvwpiqsvjzbbxiejfu.supabase.co', 'cdn.tyfixautosales.com');
+  }
   return fullUrl;
 }
 
