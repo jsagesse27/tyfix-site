@@ -39,229 +39,143 @@ export default function AdminSettingsPage() {
   if (loading || !settings) return <div className="text-center text-gray-400 py-12">Loading...</div>;
 
   return (
-    <div className="max-w-3xl space-y-6">
+    <div className="max-w-4xl space-y-12 pb-20">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-black text-gray-900">Admin Settings</h1>
+        <button onClick={handleSave} disabled={saving} className="btn-admin shadow-lg px-8 py-3">
+          {saving ? 'Saving...' : saved ? 'Settings Saved!' : <><Save size={18} /> Save All Changes</>}
+        </button>
+      </div>
+
       {saved && (
-        <div className="flex items-center gap-2 p-3 bg-green-50 text-green-700 rounded-lg text-sm animate-fade-in">
-          <CheckCircle2 size={16} /> Settings saved successfully!
+        <div className="flex items-center gap-2 p-4 bg-green-50 border border-green-100 text-green-700 rounded-xl text-sm animate-fade-in shadow-sm">
+          <CheckCircle2 size={18} /> All settings synchronized successfully. Cache has been revalidated.
         </div>
       )}
 
-      {/* Contact */}
-      <div className="admin-card">
-        <h2 className="text-lg font-bold mb-4">Contact Information</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div><label className="block text-xs font-bold text-gray-500 uppercase mb-1">Phone Number</label><input className="input-field" value={settings.phone_number} onChange={(e) => u('phone_number', e.target.value)} /></div>
-          <div><label className="block text-xs font-bold text-gray-500 uppercase mb-1">SMS Number</label><input className="input-field" value={settings.sms_number} onChange={(e) => u('sms_number', e.target.value)} /></div>
-          <div><label className="block text-xs font-bold text-gray-500 uppercase mb-1">Contact Email</label><input className="input-field" value={settings.contact_email} onChange={(e) => u('contact_email', e.target.value)} /></div>
+      {/* SECTION 1: BUSINESS PROFILE */}
+      <div className="space-y-4">
+        <div className="flex items-center gap-2 px-1">
+          <div className="w-1.5 h-6 bg-primary rounded-full"></div>
+          <h2 className="text-xl font-black text-gray-800 tracking-tight">Business Profile</h2>
         </div>
-      </div>
-
-      {/* Location */}
-      <div className="admin-card">
-        <h2 className="text-lg font-bold mb-4">Location & Hours</h2>
-        <div className="space-y-4">
-          <div><label className="block text-xs font-bold text-gray-500 uppercase mb-1">Lot Address</label><input className="input-field" value={settings.lot_address} onChange={(e) => u('lot_address', e.target.value)} /></div>
-          <div><label className="block text-xs font-bold text-gray-500 uppercase mb-1">Hours</label><input className="input-field" value={settings.hours_of_operation} onChange={(e) => u('hours_of_operation', e.target.value)} /></div>
-          <div><label className="block text-xs font-bold text-gray-500 uppercase mb-1">Directions Note</label><input className="input-field" value={settings.directions_note || ''} onChange={(e) => u('directions_note', e.target.value)} placeholder="e.g. Next to Shell gas station" /></div>
-          <div><label className="block text-xs font-bold text-gray-500 uppercase mb-1">Google Maps Embed URL</label><input className="input-field" value={settings.google_maps_embed_url || ''} onChange={(e) => u('google_maps_embed_url', e.target.value)} placeholder="https://www.google.com/maps/embed?..." /></div>
-        </div>
-      </div>
-
-      {/* Social */}
-      <div className="admin-card">
-        <h2 className="text-lg font-bold mb-4">Social Media</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div><label className="block text-xs font-bold text-gray-500 uppercase mb-1">Facebook URL</label><input className="input-field" value={settings.facebook_url || ''} onChange={(e) => u('facebook_url', e.target.value)} /></div>
-          <div><label className="block text-xs font-bold text-gray-500 uppercase mb-1">Instagram URL</label><input className="input-field" value={settings.instagram_url || ''} onChange={(e) => u('instagram_url', e.target.value)} /></div>
-          <div><label className="block text-xs font-bold text-gray-500 uppercase mb-1">TikTok URL</label><input className="input-field" value={settings.tiktok_url || ''} onChange={(e) => u('tiktok_url', e.target.value)} placeholder="https://www.tiktok.com/@tyfix" /></div>
-        </div>
-      </div>
-
-      {/* Pricing Tagline */}
-      <div className="admin-card">
-        <h2 className="text-lg font-bold mb-4">Pricing Display</h2>
-        <label className="flex items-center gap-2 text-sm cursor-pointer mb-3">
-          <input type="checkbox" checked={settings.show_price_tagline} onChange={(e) => u('show_price_tagline', e.target.checked)} className="w-4 h-4 accent-primary" />
-          Show price tagline on site
-        </label>
-        <input className="input-field" value={settings.price_tagline_text} onChange={(e) => u('price_tagline_text', e.target.value)} />
-      </div>
-
-      {/* Reviews */}
-      <div className="admin-card">
-        <h2 className="text-lg font-bold mb-4">Reviews Section</h2>
-        <label className="flex items-center gap-2 text-sm cursor-pointer mb-3">
-          <input type="checkbox" checked={settings.show_reviews_section} onChange={(e) => u('show_reviews_section', e.target.checked)} className="w-4 h-4 accent-primary" />
-          Show reviews section on homepage
-        </label>
-        <div><label className="block text-xs font-bold text-gray-500 uppercase mb-1">Google Reviews Embed Code</label><textarea className="input-field resize-none" rows={3} value={settings.google_reviews_embed || ''} onChange={(e) => u('google_reviews_embed', e.target.value)} placeholder="Paste embed code here..." /></div>
-      </div>
-
-      {/* Lead Capture Popup */}
-      <div className="admin-card">
-        <h2 className="text-lg font-bold mb-4">Lead Capture Popup (CTA)</h2>
-        <div className="space-y-4">
-          <label className="flex items-center gap-2 text-sm cursor-pointer">
-            <input 
-              type="checkbox" 
-              checked={settings.show_lead_popup} 
-              onChange={(e) => u('show_lead_popup', e.target.checked)} 
-              className="w-4 h-4 accent-primary" 
-            />
-            Show popup offer to new visitors
-          </label>
-          
-          {settings.show_lead_popup && (
-            <>
-              <div>
-                <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Headline</label>
-                <input 
-                  className="input-field" 
-                  value={settings.lead_popup_title || ''} 
-                  onChange={(e) => u('lead_popup_title', e.target.value)} 
-                  placeholder="e.g. Get $250 Off Your Next Car" 
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Subtext / Description</label>
-                <input 
-                  className="input-field" 
-                  value={settings.lead_popup_text || ''} 
-                  onChange={(e) => u('lead_popup_text', e.target.value)} 
-                  placeholder="e.g. Sign up for alerts when new cars hit the lot" 
-                />
-              </div>
-            </>
-          )}
-        </div>
-      </div>
-
-      {/* Site Experience */}
-      <div className="admin-card">
-        <h2 className="text-lg font-bold mb-4">Site Experience</h2>
-        <div className="space-y-6">
-          <div>
-            <label className="flex items-center gap-2 text-sm cursor-pointer mb-1">
-              <input 
-                type="checkbox" 
-                checked={settings.auto_carousel_enabled} 
-                onChange={(e) => u('auto_carousel_enabled', e.target.checked)} 
-                className="w-4 h-4 accent-primary" 
-              />
-              Enable auto-carousel for car thumbnails
-            </label>
-            <p className="text-xs text-gray-400">When enabled, car cards will smoothly cycle through all photos.</p>
-          </div>
-
-          {settings.auto_carousel_enabled && (
-            <div>
-              <label className="block text-xs font-bold text-gray-500 uppercase mb-3">
-                Transition Speed: {settings.auto_carousel_interval} Seconds
-              </label>
-              <div className="flex items-center gap-4">
-                <span className="text-xs text-gray-400">1s</span>
-                <input 
-                  type="range" 
-                  min={1} 
-                  max={15} 
-                  value={settings.auto_carousel_interval} 
-                  onChange={(e) => u('auto_carousel_interval', parseInt(e.target.value))}
-                  className="flex-1 h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary" 
-                />
-                <span className="text-xs text-gray-400">15s</span>
-              </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="admin-card">
+            <h3 className="text-sm font-black text-gray-400 uppercase tracking-widest mb-4">Contact Info</h3>
+            <div className="space-y-4">
+              <div><label className="block text-xs font-bold text-gray-500 mb-1 font-mono uppercase tracking-tighter">Phone Number</label><input className="input-field" value={settings.phone_number} onChange={(e) => u('phone_number', e.target.value)} /></div>
+              <div><label className="block text-xs font-bold text-gray-500 mb-1 font-mono uppercase tracking-tighter">SMS Number</label><input className="input-field" value={settings.sms_number} onChange={(e) => u('sms_number', e.target.value)} /></div>
+              <div><label className="block text-xs font-bold text-gray-500 mb-1 font-mono uppercase tracking-tighter">Contact Email</label><input className="input-field" value={settings.contact_email} onChange={(e) => u('contact_email', e.target.value)} /></div>
             </div>
-          )}
-        </div>
-      </div>
+          </div>
 
-      {/* Admin Performance Settings */}
-      <div className="admin-card">
-        <h2 className="text-lg font-bold mb-4">Dashboard Performance</h2>
-        <p className="text-xs text-gray-400 mb-4">
-          Limit how many records are loaded at once to keep the admin dashboard fast and to reduce database usage.
-        </p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Max Leads to Load</label>
-            <input 
-              type="number" 
-              className="input-field" 
-              value={settings.admin_leads_per_page} 
-              onChange={(e) => u('admin_leads_per_page', parseInt(e.target.value) || 10)} 
-              min={10} 
-            />
-          </div>
-          <div>
-            <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Max Vehicles to Load</label>
-            <input 
-              type="number" 
-              className="input-field" 
-              value={settings.admin_inventory_per_page} 
-              onChange={(e) => u('admin_inventory_per_page', parseInt(e.target.value) || 10)} 
-              min={10} 
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* Bill of Sale Settings */}
-      <div className="admin-card">
-        <h2 className="text-lg font-bold mb-4">Bill of Sale Settings</h2>
-        <div className="space-y-6">
-          <div>
-            <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Dealer Printed Name</label>
-            <input 
-              className="input-field" 
-              value={settings.dealer_printed_name || ''} 
-              onChange={(e) => u('dealer_printed_name', e.target.value)} 
-              placeholder="e.g. Elite Motors"
-            />
-          </div>
-          <div>
-            <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Dealer Signature</label>
-            <p className="text-xs text-gray-400 mb-4">This signature will be automatically applied to the "Seller's Signature" line on all generated bills of sale.</p>
-            <div className="max-w-md">
-              <SignaturePad 
-                initialSignature={settings.dealer_signature_data} 
-                onSignatureChange={(v) => u('dealer_signature_data', v || '')} 
-              />
+          <div className="admin-card">
+            <h3 className="text-sm font-black text-gray-400 uppercase tracking-widest mb-4">Location & Social</h3>
+            <div className="space-y-4">
+              <div><label className="block text-xs font-bold text-gray-500 mb-1 font-mono uppercase tracking-tighter">Lot Address</label><input className="input-field" value={settings.lot_address} onChange={(e) => u('lot_address', e.target.value)} /></div>
+              <div><label className="block text-xs font-bold text-gray-500 mb-1 font-mono uppercase tracking-tighter">Facebook URL</label><input className="input-field" value={settings.facebook_url || ''} onChange={(e) => u('facebook_url', e.target.value)} /></div>
+              <div><label className="block text-xs font-bold text-gray-500 mb-1 font-mono uppercase tracking-tighter">Instagram URL</label><input className="input-field" value={settings.instagram_url || ''} onChange={(e) => u('instagram_url', e.target.value)} /></div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Security Settings */}
-      <div className="admin-card border-red-100">
-        <h2 className="text-lg font-bold mb-4 text-red-900">Security</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-             <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Admin Dashboard PIN</label>
-             <p className="text-xs text-gray-400 mb-2">4-digit PIN used to unlock the dashboard after inactivity.</p>
-             <input 
-               type="password" 
-               maxLength={4}
-               className="input-field" 
-               value={settings.admin_pin || ''} 
-               onChange={(e) => u('admin_pin', e.target.value)} 
-               placeholder="1234"
-             />
+      {/* SECTION 2: MARKETING & EXPERIENCE */}
+      <div className="space-y-4">
+        <div className="flex items-center gap-2 px-1">
+          <div className="w-1.5 h-6 bg-primary rounded-full"></div>
+          <h2 className="text-xl font-black text-gray-800 tracking-tight">Marketing & Experience</h2>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="admin-card">
+            <h3 className="text-sm font-black text-gray-400 uppercase tracking-widest mb-4">Display & Popups</h3>
+            <div className="space-y-6">
+              <div>
+                <label className="flex items-center gap-3 text-sm font-bold cursor-pointer group">
+                  <input type="checkbox" checked={settings.show_price_tagline} onChange={(e) => u('show_price_tagline', e.target.checked)} className="w-4 h-4 accent-primary rounded" />
+                  Show Price Tagline
+                </label>
+                {settings.show_price_tagline && <input className="input-field mt-2" value={settings.price_tagline_text} onChange={(e) => u('price_tagline_text', e.target.value)} />}
+              </div>
+              <div className="pt-4 border-t border-gray-50">
+                <label className="flex items-center gap-3 text-sm font-bold cursor-pointer group">
+                  <input type="checkbox" checked={settings.show_lead_popup} onChange={(e) => u('show_lead_popup', e.target.checked)} className="w-4 h-4 accent-primary rounded" />
+                  Enable Lead Capture Popup
+                </label>
+                {settings.show_lead_popup && (
+                  <div className="space-y-3 mt-3">
+                    <input className="input-field" value={settings.lead_popup_title || ''} onChange={(e) => u('lead_popup_title', e.target.value)} placeholder="Headline" />
+                    <input className="input-field" value={settings.lead_popup_text || ''} onChange={(e) => u('lead_popup_text', e.target.value)} placeholder="Description" />
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
-          <div>
-             <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Inactivity Timeout (Minutes)</label>
-             <p className="text-xs text-gray-400 mb-2">How long before the session locks. (e.g. 4320 for 3 days)</p>
-             <input 
-               type="number" 
-               className="input-field" 
-               value={settings.inactivity_timeout_minutes || 4320} 
-               onChange={(e) => u('inactivity_timeout_minutes', parseInt(e.target.value) || 4320)} 
-               min={1} 
-             />
+
+          <div className="admin-card">
+            <h3 className="text-sm font-black text-gray-400 uppercase tracking-widest mb-4">Reviews & Media</h3>
+            <div className="space-y-6">
+              <div>
+                <label className="flex items-center gap-3 text-sm font-bold cursor-pointer">
+                  <input type="checkbox" checked={settings.show_reviews_section} onChange={(e) => u('show_reviews_section', e.target.checked)} className="w-4 h-4 accent-primary rounded" />
+                  Show Reviews Section
+                </label>
+                <textarea className="input-field mt-3 text-xs font-mono" rows={3} value={settings.google_reviews_embed || ''} onChange={(e) => u('google_reviews_embed', e.target.value)} placeholder="Embed Code" />
+              </div>
+              <div className="pt-4 border-t border-gray-50">
+                 <label className="flex items-center gap-3 text-sm font-bold cursor-pointer">
+                  <input type="checkbox" checked={settings.auto_carousel_enabled} onChange={(e) => u('auto_carousel_enabled', e.target.checked)} className="w-4 h-4 accent-primary rounded" />
+                  Auto-Cycle Car Photos
+                </label>
+                {settings.auto_carousel_enabled && (
+                  <div className="mt-3">
+                    <div className="flex justify-between text-[10px] font-black text-gray-400 mb-1 uppercase tracking-widest">
+                      <span>Speed</span>
+                      <span>{settings.auto_carousel_interval}s</span>
+                    </div>
+                    <input type="range" min={1} max={15} value={settings.auto_carousel_interval} onChange={(e) => u('auto_carousel_interval', parseInt(e.target.value))} className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none accent-primary" />
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      <button onClick={handleSave} disabled={saving} className="btn-admin"><Save size={16} /> {saving ? 'Saving...' : 'Save Settings'}</button>
+      {/* SECTION 3: SYSTEM & OPERATION */}
+      <div className="space-y-4">
+        <div className="flex items-center gap-2 px-1">
+          <div className="w-1.5 h-6 bg-slate-800 rounded-full"></div>
+          <h2 className="text-xl font-black text-gray-800 tracking-tight">System & Operations</h2>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="admin-card">
+            <h3 className="text-sm font-black text-gray-400 uppercase tracking-widest mb-4">Documents & Performance</h3>
+            <div className="space-y-4">
+              <div><label className="block text-xs font-bold text-gray-500 mb-1 font-mono uppercase tracking-tighter">Dealer Name (Prints on Bill)</label><input className="input-field" value={settings.dealer_printed_name || ''} onChange={(e) => u('dealer_printed_name', e.target.value)} /></div>
+              <div className="grid grid-cols-2 gap-4">
+                <div><label className="block text-[10px] font-black text-gray-400 uppercase mb-1">Leads/Page</label><input type="number" className="input-field h-8 text-xs" value={settings.admin_leads_per_page} onChange={(e) => u('admin_leads_per_page', parseInt(e.target.value) || 10)} /></div>
+                <div><label className="block text-[10px] font-black text-gray-400 uppercase mb-1">Cars/Page</label><input type="number" className="input-field h-8 text-xs" value={settings.admin_inventory_per_page} onChange={(e) => u('admin_inventory_per_page', parseInt(e.target.value) || 10)} /></div>
+              </div>
+              <div className="p-3 bg-gray-50 rounded-xl border border-gray-100 mt-2">
+                <label className="block text-[10px] font-black text-gray-400 uppercase mb-2">Stored Dealer Signature</label>
+                <SignaturePad initialSignature={settings.dealer_signature_data} onSignatureChange={(v) => u('dealer_signature_data', v || '')} />
+              </div>
+            </div>
+          </div>
+
+          <div className="admin-card border-red-100">
+            <h3 className="text-sm font-black text-red-500 uppercase tracking-widest mb-4">Security</h3>
+            <div className="space-y-4">
+              <div><label className="block text-xs font-bold text-gray-500 mb-1 font-mono uppercase tracking-tighter">Lock Screen PIN</label><input type="password" maxLength={4} className="input-field border-red-100" value={settings.admin_pin || ''} onChange={(e) => u('admin_pin', e.target.value)} /></div>
+              <div><label className="block text-xs font-bold text-gray-500 mb-1 font-mono uppercase tracking-tighter">Timeout (Minutes)</label><input type="number" className="input-field" value={settings.inactivity_timeout_minutes || 4320} onChange={(e) => u('inactivity_timeout_minutes', parseInt(e.target.value) || 4320)} /></div>
+              <div className="p-3 bg-red-50/30 rounded-lg text-[10px] text-red-600 font-medium">
+                PIN is required to unlock the dashboard after the specified inactivity timeout.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

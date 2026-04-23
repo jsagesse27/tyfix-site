@@ -28,22 +28,41 @@ import { clearAllCaches } from './actions';
 import { useSessionLock } from '@/hooks/useSessionLock';
 import SessionLockOverlay from '@/components/admin/SessionLockOverlay';
 
-const NAV_ITEMS = [
-  { label: 'Dashboard', href: '/admin', icon: <LayoutDashboard size={20} /> },
-  { label: 'Inventory', href: '/admin/inventory', icon: <Car size={20} /> },
-  { label: 'VIN Extractor', href: '/admin/vin-extractor', icon: <Scan size={20} /> },
-  { label: 'File Cabinet', href: '/admin/file-cabinet', icon: <FolderOpen size={20} /> },
-  { label: 'Leads', href: '/admin/leads', icon: <Users size={20} /> },
-  { label: 'Reviews', href: '/admin/testimonials', icon: <Star size={20} /> },
-  { label: 'Blog', href: '/admin/blog', icon: <PenSquare size={20} /> },
-  { label: 'AI Bot', href: '/admin/bot', icon: <Bot size={20} /> },
-  { label: 'Analytics', href: '/admin/analytics', icon: <BarChart3 size={20} /> },
-  { label: 'Sections', href: '/admin/sections', icon: <LayoutList size={20} /> },
-  { label: 'Changelog', href: '/admin/changelog', icon: <FileText size={20} /> },
-  { label: 'Settings', href: '/admin/settings', icon: <Settings size={20} /> },
-  { label: 'Content', href: '/admin/content', icon: <FileText size={20} /> },
+const NAV_GROUPS = [
+  {
+    title: 'Operations',
+    items: [
+      { label: 'Dashboard', href: '/admin', icon: <LayoutDashboard size={20} /> },
+      { label: 'Inventory', href: '/admin/inventory', icon: <Car size={20} /> },
+      { label: 'VIN Extractor', href: '/admin/vin-extractor', icon: <Scan size={20} /> },
+      { label: 'Leads', href: '/admin/leads', icon: <Users size={20} /> },
+    ]
+  },
+  {
+    title: 'Content & Marketing',
+    items: [
+      { label: 'Sections', href: '/admin/sections', icon: <LayoutList size={20} /> },
+      { label: 'Content', href: '/admin/content', icon: <FileText size={20} /> },
+      { label: 'Blog', href: '/admin/blog', icon: <PenSquare size={20} /> },
+      { label: 'Reviews', href: '/admin/testimonials', icon: <Star size={20} /> },
+      { label: 'AI Bot', href: '/admin/bot', icon: <Bot size={20} /> },
+    ]
+  },
+  {
+    title: 'Management',
+    items: [
+      { label: 'File Cabinet', href: '/admin/file-cabinet', icon: <FolderOpen size={20} /> },
+      { label: 'Analytics', href: '/admin/analytics', icon: <BarChart3 size={20} /> },
+      { label: 'Settings', href: '/admin/settings', icon: <Settings size={20} /> },
+    ]
+  },
+  {
+    title: 'System',
+    items: [
+      { label: 'Changelog', href: '/admin/changelog', icon: <RefreshCw size={20} /> },
+    ]
+  }
 ];
-
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -88,6 +107,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     return pathname.startsWith(href);
   };
 
+  const currentLabel = NAV_GROUPS.flatMap(g => g.items).find(i => isActive(i.href))?.label || 'Admin';
+
   return (
     <div className="min-h-screen bg-gray-50 flex">
       {/* Sidebar */}
@@ -111,21 +132,28 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </div>
 
           {/* Nav */}
-          <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
-            {NAV_ITEMS.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={() => setSidebarOpen(false)}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium text-sm transition-colors ${
-                  isActive(item.href)
-                    ? 'bg-primary/10 text-primary'
-                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                }`}
-              >
-                {item.icon}
-                {item.label}
-              </Link>
+          <nav className="flex-1 p-4 space-y-6 overflow-y-auto">
+            {NAV_GROUPS.map((group) => (
+              <div key={group.title} className="space-y-1">
+                <h3 className="px-3 text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">
+                  {group.title}
+                </h3>
+                {group.items.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={() => setSidebarOpen(false)}
+                    className={`flex items-center gap-3 px-3 py-2 rounded-lg font-medium text-sm transition-colors ${
+                      isActive(item.href)
+                        ? 'bg-primary/10 text-primary'
+                        : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                    }`}
+                  >
+                    {item.icon}
+                    {item.label}
+                  </Link>
+                ))}
+              </div>
             ))}
           </nav>
 
@@ -167,7 +195,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <Menu size={24} />
             </button>
             <h1 className="text-lg font-bold text-gray-900 truncate">
-              {NAV_ITEMS.find((item) => isActive(item.href))?.label || 'Admin'}
+              {currentLabel}
             </h1>
           </div>
           
