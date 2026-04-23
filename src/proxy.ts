@@ -31,8 +31,12 @@ export default async function middleware(request: NextRequest) {
 
   // Protect /admin routes — redirect to /login if not authenticated
   if (request.nextUrl.pathname.startsWith('/admin') && !user) {
+    const hasVault = request.cookies.has('_secure_admin_vault');
     const url = request.nextUrl.clone();
     url.pathname = '/login';
+    if (hasVault) {
+      url.searchParams.set('locked', 'true');
+    }
     return NextResponse.redirect(url);
   }
 

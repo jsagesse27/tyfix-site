@@ -21,13 +21,17 @@ import {
   BarChart3,
   LayoutList,
   FolderOpen,
-  RefreshCw
+  RefreshCw,
+  Scan
 } from 'lucide-react';
 import { clearAllCaches } from './actions';
+import { useSessionLock } from '@/hooks/useSessionLock';
+import SessionLockOverlay from '@/components/admin/SessionLockOverlay';
 
 const NAV_ITEMS = [
   { label: 'Dashboard', href: '/admin', icon: <LayoutDashboard size={20} /> },
   { label: 'Inventory', href: '/admin/inventory', icon: <Car size={20} /> },
+  { label: 'VIN Extractor', href: '/admin/vin-extractor', icon: <Scan size={20} /> },
   { label: 'File Cabinet', href: '/admin/file-cabinet', icon: <FolderOpen size={20} /> },
   { label: 'Leads', href: '/admin/leads', icon: <Users size={20} /> },
   { label: 'Reviews', href: '/admin/testimonials', icon: <Star size={20} /> },
@@ -45,32 +49,20 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [clearing, setClearing] = useState(false);
-
-  // ── Admin Idle Session Timeout (30 min) ─────────────────────────
-  const IDLE_TIMEOUT_MS = 30 * 60 * 1000; // 30 minutes
-  const idleTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  const resetIdleTimer = useCallback(() => {
-    if (idleTimer.current) clearTimeout(idleTimer.current);
-    idleTimer.current = setTimeout(async () => {
-      const supabase = createClient();
-      await supabase.auth.signOut();
-      router.push('/login?reason=idle');
-      router.refresh();
-    }, IDLE_TIMEOUT_MS);
-  }, [router]);
+  const [timeoutMinutes, setTimeoutMinutes] = useState(4320); // 3 days default
 
   useEffect(() => {
-    const events = ['mousemove', 'mousedown', 'keydown', 'touchstart', 'scroll'];
-    events.forEach(e => window.addEventListener(e, resetIdleTimer));
-    resetIdleTimer(); // start the timer
-
-    return () => {
-      events.forEach(e => window.removeEventListener(e, resetIdleTimer));
-      if (idleTimer.current) clearTimeout(idleTimer.current);
+    const fetchSettings = async () => {
+      const supabase = createClient();
+      const { data } = await supabase.from('site_settings').select('inactivity_timeout_minutes').limit(1).single();
+      if (data?.inactivity_timeout_minutes) {
+        setTimeoutMinutes(data.inactivity_timeout_minutes);
+      }
     };
-  }, [resetIdleTimer]);
-  // ── End Idle Timeout ────────────────────────────────────────────
+    fetchSettings();
+  }, []);
+
+  const { isLocked, vaultStatus, unlockSession } = useSessionLock({ timeoutMinutes });
 
   const handleClearCache = async () => {
     setClearing(true);
@@ -194,6 +186,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           {children}
         </main>
       </div>
+
+      {/* Lock Screen Overlay */}
+      {isLocked && <SessionLockOverlay onUnlock={unlockSession} vaultStatus={vaultStatus} />}
     </div>
   );
 }

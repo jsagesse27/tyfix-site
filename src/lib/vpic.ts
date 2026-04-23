@@ -153,9 +153,17 @@ export function mapNhtsaResult(nhtsaData: any): VinDecodeResult {
 
   // Map Engine Composition
   const engineParts = [];
-  if (nhtsaData.DisplacementL) engineParts.push(`${nhtsaData.DisplacementL}L`);
-  if (result.cylinders) engineParts.push(result.cylinders === 'Electric' ? 'Electric' : result.cylinders.replace('-Cylinder', '-Cyl'));
+  if (nhtsaData.DisplacementL) {
+    const disp = parseFloat(nhtsaData.DisplacementL);
+    if (!isNaN(disp)) {
+      engineParts.push(`${disp.toFixed(1)}L`);
+    } else {
+      engineParts.push(`${nhtsaData.DisplacementL}L`);
+    }
+  }
+  
   if (result.fuel_type) engineParts.push(result.fuel_type);
+  
   if (engineParts.length > 0) {
     result.engine = engineParts.join(' ');
   }

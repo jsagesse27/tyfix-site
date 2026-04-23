@@ -1,13 +1,15 @@
 'use client';
 
-import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { useState, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import { createClient } from '@/lib/supabase/client';
-import { LogIn, AlertCircle } from 'lucide-react';
+import { LogIn, AlertCircle, Loader2 } from 'lucide-react';
+import SessionLockOverlay from '@/components/admin/SessionLockOverlay';
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -33,6 +35,27 @@ export default function LoginPage() {
     router.push('/admin');
     router.refresh();
   };
+
+  const isLocked = searchParams.get('locked') === 'true';
+
+  if (isLocked) {
+    return (
+      <SessionLockOverlay 
+        vaultStatus="idle" 
+        onUnlock={async (sessionData) => {
+          if (sessionData) {
+            const supabase = createClient();
+            await supabase.auth.setSession({
+              access_token: sessionData.access_token,
+              refresh_token: sessionData.refresh_token,
+            });
+          }
+          router.push('/admin');
+          router.refresh();
+        }} 
+      />
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
@@ -90,5 +113,13 @@ export default function LoginPage() {
         </p>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><Loader2 className="animate-spin text-primary" /></div>}>
+      <LoginForm />
+    </Suspense>
   );
 }

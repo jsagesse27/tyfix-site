@@ -231,6 +231,36 @@ export default function AdminSettingsPage() {
         </div>
       </div>
 
+      {/* Security Settings */}
+      <div className="admin-card border-red-100">
+        <h2 className="text-lg font-bold mb-4 text-red-900">Security</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+             <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Admin Dashboard PIN</label>
+             <p className="text-xs text-gray-400 mb-2">4-digit PIN used to unlock the dashboard after inactivity.</p>
+             <input 
+               type="password" 
+               maxLength={4}
+               className="input-field" 
+               value={settings.admin_pin || ''} 
+               onChange={(e) => u('admin_pin', e.target.value)} 
+               placeholder="1234"
+             />
+          </div>
+          <div>
+             <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Inactivity Timeout (Minutes)</label>
+             <p className="text-xs text-gray-400 mb-2">How long before the session locks. (e.g. 4320 for 3 days)</p>
+             <input 
+               type="number" 
+               className="input-field" 
+               value={settings.inactivity_timeout_minutes || 4320} 
+               onChange={(e) => u('inactivity_timeout_minutes', parseInt(e.target.value) || 4320)} 
+               min={1} 
+             />
+          </div>
+        </div>
+      </div>
+
       <button onClick={handleSave} disabled={saving} className="btn-admin"><Save size={16} /> {saving ? 'Saving...' : 'Save Settings'}</button>
     </div>
   );

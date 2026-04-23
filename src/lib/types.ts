@@ -111,6 +111,9 @@ export interface SiteSettings {
   show_lead_popup: boolean;
   lead_popup_title: string;
   lead_popup_text: string;
+  admin_pin: string | null;
+  inactivity_timeout_minutes: number;
+  lock_failures: number;
   updated_at: string;
 }
 
@@ -258,4 +261,27 @@ export interface HomepageSection {
   is_visible: boolean;
   updated_at: string;
 }
+
+// ============================================================
+// VIN Extractor Types
+// ============================================================
+
+export interface VinExtractionItem {
+  vin: string;
+  make: string;
+  model: string;
+  year: string;
+  status: 'valid' | 'invalid' | 'warning';
+  notes?: string;
+  confidence?: string;
+}
+
+export interface VinExtractionList {
+  id: string;
+  title: string;
+  items: VinExtractionItem[];
+  created_at: string;
+  updated_at: string;
+}
+
 

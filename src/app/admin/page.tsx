@@ -32,6 +32,9 @@ export default async function AdminDashboard() {
         <Link href="/admin/inventory?new=true" className="btn-admin">
           <Plus size={16} /> Add Vehicle
         </Link>
+        <Link href="/admin/vin-extractor" className="btn-admin-outline">
+          <TrendingUp size={16} /> VIN Extractor
+        </Link>
         <Link href="/" target="_blank" className="btn-admin-outline">
           View Live Site
         </Link>

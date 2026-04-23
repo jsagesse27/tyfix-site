@@ -123,7 +123,6 @@ export default function VinScannerButton({
         ref={fileRef}
         type="file"
         accept="image/*"
-        capture="environment"
         onChange={handleCapture}
         className="hidden"
         disabled={disabled || status === 'compressing' || status === 'scanning'}
