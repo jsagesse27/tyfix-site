@@ -12,13 +12,8 @@ export function formatMileage(mileage: number): string {
 }
 
 export function getOptimizedImageUrl(fullUrl: string): string {
-  // Hardcoding the domain mapping for the CDN optimization
-  // because process.env in Next.js might not inject cleanly for client components without NEXT_PUBLIC
-  if (!fullUrl) return fullUrl;
-  
-  if (fullUrl.includes('orzvwpiqsvjzbbxiejfu.supabase.co')) {
-    return fullUrl.replace('orzvwpiqsvjzbbxiejfu.supabase.co', 'cdn.tyfixautosales.com');
-  }
+  // Disabling the CDN override temporarily.
+  // The 'cdn.tyfixautosales.com' DNS records are currently pointing to Vercel instead of Supabase.
   return fullUrl;
 }
 
