@@ -12,11 +12,33 @@ export default function VinListClient({ list }: { list: VinExtractionList }) {
   const [editVinValue, setEditVinValue] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
-  // Sync back to db whenever items structurally change
-  const syncItems = async (newItems: VinExtractionItem[]) => {
+  // Hydrate from localStorage
+  useEffect(() => {
+    const stored = localStorage.getItem(`vin-extractor-${list.id}`);
+    if (stored) {
+      try {
+        setItems(JSON.parse(stored));
+        setHasUnsavedChanges(true);
+      } catch (e) {
+        // Fallback silently if corrupt
+      }
+    }
+  }, [list.id]);
+
+  // Persist ephemeral changes
+  useEffect(() => {
+    if (hasUnsavedChanges) {
+      localStorage.setItem(`vin-extractor-${list.id}`, JSON.stringify(items));
+    }
+  }, [items, hasUnsavedChanges, list.id]);
+
+  const handleManualSave = async () => {
     setIsSaving(true);
-    await updateVinListItems(list.id, newItems);
+    await updateVinListItems(list.id, items);
+    localStorage.removeItem(`vin-extractor-${list.id}`);
+    setHasUnsavedChanges(false);
     setIsSaving(false);
   };
 
@@ -56,21 +78,21 @@ export default function VinListClient({ list }: { list: VinExtractionList }) {
         return item;
       });
       setItems(decodedItems);
-      syncItems(decodedItems);
+      setHasUnsavedChanges(true);
     } else {
       const failedItems = newItems.map((item, idx) => {
          if (idx === 0) return { ...item, status: 'invalid', make: 'Decode Failed' } as VinExtractionItem;
          return item;
       });
       setItems(failedItems);
-      syncItems(failedItems);
+      setHasUnsavedChanges(true);
     }
   };
 
   const removeVin = (index: number) => {
     const updated = items.filter((_, i) => i !== index);
     setItems(updated);
-    syncItems(updated);
+    setHasUnsavedChanges(true);
   };
 
   const startEdit = (index: number) => {
@@ -104,7 +126,7 @@ export default function VinListClient({ list }: { list: VinExtractionList }) {
       updated[index].make = 'Decode Failed';
     }
     setItems([...updated]);
-    syncItems(updated);
+    setHasUnsavedChanges(true);
   };
 
   const handleCopy = () => {
@@ -176,9 +198,17 @@ export default function VinListClient({ list }: { list: VinExtractionList }) {
               <h2 className="text-lg font-bold text-gray-900">Extraction Roster</h2>
               <p className="text-sm text-gray-500 flex items-center gap-2">
                 {items.length} VINs Scanned
-                {isSaving && <span className="flex items-center gap-1 text-xs text-blue-500 bg-blue-50 px-2 py-0.5 rounded-full animate-pulse"><Save size={10}/> Auto-saving...</span>}
+                {hasUnsavedChanges && !isSaving && <span className="text-xs text-amber-500 bg-amber-50 px-2 py-0.5 rounded-full">Unsaved local changes</span>}
               </p>
             </div>
+            <button 
+              onClick={handleManualSave}
+              disabled={!hasUnsavedChanges || isSaving}
+              className={`btn-primary py-2 px-4 shadow text-sm flex items-center gap-2 ${(!hasUnsavedChanges || isSaving) ? 'opacity-50 pointer-events-none' : ''}`}
+            >
+              {isSaving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+              {isSaving ? 'Saving...' : 'Save to DB'}
+            </button>
           </div>
 
           {items.length === 0 ? (
