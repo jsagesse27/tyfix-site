@@ -17,12 +17,13 @@ async function updateListTitle(formData: FormData) {
   revalidatePath(`/admin/vin-extractor/${id}`);
 }
 
-export default async function VinExtractorPage({ params }: { params: { id: string } }) {
+export default async function VinExtractorPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const supabase = await createClient();
   const { data: list, error } = await supabase
     .from('vin_extraction_lists')
     .select('*')
-    .eq('id', params.id)
+    .eq('id', id)
     .single();
 
   if (error || !list) {
