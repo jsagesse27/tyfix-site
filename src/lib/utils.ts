@@ -12,11 +12,7 @@ export function formatMileage(mileage: number): string {
 }
 
 export function getOptimizedImageUrl(fullUrl: string): string {
-  if (!fullUrl) return fullUrl;
-
-  if (fullUrl.includes('orzvwpiqsvjzbbxiejfu.supabase.co')) {
-    return fullUrl.replace('orzvwpiqsvjzbbxiejfu.supabase.co', 'cdn.tyfixautosales.com');
-  }
+  // Temporarily bypass CDN while Cloudflare routing is fixed
   return fullUrl;
 }
 
