@@ -1,11 +1,48 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { useInView, useMotionValue, useSpring } from 'framer-motion';
 import Link from 'next/link';
 import { ArrowRight, CalendarCheck, ChevronDown } from 'lucide-react';
 import type { SiteSettings } from '@/lib/types';
 import Image from 'next/image';
 import BookTestDrive from './BookTestDrive';
+
+function AnimatedCounter({ value }: { value: string }) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const isInView = useInView(ref, { once: true, margin: "0px" });
+  
+  const match = value.match(/^(\d+)(.*)$/);
+  const targetNumber = match ? parseInt(match[1], 10) : 0;
+  const suffix = match ? match[2] : value;
+  const isPureString = !match;
+
+  const motionValue = useMotionValue(0);
+  const springValue = useSpring(motionValue, {
+    damping: 30,
+    stiffness: 80, // slightly slower for a better visual effect
+    mass: 1
+  });
+
+  useEffect(() => {
+    if (isInView && !isPureString) {
+      motionValue.set(targetNumber);
+    }
+  }, [isInView, targetNumber, isPureString, motionValue]);
+
+  useEffect(() => {
+    if (isPureString) return;
+    return springValue.on("change", (latest) => {
+      if (ref.current) {
+        ref.current.textContent = Math.floor(latest).toString() + suffix;
+      }
+    });
+  }, [springValue, suffix, isPureString]);
+
+  if (isPureString) return <span>{value}</span>;
+
+  return <span ref={ref}>0{suffix}</span>;
+}
 
 interface HeroProps {
   settings: SiteSettings | null;
@@ -76,7 +113,9 @@ export default function Hero({ settings, content, soldCount }: HeroProps) {
           <div className="mt-10 sm:mt-20 grid grid-cols-3 gap-2 sm:gap-4 w-full animate-fade-in" style={{ animationDelay: '450ms', opacity: 0 }}>
             {stats.map((stat, i) => (
               <div key={i} className="border border-white/10 rounded-xl sm:rounded-2xl p-3 sm:p-6 backdrop-blur-sm bg-white/5 text-center">
-                <p className="text-lg sm:text-2xl md:text-3xl font-black text-white" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>{stat.value}</p>
+                <p className="text-lg sm:text-2xl md:text-3xl font-black text-white" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
+                  <AnimatedCounter value={stat.value} />
+                </p>
                 <p className="text-[8px] sm:text-[10px] text-slate-400 font-black uppercase tracking-[0.15em] sm:tracking-[0.2em] mt-1 sm:mt-2">{stat.label}</p>
               </div>
             ))}
