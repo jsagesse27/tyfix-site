@@ -16,6 +16,25 @@ export type ChangelogItem = {
 
 export const changelogs: ChangelogItem[] = [
   {
+    id: 'apr-24-2026',
+    date: 'April 24, 2026',
+    target: 'Executive Leadership',
+    title: 'Cloudflare Edge Worker & Network Routing Resolution',
+    summary: 'Successfully resolved a deep network routing conflict where serverless domain overlapping caused edge image traffic to bypass our custom CDN. We engineered a standalone Cloudflare Worker to act as a dedicated proxy, guaranteeing that all media assets load instantly from the correct Supabase origin with full caching benefits.',
+    sections: [
+      {
+        title: '1. Network Architecture Refinement',
+        items: [
+          {
+            action: 'Cloudflare Edge Worker Deployment: Engineered and deployed a custom Cloudflare Worker to forcefully route cdn.tyfixautosales.com traffic directly to the Supabase storage bucket, bypassing Vercel\'s wildcard domain interception.',
+            explanation: 'Fixed a complex issue where Vercel was accidentally "stealing" our image traffic. The new Worker acts as a dedicated traffic cop, ensuring all vehicle photos load instantly and securely.'
+          }
+        ]
+      }
+    ],
+    conclusion: 'The CDN architecture is now fully isolated from external platform conflicts. This guarantees maximum performance for public visitors while maintaining zero egress costs.'
+  },
+  {
     id: 'apr-23-2026',
     date: 'April 23, 2026',
     target: 'Executive Leadership',
@@ -28,10 +47,6 @@ export const changelogs: ChangelogItem[] = [
           {
             action: 'Cloudflare CDN Integration: Routed 100% of public vehicle image traffic through a dedicated Cloudflare edge proxy (cdn.tyfixautosales.com), eliminating Supabase Storage Egress fees permanently.',
             explanation: 'Think of it like Costco buying in bulk — instead of paying every time a shopper looks at a car photo, Cloudflare stores copies for free and serves them. Stops the meter from running on image traffic.'
-          },
-          {
-            action: 'Cloudflare Edge Worker Routing: Implemented a standalone Cloudflare Edge Worker to intercept CDN requests and bypass Vercel wildcard routing conflicts, securing direct edge-to-origin proxying.',
-            explanation: 'Fixed a deep network routing conflict where Vercel was accidentally stealing image traffic. The new Worker acts as a dedicated traffic cop, guaranteeing images load instantly from the correct source with full caching.'
           },
           {
             action: 'On-Demand Next.js Cache Revalidation: Re-engineered deployment caching to operate "On-Demand" via webhooks, so the Admin Dashboard updates the public site in real-time without forcing expensive re-renders.',
