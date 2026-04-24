@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { useInView, useMotionValue, useSpring } from 'framer-motion';
+import { useInView } from 'framer-motion';
 import Link from 'next/link';
 import { ArrowRight, CalendarCheck, ChevronDown } from 'lucide-react';
 import type { SiteSettings } from '@/lib/types';
@@ -17,27 +17,27 @@ function AnimatedCounter({ value }: { value: string }) {
   const suffix = match ? match[2] : value;
   const isPureString = !match;
 
-  const motionValue = useMotionValue(0);
-  const springValue = useSpring(motionValue, {
-    damping: 30,
-    stiffness: 80, // slightly slower for a better visual effect
-    mass: 1
-  });
-
   useEffect(() => {
     if (isInView && !isPureString) {
-      motionValue.set(targetNumber);
+      // Wait for the container's 450ms fade-in to finish before starting the count
+      const timeout = setTimeout(() => {
+        // Use an explicit duration for a rapid, satisfying count-up
+        import('framer-motion').then(({ animate }) => {
+          animate(0, targetNumber, {
+            duration: 1.2, // 1.2 seconds to reach the target rapidly
+            ease: "easeOut",
+            onUpdate: (latest) => {
+              if (ref.current) {
+                ref.current.textContent = Math.floor(latest).toString() + suffix;
+              }
+            }
+          });
+        });
+      }, 500);
+      
+      return () => clearTimeout(timeout);
     }
-  }, [isInView, targetNumber, isPureString, motionValue]);
-
-  useEffect(() => {
-    if (isPureString) return;
-    return springValue.on("change", (latest) => {
-      if (ref.current) {
-        ref.current.textContent = Math.floor(latest).toString() + suffix;
-      }
-    });
-  }, [springValue, suffix, isPureString]);
+  }, [isInView, targetNumber, isPureString, suffix]);
 
   if (isPureString) return <span>{value}</span>;
 
