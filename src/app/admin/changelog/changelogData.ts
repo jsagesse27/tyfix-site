@@ -30,6 +30,10 @@ export const changelogs: ChangelogItem[] = [
             explanation: 'Think of it like Costco buying in bulk — instead of paying every time a shopper looks at a car photo, Cloudflare stores copies for free and serves them. Stops the meter from running on image traffic.'
           },
           {
+            action: 'Cloudflare Edge Worker Routing: Implemented a standalone Cloudflare Edge Worker to intercept CDN requests and bypass Vercel wildcard routing conflicts, securing direct edge-to-origin proxying.',
+            explanation: 'Fixed a deep network routing conflict where Vercel was accidentally stealing image traffic. The new Worker acts as a dedicated traffic cop, guaranteeing images load instantly from the correct source with full caching.'
+          },
+          {
             action: 'On-Demand Next.js Cache Revalidation: Re-engineered deployment caching to operate "On-Demand" via webhooks, so the Admin Dashboard updates the public site in real-time without forcing expensive re-renders.',
             explanation: 'Before, the website rebuilt itself constantly "just in case" something changed. Now it only rebuilds when you actually change something — lower cost, and inventory updates go live instantly.'
           },
