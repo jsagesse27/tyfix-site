@@ -46,8 +46,8 @@ const nextConfig: NextConfig = {
               "font-src 'self' https://fonts.gstatic.com",
               // Images: self + Supabase + Unsplash + data URIs + tiles
               "img-src 'self' data: blob: https://cdn.tyfixautosales.com https://orzvwpiqsvjzbbxiejfu.supabase.co https://images.unsplash.com https://*.basemaps.cartocdn.com https://i.pravatar.cc",
-              // Frames: Calendly + EmbedSocial + Turnstile
-              "frame-src 'self' https://calendly.com https://embedsocial.com https://challenges.cloudflare.com",
+              // Frames: Calendly + EmbedSocial + Turnstile + Google Maps
+              "frame-src 'self' https://calendly.com https://embedsocial.com https://challenges.cloudflare.com https://www.google.com",
               // API/fetch calls: self + Supabase + NHTSA + Turnstile + AI providers
               "connect-src 'self' https://orzvwpiqsvjzbbxiejfu.supabase.co https://*.supabase.co https://vpic.nhtsa.dot.gov https://challenges.cloudflare.com https://api.groq.com https://generativelanguage.googleapis.com",
               // Workers (Turnstile uses workers)
